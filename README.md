@@ -1,18 +1,15 @@
-<p align="center"><img src="https://i.imgur.com/CBGh0Yx.png" /></p>
+<p align="center"><img src="evillimiter_ng_screenshot.png" /></p>
 
-# Evil Limiter
+# Evil Limiter Next Generation
 
 [![License Badge](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Compatibility](https://img.shields.io/badge/python-3-brightgreen.svg)](PROJECT)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/bitbrute/evillimiter/graphs/commit-activity)
-[![HitCount](http://hits.dwyl.io/bitbrute/evillimiter.svg)](http://hits.dwyl.io/bitbrute/evillimiter)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/KevinCrrl/evillimiter-ng/graphs/commit-activity)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
-A tool to monitor, analyze and limit the bandwidth (upload/download) of devices on your local network without physical or administrative access.<br>
-```evillimiter``` employs [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) and [traffic shaping](https://en.wikipedia.org/wiki/Traffic_shaping) to throttle the bandwidth of hosts on the network.
+A tool to monitor, analyze and limit the bandwidth (upload/download) of devices on your local network without physical or administrative access.
 
-**Searching for a Windows-compatible version?**<br>
-Check out the open-source alternative [EvilLimiter for Windows](https://github.com/bitbrute/evillimiter-windows).
+```evillimiter-ng``` employs [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) and [traffic shaping](https://en.wikipedia.org/wiki/Traffic_shaping) to throttle the bandwidth of hosts on the network.
 
 ## Requirements
 - Linux distribution
@@ -23,18 +20,11 @@ Possibly missing python packages will be installed during the installation proce
 ## Installation
 
 ```bash
-git clone https://github.com/bitbrute/evillimiter.git
-cd evillimiter
-sudo python3 setup.py install
+git clone https://github.com/KevinCrrl/evillimiter-ng.git
+cd evillimiter-ng
+python -m build
+python -m installer dist/*.whl
 ```
-
-Alternatively, you can download a desired version from the [Release page](https://github.com/bitbrute/evillimiter/releases).<br>
-
-## Usage
-
-Type ```evillimiter``` or ```python3 bin/evillimiter``` to run the tool.
-
-```evillimiter``` will try to resolve required information (network interface, netmask, gateway address, ...) on its own, automatically.
 
 #### Command-Line Arguments
 
@@ -73,15 +63,11 @@ Type ```evillimiter``` or ```python3 bin/evillimiter``` to run the tool.
 - **Limits IPv4 connctions only**, since [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) requires the ARP packet that is only present  on IPv4 networks.
 
 ## Disclaimer
-[Evil Limiter](https://github.com/bitbrute/evillimiter) is provided by [bitbrute](https://github.com/bitbrute) "as is" and "with all faults". The provider makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether Evil Limiter is compatible with your equipment and other software installed on your equipment. You are also solely responsible for the protection of your equipment and backup of your data, and the provider will not be liable for any damages you may suffer in connection with using, modifying, or distributing this software. 
+[Evil Limiter Next Generation](https://github.com/KevinCrrl/evillimiter-ng) is provided by [KevinCrl](https://github.com/KevinCrrl) "as is" and "with all faults". The provider makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether Evil Limiter is compatible with your equipment and other software installed on your equipment. You are also solely responsible for the protection of your equipment and backup of your data, and the provider will not be liable for any damages you may suffer in connection with using, modifying, or distributing this software. 
 
 ## License
 
-Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute). Some rights reserved.<br>
-[Evil Limiter](https://github.com/bitbrute/evillimiter) is licensed under the MIT License as stated in the [LICENSE file](LICENSE).
+Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute). 
 
-## Donation
-You like my projects? Feel free to help me pay off my incredibly overprized Mercedes VIP leasing contract. <3
-
-BTC: 16oNzE8Vkcz8YQfnHF4g19moN3E6wc8E31<br>
-ETH: 0xB08D257cf5B76dB0D2fBAd1E68f52b9cCE3581e3
+Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl). Some rights reserved.<br>
+[Evil Limiter Next Generation](https://github.com/KevinCrrl/evillimiter-ng) is licensed under the MIT License as stated in the [LICENSE file](LICENSE).
