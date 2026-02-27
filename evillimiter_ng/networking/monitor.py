@@ -86,5 +86,4 @@ class BandwidthMonitor(object):
         def stop_filter(pkt):
             return not self._running
 
-        sniff(iface=self.interface, prn=pkt_handler, stop_filter=stop_filter, store=0)
-    
+        sniff(prn=pkt_handler, stop_filter=stop_filter, store=0)

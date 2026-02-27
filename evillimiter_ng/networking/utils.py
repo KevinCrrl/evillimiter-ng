@@ -2,8 +2,8 @@ import re
 import netifaces
 from scapy.all import ARP, sr1 # pylint: disable=no-name-in-module
 
-import evillimiter.console.shell as shell
-from evillimiter.common.globals import BIN_TC, BIN_IPTABLES, BIN_SYSCTL, IP_FORWARD_LOC
+from evillimiter_ng.console import shell
+from evillimiter_ng.common.globals import BIN_TC, BIN_IPTABLES, BIN_SYSCTL, IP_FORWARD_LOC
 
 
 def get_default_interface():
@@ -40,7 +40,7 @@ def get_mac_by_ip(interface, address):
     """
     # ARP packet with operation 1 (who-is)
     packet = ARP(op=1, pdst=address)
-    response = sr1(packet, timeout=3, verbose=0, iface=interface)
+    response = sr1(packet, timeout=3, verbose=0)
 
     if response is not None:
         return response.hwsrc
