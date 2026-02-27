@@ -4,7 +4,6 @@ import os.path
 import argparse
 import platform
 import collections
-import pkg_resources
 
 import evillimiter.networking.utils as netutils
 from evillimiter.menus.main_menu import MainMenu
@@ -74,10 +73,10 @@ def process_arguments(args):
     else:
         interface = args.interface
         if not netutils.exists_interface(interface):
-            IO.error('interface {}{}{} does not exist.'.format(IO.Fore.LIGHTYELLOW_EX, interface, IO.Style.RESET_ALL))
+            IO.error(f'interface {IO.Fore.LIGHTYELLOW_EX}{interface}{IO.Style.RESET_ALL} does not exist.')
             return
 
-    IO.ok('interface: {}{}{}'.format(IO.Fore.LIGHTYELLOW_EX, interface, IO.Style.RESET_ALL))
+    IO.ok(f'interface: {IO.Fore.LIGHTYELLOW_EX}{interface}{IO.Style.RESET_ALL}')
 
     if args.gateway_ip is None:
         gateway_ip = netutils.get_default_gateway()
@@ -87,7 +86,7 @@ def process_arguments(args):
     else:
         gateway_ip = args.gateway_ip
 
-    IO.ok('gateway ip: {}{}{}'.format(IO.Fore.LIGHTYELLOW_EX, gateway_ip, IO.Style.RESET_ALL))
+    IO.ok(f'gateway ip: {IO.Fore.LIGHTYELLOW_EX}{gateway_ip}{IO.Style.RESET_ALL}')
 
     if args.gateway_mac is None:
         gateway_mac = netutils.get_mac_by_ip(interface, gateway_ip)
@@ -101,7 +100,7 @@ def process_arguments(args):
             IO.error('gateway mac is invalid.')
             return
 
-    IO.ok('gateway mac: {}{}{}'.format(IO.Fore.LIGHTYELLOW_EX, gateway_mac, IO.Style.RESET_ALL))
+    IO.ok(f'gateway mac: {IO.Fore.LIGHTYELLOW_EX}{gateway_mac}{IO.Style.RESET_ALL}')
 
     if args.netmask is None:
         netmask = netutils.get_default_netmask(interface)
@@ -111,7 +110,7 @@ def process_arguments(args):
     else:
         netmask = args.netmask
 
-    IO.ok('netmask: {}{}{}'.format(IO.Fore.LIGHTYELLOW_EX, netmask, IO.Style.RESET_ALL))
+    IO.ok(f'netmask: {IO.Fore.LIGHTYELLOW_EX}{netmask}{IO.Style.RESET_ALL}')
 
     if args.flush:
         netutils.flush_network_settings(interface)

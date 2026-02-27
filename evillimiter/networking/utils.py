@@ -59,18 +59,18 @@ def flush_network_settings(interface):
     related to the given interface
     """
     # reset default policy
-    shell.execute_suppressed('{} -P INPUT ACCEPT'.format(BIN_IPTABLES))
-    shell.execute_suppressed('{} -P OUTPUT ACCEPT'.format(BIN_IPTABLES))
-    shell.execute_suppressed('{} -P FORWARD ACCEPT'.format(BIN_IPTABLES))
+    shell.execute_suppressed(f'{BIN_IPTABLES} -P INPUT ACCEPT')
+    shell.execute_suppressed(f'{BIN_IPTABLES} -P OUTPUT ACCEPT')
+    shell.execute_suppressed(f'{BIN_IPTABLES} -P FORWARD ACCEPT')
 
     # flush all chains in all tables (including user-defined)
-    shell.execute_suppressed('{} -t mangle -F'.format(BIN_IPTABLES))
-    shell.execute_suppressed('{} -t nat -F'.format(BIN_IPTABLES))
-    shell.execute_suppressed('{} -F'.format(BIN_IPTABLES))
-    shell.execute_suppressed('{} -X'.format(BIN_IPTABLES))
+    shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -F')
+    shell.execute_suppressed(f'{BIN_IPTABLES} -t nat -F')
+    shell.execute_suppressed(f'{BIN_IPTABLES} -F')
+    shell.execute_suppressed(f'{BIN_IPTABLES} -X')
 
     # delete root qdisc for given interface
-    shell.execute_suppressed('{} qdisc del dev {} root'.format(BIN_TC, interface))
+    shell.execute_suppressed(f'{BIN_TC} qdisc del dev {interface} root')
 
 
 def validate_ip_address(ip):
@@ -85,19 +85,19 @@ def create_qdisc_root(interface):
     """
     Creates a root htb qdisc in traffic control for a given interface
     """
-    return shell.execute_suppressed('{} qdisc add dev {} root handle 1:0 htb'.format(BIN_TC, interface)) == 0
+    return shell.execute_suppressed(f'{BIN_TC} qdisc add dev {interface} root handle 1:0 htb') == 0
 
 
 def delete_qdisc_root(interface):
-    return shell.execute_suppressed('{} qdisc del dev {} root handle 1:0 htb'.format(BIN_TC, interface))
+    return shell.execute_suppressed(f'{BIN_TC} qdisc del dev {interface} root handle 1:0 htb')
 
 
 def enable_ip_forwarding():
-    return shell.execute_suppressed('{} -w {}=1'.format(BIN_SYSCTL, IP_FORWARD_LOC)) == 0
+    return shell.execute_suppressed(f'{BIN_SYSCTL} -w {IP_FORWARD_LOC}=1') == 0
 
 
 def disable_ip_forwarding():
-    return shell.execute_suppressed('{} -w {}=0'.format(BIN_SYSCTL, IP_FORWARD_LOC)) == 0
+    return shell.execute_suppressed(f'{BIN_SYSCTL} -w {IP_FORWARD_LOC}=0') == 0
 
 
 class ValueConverter:
@@ -132,7 +132,7 @@ class BitRate(object):
                 elif counter == 3:
                     unit = 'gbit'
                 
-                return '{}{}'.format(int(r), unit)
+                return f'{int(r)}{unit}'
             
             if counter > 3:
                 raise Exception('Bitrate limit exceeded')
@@ -147,7 +147,7 @@ class BitRate(object):
         end = len([_ for _ in string if _.isdigit()])
         num = int(string[:end])
     
-        return '{}{}'.format(fmt % num, string[end:])
+        return f'{fmt % num}{string[end:]}'
 
     @classmethod
     def from_rate_string(cls, rate_string):
@@ -207,7 +207,7 @@ class ByteValue(object):
                 elif counter == 4:
                     unit = 'tb'
                 
-                return '{}{}'.format(int(v), unit)
+                return f'{int(v)}{unit}'
             
             if counter > 3:
                 raise Exception('Byte value limit exceeded')
@@ -240,7 +240,7 @@ class ByteValue(object):
         end = len([_ for _ in string if _.isdigit()])
         num = int(string[:end])
 
-        return '{}{}'.format(fmt % num, string[end:])
+        return f'{fmt % num}{string[end:]}'
 
     @classmethod
     def from_byte_string(cls, byte_string):
