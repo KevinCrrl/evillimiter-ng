@@ -23,6 +23,6 @@ def output_suppressed(command, root=True):
 
 def locate_bin(name):
     try:
-        return output_suppressed('which {}'.format(name)).replace('\n', '')
+        return output_suppressed(f'which {name}').replace('\n', '')
     except subprocess.CalledProcessError:
-        IO.error('missing util: {}, check your PATH'.format(name))
+        IO.error(f'missing util: {name}, check your PATH')

@@ -23,7 +23,7 @@ from evillimiter.networking.watch import HostWatcher
 class MainMenu(CommandMenu):
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         super().__init__()
-        self.prompt = '({}Main{}) >>> '.format(IO.Style.BRIGHT, IO.Style.RESET_ALL)
+        self.prompt = f'({IO.Style.BRIGHT}Main{IO.Style.RESET_ALL}) >>> '
         self.parser.add_subparser('clear', self._clear_handler)
 
         hosts_parser = self.parser.add_subparser('hosts', self._hosts_handler)
@@ -81,7 +81,7 @@ class MainMenu(CommandMenu):
         self.netmask = netmask
 
         # range of IP address calculated from gateway IP and netmask
-        self.iprange = list(netaddr.IPNetwork('{}/{}'.format(self.gateway_ip, self.netmask)))
+        self.iprange = list(netaddr.IPNetwork(f'{self.gateway_ip}/{self.netmask}'))
 
         self.host_scanner = HostScanner(self.interface, self.iprange)
         self.arp_spoofer = ARPSpoofer(self.interface, self.gateway_ip, self.gateway_mac)
@@ -148,7 +148,7 @@ class MainMenu(CommandMenu):
         self.hosts = hosts
         self.hosts_lock.release()
 
-        IO.ok('{}{}{} hosts discovered.'.format(IO.Fore.LIGHTYELLOW_EX, len(hosts), IO.Style.RESET_ALL))
+        IO.ok(f'{IO.Fore.LIGHTYELLOW_EX}{len(hosts)}{IO.Style.RESET_ALL} hosts discovered.')
         IO.spacer()
 
     def _hosts_handler(self, args):
@@ -157,17 +157,17 @@ class MainMenu(CommandMenu):
         Displays discovered hosts
         """
         table_data = [[
-            '{}ID{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-            '{}IP address{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-            '{}MAC address{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-            '{}Hostname{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-            '{}Status{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL)
+            f'{IO.Style.BRIGHT}ID{IO.Style.RESET_ALL}',
+            f'{IO.Style.BRIGHT}IP address{IO.Style.RESET_ALL}',
+            f'{IO.Style.BRIGHT}MAC address{IO.Style.RESET_ALL}',
+            f'{IO.Style.BRIGHT}Hostname{IO.Style.RESET_ALL}',
+            f'{IO.Style.BRIGHT}Status{IO.Style.RESET_ALL}'
         ]]
         
         with self.hosts_lock:
             for host in self.hosts:
                 table_data.append([
-                    '{}{}{}'.format(IO.Fore.LIGHTYELLOW_EX, self._get_host_id(host, lock=False), IO.Style.RESET_ALL),
+                    f'{IO.Fore.LIGHTYELLOW_EX}{self._get_host_id(host, lock=False)}{IO.Style.RESET_ALL}',
                     host.ip,
                     host.mac,
                     host.name,
@@ -317,9 +317,9 @@ class MainMenu(CommandMenu):
                         str(self._get_host_id(host)),
                         host.ip,
                         host.name,
-                        '{}↑ {}↓'.format(result.upload_rate, result.download_rate),
-                        '{}↑ {}↓'.format(result.upload_total_size, result.download_total_size),
-                        '{}↑ {}↓'.format(result.upload_total_count, result.download_total_count)
+                        f'{result.upload_rate}↑ {result.download_rate}↓',
+                        f'{result.upload_total_size}↑ {result.download_total_size}↓',
+                        f'{result.upload_total_count}↑ {result.download_total_count}↓'
                     ]
 
                     if not temps_reached and host in hosts_to_be_freed:
@@ -401,7 +401,7 @@ class MainMenu(CommandMenu):
             host_values[host] = {}
             host_values[host]['prev'] = (host_result.upload_total_size, host_result.download_total_size)
 
-        IO.ok('analyzing traffic for {}s.'.format(duration))
+        IO.ok(f'analyzing traffic for {duration}s.')
         time.sleep(duration)
 
         error_occurred = False
@@ -452,21 +452,21 @@ class MainMenu(CommandMenu):
     def _watch_handler(self, args):
         if len(args) == 0:
             watch_table_data = [[
-                '{}ID{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-                '{}IP address{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-                '{}MAC address{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL)
+                f'{IO.Style.BRIGHT}ID{IO.Style.RESET_ALL}',
+                f'{IO.Style.BRIGHT}IP address{IO.Style.RESET_ALL}',
+                f'{IO.Style.BRIGHT}MAC address{IO.Style.RESET_ALL}'
             ]]
 
             set_table_data = [[
-                '{}Attribute{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-                '{}Value{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL)
+                f'{IO.Style.BRIGHT}Attribute{IO.Style.RESET_ALL}',
+                f'{IO.Style.BRIGHT}Value{IO.Style.RESET_ALL}'
             ]]
 
             hist_table_data = [[
-                '{}ID{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-                '{}Old IP address{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-                '{}New IP address{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL),
-                '{}Time{}'.format(IO.Style.BRIGHT, IO.Style.RESET_ALL)
+                f'{IO.Style.BRIGHT}ID{IO.Style.RESET_ALL}',
+                f'{IO.Style.BRIGHT}Old IP address{IO.Style.RESET_ALL}',
+                f'{IO.Style.BRIGHT}New IP address{IO.Style.RESET_ALL}',
+                f'{IO.Style.BRIGHT}Time{IO.Style.RESET_ALL}'
             ]]
 
             iprange = self.host_watcher.iprange
@@ -474,23 +474,23 @@ class MainMenu(CommandMenu):
             intensity = self.host_watcher.intensity
 
             set_table_data.append([
-                '{}range{}'.format(IO.Fore.LIGHTYELLOW_EX, IO.Style.RESET_ALL),
-                '{} addresses'.format(len(iprange)) if iprange is not None else 'default'
+                f'{IO.Fore.LIGHTYELLOW_EX}range{IO.Style.RESET_ALL}',
+                f'{len(iprange)} addresses' if iprange is not None else 'default'
             ])
 
             set_table_data.append([
-                '{}interval{}'.format(IO.Fore.LIGHTYELLOW_EX, IO.Style.RESET_ALL),
-                '{}s'.format(interval)
+                f'{IO.Fore.LIGHTYELLOW_EX}interval{IO.Style.RESET_ALL}',
+                f'{interval}s'
             ])
 
             set_table_data.append([
-                '{}intensity{}'.format(IO.Fore.LIGHTYELLOW_EX, IO.Style.RESET_ALL),
+                f'{IO.Fore.LIGHTYELLOW_EX}intensity{IO.Style.RESET_ALL}',
                 intensity
             ])
 
             for host in self.host_watcher.hosts:
                 watch_table_data.append([
-                    '{}{}{}'.format(IO.Fore.LIGHTYELLOW_EX, self._get_host_id(host), IO.Style.RESET_ALL),
+                    f'{IO.Fore.LIGHTYELLOW_EX}{self._get_host_id(host)}{IO.Style.RESET_ALL}',
                     host.ip,
                     host.mac
                 ])
@@ -562,7 +562,7 @@ class MainMenu(CommandMenu):
             else:
                 IO.error('invalid scan intensity level.')
         else:
-            IO.error('{}{}{} is an invalid settings attribute.'.format(IO.Fore.LIGHTYELLOW_EX, args.attribute, IO.Style.RESET_ALL))
+            IO.error(f'{IO.Fore.LIGHTYELLOW_EX}{args.attribute}{IO.Style.RESET_ALL} is an invalid settings attribute.')
 
     def _reconnect_callback(self, old_host, new_host):
         """
@@ -711,7 +711,7 @@ class MainMenu(CommandMenu):
                 is_id_ = id_.isdigit()
 
                 if not is_mac and not is_ip and not is_id_:
-                    IO.error('invalid identifier(s): \'{}\'.'.format(ids_string))
+                    IO.error(f'invalid identifier(s): \'{ids_string}\'.')
                     return
 
                 if is_mac or is_ip:
@@ -722,12 +722,12 @@ class MainMenu(CommandMenu):
                             hosts.add(host)
                             break
                     if not found:
-                        IO.error('no host matching {}{}{}.'.format(IO.Fore.LIGHTYELLOW_EX, id_, IO.Style.RESET_ALL))
+                        IO.error(f'no host matching {IO.Fore.LIGHTYELLOW_EX}{id_}{IO.Style.RESET_ALL}.')
                         return
                 else:
                     id_ = int(id_)
                     if len(self.hosts) == 0 or id_ not in range(len(self.hosts)):
-                        IO.error('no host with id {}{}{}.'.format(IO.Fore.LIGHTYELLOW_EX, id_, IO.Style.RESET_ALL))
+                        IO.error(f'no host with id {IO.Fore.LIGHTYELLOW_EX}{id_}{IO.Style.RESET_ALL}.')
                         return
                     hosts.add(self.hosts[id_])
 
