@@ -5,17 +5,17 @@ import argparse
 import platform
 import collections
 
-import evillimiter.networking.utils as netutils
-from evillimiter.menus.main_menu import MainMenu
-from evillimiter.console.banner import get_main_banner
-from evillimiter.console.io import IO
+import evillimiter_ng.networking.utils as netutils
+from evillimiter_ng.menus.main_menu import MainMenu
+from evillimiter_ng.console.banner import get_main_banner
+from evillimiter_ng.console.io import IO
 
 
 InitialArguments = collections.namedtuple('InitialArguments', 'interface, gateway_ip, netmask, gateway_mac')
 
 
 def get_init_content():
-    with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), '__init__.py'), 'r') as f:
+    with open(os.path.join(os.path.abspath(os.path.dirname(__file__)), '__init__.py'), 'r', encoding='utf-8') as f:
         return f.read()
 
 
@@ -145,7 +145,7 @@ def cleanup(interface):
     netutils.disable_ip_forwarding()
 
 
-def run():
+def main():
     """
     Main entry point of the application
     """
@@ -173,7 +173,3 @@ def run():
         menu = MainMenu(version, args.interface, args.gateway_ip, args.gateway_mac, args.netmask)
         menu.start()
         cleanup(args.interface)
-
-
-if __name__ == '__main__':
-    run()

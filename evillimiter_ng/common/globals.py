@@ -1,4 +1,4 @@
-import evillimiter.console.shell as shell
+from evillimiter_ng.console import shell
 
 BROADCAST = 'ff:ff:ff:ff:ff:ff'
 

@@ -1,9 +1,8 @@
 import threading
 
-import evillimiter.console.shell as shell
-from .host import Host
-from evillimiter.common.globals import BIN_TC, BIN_IPTABLES
-from evillimiter.console.io import IO
+from evillimiter_ng.console import shell
+from evillimiter_ng.common.globals import BIN_TC, BIN_IPTABLES
+from evillimiter_ng.console.io import IO
 
 
 class Limiter(object):
@@ -130,8 +129,8 @@ class Limiter(object):
         self._host_dict_lock.release()
 
         if present:
-                host_ids = self._host_dict[host]['ids']
-                self.unlimit(host, direction)
+            host_ids = self._host_dict[host]['ids']
+            self.unlimit(host, direction)
         
         return Limiter.HostLimitIDs(*self._create_ids()) if host_ids is None else host_ids
 

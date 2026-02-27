@@ -1,7 +1,7 @@
 import enum
 import collections
 
-from evillimiter.console.io import IO
+from evillimiter_ng.console.io import IO
 
 
 class CommandParser(object):

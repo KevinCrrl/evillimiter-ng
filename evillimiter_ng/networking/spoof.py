@@ -2,8 +2,7 @@ import time
 import threading
 from scapy.all import ARP, send # pylint: disable=no-name-in-module
 
-from .host import Host
-from evillimiter.common.globals import BROADCAST
+from evillimiter_ng.common.globals import BROADCAST
 
 
 class ARPSpoofer(object):
@@ -65,7 +64,7 @@ class ARPSpoofer(object):
             ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac)
         ]
 
-        [send(x, verbose=0, iface=self.interface) for x in packets]
+        [send(x, verbose=0) for x in packets]
 
     def _restore(self, host):
         """
@@ -77,4 +76,4 @@ class ARPSpoofer(object):
             ARP(op=2, psrc=self.gateway_ip, hwsrc=self.gateway_mac, pdst=host.ip, hwdst=BROADCAST)
         ]
 
-        [send(x, verbose=0, iface=self.interface, count=3) for x in packets]
+        [send(x, verbose=0, count=3) for x in packets]

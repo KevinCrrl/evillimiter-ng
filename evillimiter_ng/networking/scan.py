@@ -1,14 +1,12 @@
-import sys
 import socket
 import threading
 import collections
 from tqdm import tqdm
-from netaddr import IPAddress
 from scapy.all import sr1, ARP # pylint: disable=no-name-in-module
 from concurrent.futures import ThreadPoolExecutor
 
 from .host import Host
-from evillimiter.console.io import IO
+from evillimiter_ng.console.io import IO
         
 
 class HostScanner(object):
@@ -96,7 +94,7 @@ class HostScanner(object):
         settings = self.settings
 
         packet = ARP(op=1, pdst=ip)
-        answer = sr1(packet, retry=settings.retries, timeout=settings.timeout, verbose=0, iface=self.interface)
+        answer = sr1(packet, retry=settings.retries, timeout=settings.timeout, verbose=0)
         
         if answer is not None:
             return Host(ip, answer.hwsrc, '')

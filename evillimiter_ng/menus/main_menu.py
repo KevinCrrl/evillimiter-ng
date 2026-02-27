@@ -3,21 +3,20 @@ import socket
 import curses
 import netaddr
 import threading
-import collections
 from terminaltables import SingleTable
 
-import evillimiter.networking.utils as netutils
+import evillimiter_ng.networking.utils as netutils
 from .menu import CommandMenu
-from evillimiter.networking.utils import BitRate
-from evillimiter.console.io import IO
-from evillimiter.console.chart import BarChart
-from evillimiter.console.banner import get_main_banner
-from evillimiter.networking.host import Host
-from evillimiter.networking.limit import Limiter, Direction
-from evillimiter.networking.spoof import ARPSpoofer
-from evillimiter.networking.scan import HostScanner, ScanIntensity
-from evillimiter.networking.monitor import BandwidthMonitor
-from evillimiter.networking.watch import HostWatcher
+from evillimiter_ng.networking.utils import BitRate
+from evillimiter_ng.console.io import IO
+from evillimiter_ng.console.chart import BarChart
+from evillimiter_ng.console.banner import get_main_banner
+from evillimiter_ng.networking.host import Host
+from evillimiter_ng.networking.limit import Limiter, Direction
+from evillimiter_ng.networking.spoof import ARPSpoofer
+from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
+from evillimiter_ng.networking.monitor import BandwidthMonitor
+from evillimiter_ng.networking.watch import HostWatcher
 
 
 class MainMenu(CommandMenu):
@@ -747,8 +746,7 @@ class MainMenu(CommandMenu):
         try:
             if '-' in range:
                 return list(netaddr.iter_iprange(*range.split('-')))
-            else:
-                return list(netaddr.IPNetwork(range))
+            return list(netaddr.IPNetwork(range))
         except netaddr.core.AddrFormatError:
             return
 
