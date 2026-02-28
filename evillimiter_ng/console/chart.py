@@ -25,11 +25,6 @@ class BarChart(object):
             else:
                 bar_length = round(remap(value['value'], 0, max_value, 0, self.max_bar_length))
             
-            chart += '{}{}: {} {}\n'.format(
-                value['prefix'],
-                ' ' * (max_prefix_length - len(value['prefix'])),
-                self.draw_char * bar_length,
-                value['suffix']
-            )
+            chart += f"{value['prefix']}{' ' * (max_prefix_length - len(value['prefix']))}: {self.draw_char * bar_length} {value['suffix']}\n"
 
         return chart[:-1]

@@ -12,7 +12,6 @@ class CommandMenu(object):
         """
         Handles command-line arguments.
         """
-        pass
 
     def interrupt_handler(self):
         """

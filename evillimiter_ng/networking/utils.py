@@ -262,13 +262,12 @@ class ByteValue(object):
 
         if unit == 'b':
             return number
-        elif unit == 'kb':
+        if unit == 'kb':
             return number * 1024
-        elif unit == 'mb':
+        if unit == 'mb':
             return number * 1024 ** 2
-        elif unit == 'gb':
+        if unit == 'gb':
             return number * 1024 ** 3
-        elif unit == 'tb':
+        if unit == 'tb':
             return number * 1024 ** 4
-        else:
-            raise Exception('Invalid byte string')
+        raise Exception('Invalid byte string')

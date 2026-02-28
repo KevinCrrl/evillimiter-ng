@@ -205,7 +205,7 @@ class MainMenu(CommandMenu):
             self.limiter.limit(host, direction, rate)
             self.bandwidth_monitor.add(host)
 
-            IO.ok('{}{}{r} {} {}limited{r} to {}.'.format(IO.Fore.LIGHTYELLOW_EX, host.ip, Direction.pretty_direction(direction), IO.Fore.LIGHTRED_EX, rate, r=IO.Style.RESET_ALL))
+            IO.ok(f'{IO.Fore.LIGHTYELLOW_EX}{host.ip}{IO.Style.RESET_ALL} {Direction.pretty_direction(direction)} {IO.Fore.LIGHTRED_EX}limited{IO.Style.RESET_ALL} to {rate}.')
 
     def _block_handler(self, args):
         """
@@ -222,7 +222,7 @@ class MainMenu(CommandMenu):
 
                 self.limiter.block(host, direction)
                 self.bandwidth_monitor.add(host)
-                IO.ok('{}{}{r} {} {}blocked{r}.'.format(IO.Fore.LIGHTYELLOW_EX, host.ip, Direction.pretty_direction(direction), IO.Fore.RED, r=IO.Style.RESET_ALL))
+                IO.ok(f'{IO.Fore.LIGHTYELLOW_EX}{host.ip}{IO.Style.RESET_ALL} {Direction.pretty_direction(direction)} {IO.Fore.RED}blocked{IO.Style.RESET_ALL}.')
 
     def _free_handler(self, args):
         """
@@ -428,11 +428,7 @@ class MainMenu(CommandMenu):
             upload_value = host_values[host]['current'][0] - host_values[host]['prev'][0]
             download_value = host_values[host]['current'][1] - host_values[host]['prev'][1]
 
-            prefix = '{}{}{} ({}, {})'.format(
-                IO.Fore.LIGHTYELLOW_EX, self._get_host_id(host), IO.Style.RESET_ALL,
-                host.ip,
-                host.name
-            )
+            prefix = f'{IO.Fore.LIGHTYELLOW_EX}{self._get_host_id(host)}{IO.Style.RESET_ALL} ({host.ip}, {host.name})'
             
             upload_chart.add_value(upload_value.value, prefix, upload_value)
             download_chart.add_value(download_value.value, prefix, download_value)
@@ -597,80 +593,60 @@ class MainMenu(CommandMenu):
         Handles 'help' command-line argument
         Prints help message including commands and usage
         """
-        spaces = ' ' * 35
+        s = ' ' * 35
+        y = IO.Fore.LIGHTYELLOW_EX
+        r = IO.Style.RESET_ALL
+        b = IO.Style.BRIGHT
 
         IO.print(
-            """
-{y}scan (--range [IP range]){r}{}scans for online hosts on your network.
-{y}     (--intensity [(1,2,3)]){r}{}required to find the hosts you want to limit.
+            f"""
+{y}scan (--range [IP range]){r}{s[len('scan (--range [IP range])'):]}scans for online hosts on your network.
+{y}     (--intensity [(1,2,3)]){r}{s[len('     (--intensity [(1,2,3)])'):]}required to find the hosts you want to limit.
 {b}{s}e.g.: scan
 {s}      scan --range 192.168.178.1-192.168.178.50
 {s}      scan --range 192.168.178.1/24 --intensity 3{r}
 
-{y}hosts (--force){r}{}lists all scanned hosts.
+{y}hosts (--force){r}{s[len('hosts (--force)'):]}lists all scanned hosts.
 {s}contains host information, including IDs.
 
-{y}limit [ID1,ID2,...] [rate]{r}{}limits bandwith of host(s) (uload/dload).
-{y}      (--upload) (--download){r}{}{b}e.g.: limit 4 100kbit
+{y}limit [ID1,ID2,...] [rate]{r}{s[len('limit [ID1,ID2,...] [rate]'):]}limits bandwith of host(s) (uload/dload).
+{y}      (--upload) (--download){r}{s[len('      (--upload) (--download)'):]}{b}e.g.: limit 4 100kbit
 {s}      limit 2,3,4 1gbit --download
 {s}      limit all 200kbit --upload{r}
 
-{y}block [ID1,ID2,...]{r}{}blocks internet access of host(s).
-{y}      (--upload) (--download){r}{}{b}e.g.: block 3,2
+{y}block [ID1,ID2,...]{r}{s[len('block [ID1,ID2,...]'):]}blocks internet access of host(s).
+{y}      (--upload) (--download){r}{s[len('      (--upload) (--download)'):]}{b}e.g.: block 3,2
 {s}      block all --upload{r}
 
-{y}free [ID1,ID2,...]{r}{}unlimits/unblocks host(s).
+{y}free [ID1,ID2,...]{r}{s[len('free [ID1,ID2,...]'):]}unlimits/unblocks host(s).
 {b}{s}e.g.: free 3
 {s}      free all{r}
 
-{y}add [IP] (--mac [MAC]){r}{}adds custom host to host list.
+{y}add [IP] (--mac [MAC]){r}{s[len('add [IP] (--mac [MAC])'):]}adds custom host to host list.
 {s}mac resolved automatically.
 {b}{s}e.g.: add 192.168.178.24
 {s}      add 192.168.1.50 --mac 1c:fc:bc:2d:a6:37{r}
 
-{y}monitor [ID1,ID2,...]{r}{}monitors bandwidth usage of host(s).
-{y}        (--interval [time in ms]){r}{}{b}e.g.: monitor all --interval 600{r}
+{y}monitor [ID1,ID2,...]{r}{s[len('monitor [ID1,ID2,...]'):]}monitors bandwidth usage of host(s).
+{y}        (--interval [time in ms]){r}{s[len('        (--interval [time in ms])'):]}{b}e.g.: monitor all --interval 600{r}
 
-{y}analyze [ID1,ID2,...]{r}{}analyzes traffic of host(s) without limiting
-{y}        (--duration [time in s]){r}{}to determine who uses how much bandwidth.
+{y}analyze [ID1,ID2,...]{r}{s[len('analyze [ID1,ID2,...]'):]}analyzes traffic of host(s) without limiting
+{y}        (--duration [time in s]){r}{s[len('        (--duration [time in s])'):]}to determine who uses how much bandwidth.
 {b}{s}e.g.: analyze 2,3 --duration 120{r}
 
-{y}watch{r}{}detects host reconnects with different IP.
-{y}watch add [ID1,ID2,...]{r}{}adds host to the reconnection watchlist.
+{y}watch{r}{s[len('watch'):]}detects host reconnects with different IP.
+{y}watch add [ID1,ID2,...]{r}{s[len('watch add [ID1,ID2,...]'):]}adds host to the reconnection watchlist.
 {b}{s}e.g.: watch add 3,4{r}
-{y}watch remove [ID1,ID2,...]{r}{}removes host from the reconnection watchlist.
+{y}watch remove [ID1,ID2,...]{r}{s[len('watch remove [ID1,ID2,...]'):]}removes host from the reconnection watchlist.
 {b}{s}e.g.: watch remove all{r}
-{y}watch set [attr] [value]{r}{}changes reconnect watch settings.
+{y}watch set [attr] [value]{r}{s[len('watch set [attr] [value]'):]}changes reconnect watch settings.
 {b}{s}e.g.: watch set interval 120
 {s}      watch set intensity 1{r}
 
-{y}clear{r}{}clears the terminal window.
+{y}clear{r}{s[len('clear'):]}clears the terminal window.
 
-{y}quit{r}{}quits the application.
-            """.format(
-                    spaces[len('scan (--range [IP range])'):],
-                    spaces[len('     (--intensity [(1,2,3)])'):],
-                    spaces[len('hosts (--force)'):],
-                    spaces[len('limit [ID1,ID2,...] [rate]'):],
-                    spaces[len('      (--upload) (--download)'):],
-                    spaces[len('block [ID1,ID2,...]'):],
-                    spaces[len('      (--upload) (--download)'):],
-                    spaces[len('free [ID1,ID2,...]'):],
-                    spaces[len('add [IP] (--mac [MAC])'):],
-                    spaces[len('monitor [ID1,ID2,...]'):],
-                    spaces[len('        (--interval [time in ms])'):],
-                    spaces[len('analyze [ID1,ID2,...]'):],
-                    spaces[len('        (--duration [time in s])'):],
-                    spaces[len('watch'):],
-                    spaces[len('watch add [ID1,ID2,...]'):],
-                    spaces[len('watch remove [ID1,ID2,...]'):],
-                    spaces[len('watch set [attr] [value]'):],
-                    spaces[len('clear'):],
-                    spaces[len('quit'):],
-                    y=IO.Fore.LIGHTYELLOW_EX, r=IO.Style.RESET_ALL, b=IO.Style.BRIGHT,
-                    s=spaces
-                )
-        )
+{y}quit{r}{s[len('quit'):]}quits the application.
+            """)
 
     def _quit_handler(self, args):
         self.interrupt_handler(False)
@@ -693,7 +669,7 @@ class MainMenu(CommandMenu):
         return ret
 
     def _print_help_reminder(self):
-        IO.print('type {Y}help{R} or {Y}?{R} to show command information.'.format(Y=IO.Fore.LIGHTYELLOW_EX, R=IO.Style.RESET_ALL))
+        IO.print(f'type {IO.Fore.LIGHTYELLOW_EX}help{IO.Style.RESET_ALL} or {IO.Fore.LIGHTYELLOW_EX}?{IO.Style.RESET_ALL} to show command information.')
 
     def _get_hosts_by_ids(self, ids_string):
         if ids_string == 'all':
@@ -742,11 +718,11 @@ class MainMenu(CommandMenu):
 
         return Direction.BOTH if direction == Direction.NONE else direction
 
-    def _parse_iprange(self, range):
+    def _parse_iprange(self, ip_range):
         try:
-            if '-' in range:
-                return list(netaddr.iter_iprange(*range.split('-')))
-            return list(netaddr.IPNetwork(range))
+            if '-' in ip_range:
+                return list(netaddr.iter_iprange(*ip_range.split('-')))
+            return list(netaddr.IPNetwork(ip_range))
         except netaddr.core.AddrFormatError:
             return
 
