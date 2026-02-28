@@ -16,7 +16,7 @@ dependencies = [
     'netaddr',
     'netifaces',
     'tqdm',
-    'scapy',
+    'scapy>2.5.0',
     'terminaltables'
 ]
 
@@ -24,8 +24,7 @@ classifiers = ['Environment :: Console',
                'Intended Audience :: End Users/Desktop',
                'Intended Audience :: System Administrators',
                'Intended Audience :: Developers',
-               'Natural Language :: English',
-               'Operating System :: Unix',
+               'Operating System :: Linux',
                'Programming Language :: Python :: 3.10',
                'Programming Language :: Python :: 3 :: Only',
                'Topic :: System :: Networking',

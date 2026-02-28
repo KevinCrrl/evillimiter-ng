@@ -117,7 +117,7 @@ class CommandParser(object):
                         result_dict[cmd.name] = True
                         is_arg_processed = True
                         break
-                    elif cmd.type == CommandParser.CommandType.PARAMETERIZED_FLAG_COMMAND:
+                    if cmd.type == CommandParser.CommandType.PARAMETERIZED_FLAG_COMMAND:
                         if (len(command) - 1) < (i + 1):
                             # no more command arguments to process
                             IO.error(f'parameter for flag {IO.Fore.LIGHTYELLOW_EX}{cmd.name}{IO.Style.RESET_ALL} is missing')

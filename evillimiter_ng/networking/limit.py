@@ -27,14 +27,14 @@ class Limiter(object):
             # add a class to the root qdisc with specified rate
             shell.execute_suppressed(f'{BIN_TC} class add dev {self.interface} parent 1:0 classid 1:{host_ids.upload_id} htb rate {rate} burst {rate * 1.1}')
             # add a fw filter that filters packets marked with the corresponding ID
-            shell.execute_suppressed('{} filter add dev {} parent 1:0 protocol ip prio {id} handle {id} fw flowid 1:{id}'.format(BIN_TC, self.interface, id=host_ids.upload_id))
+            shell.execute_suppressed(f'{BIN_TC} filter add dev {self.interface} parent 1:0 protocol ip prio {host_ids.upload_id} handle {host_ids.upload_id} fw flowid 1:{host_ids.upload_id}')
             # marks outgoing packets 
             shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -A POSTROUTING -s {host.ip} -j MARK --set-mark {host_ids.upload_id}')
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             # add a class to the root qdisc with specified rate
             shell.execute_suppressed(f'{BIN_TC} class add dev {self.interface} parent 1:0 classid 1:{host_ids.download_id} htb rate {rate} burst {rate * 1.1}')
             # add a fw filter that filters packets marked with the corresponding ID
-            shell.execute_suppressed('{} filter add dev {} parent 1:0 protocol ip prio {id} handle {id} fw flowid 1:{id}'.format(BIN_TC, self.interface, id=host_ids.download_id))
+            shell.execute_suppressed(f'{BIN_TC} filter add dev {self.interface} parent 1:0 protocol ip prio {host_ids.download_id} handle {host_ids.download_id} fw flowid 1:{host_ids.download_id}')
             # marks incoming packets
             shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -A PREROUTING -d {host.ip} -j MARK --set-mark {host_ids.download_id}')
 
@@ -114,8 +114,7 @@ class Limiter(object):
 
                 return f'{IO.Fore.LIGHTYELLOW_EX}{final.strip()}{IO.Style.RESET_ALL}'
 
-            else:
-                return f'{IO.Fore.LIGHTGREEN_EX}Free{IO.Style.RESET_ALL}'
+            return f'{IO.Fore.LIGHTGREEN_EX}Free{IO.Style.RESET_ALL}'
 
     def _new_host_limit_ids(self, host, direction):
         """
@@ -186,9 +185,8 @@ class Direction:
     def pretty_direction(direction):
         if direction == Direction.OUTGOING:
             return 'upload'
-        elif direction == Direction.INCOMING:
+        if direction == Direction.INCOMING:
             return 'download'
-        elif direction == Direction.BOTH:
-            return 'upload / download'
-        else:
-            return '-'
+        if direction == Direction.BOTH:
+            return 'upload / download'    
+        return '-'

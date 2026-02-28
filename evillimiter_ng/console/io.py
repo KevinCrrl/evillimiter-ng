@@ -75,7 +75,7 @@ class IO(object):
         edited = text
 
         for match in IO._ANSI_CSI_RE.finditer(text):
-                s, e = match.span()
-                edited = edited.replace(text[s:e], '')
+            s, e = match.span()
+            edited = edited.replace(text[s:e], '')
 
         return edited
