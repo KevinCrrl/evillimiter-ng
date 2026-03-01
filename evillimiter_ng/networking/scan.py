@@ -1,7 +1,7 @@
 import socket
 import threading
 import collections
-from tqdm import tqdm
+from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
 from scapy.all import sr1, ARP # pylint: disable=no-name-in-module
 from concurrent.futures import ThreadPoolExecutor
 
@@ -45,27 +45,29 @@ class HostScanner(object):
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             hosts = []
             iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
-            iterator = tqdm(
-                iterable=executor.map(self._sweep, iprange),
-                total=len(iprange),
-                ncols=45,
-                bar_format='{percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt}'
-            )
+            iterable=executor.map(self._sweep, iprange)
 
-            try:
-                for host in iterator:
-                    if host is not None:
-                        try:
-                            host_info = socket.gethostbyaddr(host.ip)
-                            name = '' if host_info is None else host_info[0]
-                            host.name = name
-                        except socket.herror:
-                            pass
+            with Progress(
+                    SpinnerColumn(),
+                    BarColumn(bar_width=None),
+                    TextColumn("({task.completed}/{task.total})"),
+                    console=IO.console
+                ) as progress:
+                task = progress.add_task("Scaning...", total=len(iprange))
 
-                        hosts.append(host)
-            except KeyboardInterrupt:
-                iterator.close()
-                IO.ok('aborted. waiting for shutdown...')
+                try:
+                    for host in iterable:
+                        if host is not None:
+                            try:
+                                host_info = socket.gethostbyaddr(host.ip)
+                                name = '' if host_info is None else host_info[0]
+                                host.name = name
+                            except socket.herror:
+                                pass
+                            hosts.append(host)
+                        progress.update(task, advance=1)
+                except KeyboardInterrupt:
+                    IO.ok('aborted. waiting for shutdown...')
 
             return hosts
 
