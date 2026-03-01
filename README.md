@@ -69,5 +69,5 @@ python -m installer dist/*.whl
 
 Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute). 
 
-Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl). Some rights reserved.<br>
+Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl). Some rights reserved.
 [Evil Limiter Next Generation](https://github.com/KevinCrrl/evillimiter-ng) is licensed under the MIT License as stated in the [LICENSE file](LICENSE).
