@@ -73,10 +73,10 @@ def process_arguments(args):
     else:
         interface = args.interface
         if not netutils.exists_interface(interface):
-            IO.error(f'interface {IO.Fore.LIGHTYELLOW_EX}{interface}{IO.Style.RESET_ALL} does not exist.')
+            IO.error(f'interface {IO.LIGHTYELLOW}{interface}{IO.END_LIGHTYELLOW} does not exist.')
             return
 
-    IO.ok(f'interface: {IO.Fore.LIGHTYELLOW_EX}{interface}{IO.Style.RESET_ALL}')
+    IO.ok(f'interface: {IO.LIGHTYELLOW}{interface}{IO.END_LIGHTYELLOW}')
 
     if args.gateway_ip is None:
         gateway_ip = netutils.get_default_gateway()
@@ -86,7 +86,7 @@ def process_arguments(args):
     else:
         gateway_ip = args.gateway_ip
 
-    IO.ok(f'gateway ip: {IO.Fore.LIGHTYELLOW_EX}{gateway_ip}{IO.Style.RESET_ALL}')
+    IO.ok(f'gateway ip: {IO.LIGHTYELLOW}{gateway_ip}{IO.END_LIGHTYELLOW}')
 
     if args.gateway_mac is None:
         gateway_mac = netutils.get_mac_by_ip(interface, gateway_ip)
@@ -100,7 +100,7 @@ def process_arguments(args):
             IO.error('gateway mac is invalid.')
             return
 
-    IO.ok(f'gateway mac: {IO.Fore.LIGHTYELLOW_EX}{gateway_mac}{IO.Style.RESET_ALL}')
+    IO.ok(f'gateway mac: {IO.LIGHTYELLOW}{gateway_mac}{IO.END_LIGHTYELLOW}')
 
     if args.netmask is None:
         netmask = netutils.get_default_netmask(interface)
@@ -110,7 +110,7 @@ def process_arguments(args):
     else:
         netmask = args.netmask
 
-    IO.ok(f'netmask: {IO.Fore.LIGHTYELLOW_EX}{netmask}{IO.Style.RESET_ALL}')
+    IO.ok(f'netmask: {IO.LIGHTYELLOW}{netmask}{IO.END_LIGHTYELLOW}')
 
     if args.flush:
         netutils.flush_network_settings(interface)
@@ -152,7 +152,6 @@ def main():
     version = get_version()
     args = parse_arguments()
 
-    IO.initialize(args.colorless)
     IO.print(get_main_banner(version))
 
     if not is_linux():

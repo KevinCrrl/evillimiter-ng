@@ -12,12 +12,11 @@ description = "Limit devices on your network (next generation)"
 requires-python = ">=3.10"
 license = "MIT"
 dependencies = [
-    'colorama',
+    'rich',
     'netaddr',
     'netifaces',
     'tqdm',
     'scapy>2.5.0',
-    'terminaltables'
 ]
 
 classifiers = ['Environment :: Console',

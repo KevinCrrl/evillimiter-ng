@@ -112,9 +112,9 @@ class Limiter(object):
                 if dload is not None:
                     final += f' {dload}↓'
 
-                return f'{IO.Fore.LIGHTYELLOW_EX}{final.strip()}{IO.Style.RESET_ALL}'
+                return f'{IO.LIGHTYELLOW}{final.strip()}{IO.END_LIGHTYELLOW}'
 
-            return f'{IO.Fore.LIGHTGREEN_EX}Free{IO.Style.RESET_ALL}'
+            return f'{IO.BOLD_LIGHTGREEN}Free{IO.END_BOLD_LIGHTGREEN}'
 
     def _new_host_limit_ids(self, host, direction):
         """
