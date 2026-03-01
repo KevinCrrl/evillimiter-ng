@@ -3,7 +3,9 @@ import socket
 import curses
 import netaddr
 import threading
-from terminaltables import SingleTable
+from rich.table import Table
+from rich.panel import Panel
+from rich.columns import Columns
 
 import evillimiter_ng.networking.utils as netutils
 from .menu import CommandMenu
@@ -22,7 +24,7 @@ from evillimiter_ng.networking.watch import HostWatcher
 class MainMenu(CommandMenu):
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         super().__init__()
-        self.prompt = f'({IO.Style.BRIGHT}Main{IO.Style.RESET_ALL}) >>> '
+        self.prompt = f'({IO.BOLD_LIGHT}Main{IO.END_BOLD_LIGHT}) >>> '
         self.parser.add_subparser('clear', self._clear_handler)
 
         hosts_parser = self.parser.add_subparser('hosts', self._hosts_handler)
@@ -147,7 +149,7 @@ class MainMenu(CommandMenu):
         self.hosts = hosts
         self.hosts_lock.release()
 
-        IO.ok(f'{IO.Fore.LIGHTYELLOW_EX}{len(hosts)}{IO.Style.RESET_ALL} hosts discovered.')
+        IO.ok(f'{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} hosts discovered.')
         IO.spacer()
 
     def _hosts_handler(self, args):
@@ -155,32 +157,26 @@ class MainMenu(CommandMenu):
         Handles 'hosts' command-line argument
         Displays discovered hosts
         """
-        table_data = [[
-            f'{IO.Style.BRIGHT}ID{IO.Style.RESET_ALL}',
-            f'{IO.Style.BRIGHT}IP address{IO.Style.RESET_ALL}',
-            f'{IO.Style.BRIGHT}MAC address{IO.Style.RESET_ALL}',
-            f'{IO.Style.BRIGHT}Hostname{IO.Style.RESET_ALL}',
-            f'{IO.Style.BRIGHT}Status{IO.Style.RESET_ALL}'
-        ]]
         
+        table = Table(title="Hosts")
+        table.add_column(f'{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}', style="yellow")
+        table.add_column(f'{IO.BOLD_LIGHT}IP address{IO.END_BOLD_LIGHT}')
+        table.add_column(f'{IO.BOLD_LIGHT}MAC address{IO.END_BOLD_LIGHT}')
+        table.add_column(f'{IO.BOLD_LIGHT}Hostname{IO.END_BOLD_LIGHT}')
+        table.add_column(f'{IO.BOLD_LIGHT}Status{IO.END_BOLD_LIGHT}')
+
         with self.hosts_lock:
             for host in self.hosts:
-                table_data.append([
-                    f'{IO.Fore.LIGHTYELLOW_EX}{self._get_host_id(host, lock=False)}{IO.Style.RESET_ALL}',
+                table.add_row(
+                    f'{IO.LIGHTYELLOW}{self._get_host_id(host, lock=False)}{IO.END_LIGHTYELLOW}',
                     host.ip,
                     host.mac,
                     host.name,
                     self.limiter.pretty_status(host)
-                ])
-
-        table = SingleTable(table_data, 'Hosts')
-
-        if not args.force and not table.ok:
-            IO.error('table does not fit terminal. resize or decrease font size. you can also force the display (--force).')
-            return
+                )
 
         IO.spacer()
-        IO.print(table.table)
+        IO.print(table)
         IO.spacer()
 
     def _limit_handler(self, args):
@@ -205,7 +201,7 @@ class MainMenu(CommandMenu):
             self.limiter.limit(host, direction, rate)
             self.bandwidth_monitor.add(host)
 
-            IO.ok(f'{IO.Fore.LIGHTYELLOW_EX}{host.ip}{IO.Style.RESET_ALL} {Direction.pretty_direction(direction)} {IO.Fore.LIGHTRED_EX}limited{IO.Style.RESET_ALL} to {rate}.')
+            IO.ok(f'{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}limited{IO.END_BOLD_LIGHTRED} to {rate}.')
 
     def _block_handler(self, args):
         """
@@ -222,7 +218,7 @@ class MainMenu(CommandMenu):
 
                 self.limiter.block(host, direction)
                 self.bandwidth_monitor.add(host)
-                IO.ok(f'{IO.Fore.LIGHTYELLOW_EX}{host.ip}{IO.Style.RESET_ALL} {Direction.pretty_direction(direction)} {IO.Fore.RED}blocked{IO.Style.RESET_ALL}.')
+                IO.ok(f'{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}blocked{IO.END_BOLD_LIGHTRED}.')
 
     def _free_handler(self, args):
         """
@@ -428,86 +424,95 @@ class MainMenu(CommandMenu):
             upload_value = host_values[host]['current'][0] - host_values[host]['prev'][0]
             download_value = host_values[host]['current'][1] - host_values[host]['prev'][1]
 
-            prefix = f'{IO.Fore.LIGHTYELLOW_EX}{self._get_host_id(host)}{IO.Style.RESET_ALL} ({host.ip}, {host.name})'
+            prefix = f'{IO.LIGHTYELLOW}{self._get_host_id(host)}{IO.END_LIGHTYELLOW} ({host.ip}, {host.name})'
             
             upload_chart.add_value(upload_value.value, prefix, upload_value)
             download_chart.add_value(download_value.value, prefix, download_value)
 
-        upload_table = SingleTable([[upload_chart.get()]], 'Upload')
-        download_table = SingleTable([[download_chart.get()]], 'Download')
+        up_panel = Panel(
+            upload_chart.get(), 
+            title="Upload", 
+            expand=False
+        )
 
-        upload_table.inner_heading_row_border = False
-        download_table.inner_heading_row_border = False
+        down_panel = Panel(
+            download_chart.get(), 
+            title="Download", 
+            expand=False
+        )
 
-        IO.spacer()
-        IO.print(upload_table.table)
-        IO.print(download_table.table)
-        IO.spacer()
+        IO.console.print(Columns([up_panel, down_panel]))
 
     def _watch_handler(self, args):
         if len(args) == 0:
-            watch_table_data = [[
-                f'{IO.Style.BRIGHT}ID{IO.Style.RESET_ALL}',
-                f'{IO.Style.BRIGHT}IP address{IO.Style.RESET_ALL}',
-                f'{IO.Style.BRIGHT}MAC address{IO.Style.RESET_ALL}'
-            ]]
+            watch_table_data = [
+                f'{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}',
+                f'{IO.BOLD_LIGHT}IP address{IO.END_BOLD_LIGHT}',
+                f'{IO.BOLD_LIGHT}MAC address{IO.END_BOLD_LIGHT}'
+            ]
 
-            set_table_data = [[
-                f'{IO.Style.BRIGHT}Attribute{IO.Style.RESET_ALL}',
-                f'{IO.Style.BRIGHT}Value{IO.Style.RESET_ALL}'
-            ]]
+            set_table_data = [
+                f'{IO.BOLD_LIGHT}Attribute{IO.END_BOLD_LIGHT}',
+                f'{IO.BOLD_LIGHT}Value{IO.END_BOLD_LIGHT}'
+            ]
 
-            hist_table_data = [[
-                f'{IO.Style.BRIGHT}ID{IO.Style.RESET_ALL}',
-                f'{IO.Style.BRIGHT}Old IP address{IO.Style.RESET_ALL}',
-                f'{IO.Style.BRIGHT}New IP address{IO.Style.RESET_ALL}',
-                f'{IO.Style.BRIGHT}Time{IO.Style.RESET_ALL}'
-            ]]
+            hist_table_data = [
+                f'{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}',
+                f'{IO.BOLD_LIGHT}Old IP address{IO.END_BOLD_LIGHT}',
+                f'{IO.BOLD_LIGHT}New IP address{IO.END_BOLD_LIGHT}',
+                f'{IO.BOLD_LIGHT}Time{IO.END_BOLD_LIGHT}'
+            ]
+
+            watch_table = Table(title="Watchlist")
+            for data in watch_table_data:
+                watch_table.add_column(data)
+            set_table = Table(title="Setting")
+            for data in set_table_data:
+                set_table.add_column(data)
+            hist_table = Table(title="Reconnection History")
+            for data in hist_table_data:
+                hist_table.add_column(data)
 
             iprange = self.host_watcher.iprange
             interval = self.host_watcher.interval
             intensity = self.host_watcher.intensity
 
-            set_table_data.append([
-                f'{IO.Fore.LIGHTYELLOW_EX}range{IO.Style.RESET_ALL}',
+            set_table.add_row(
+                f'{IO.LIGHTYELLOW}range{IO.END_LIGHTYELLOW}',
                 f'{len(iprange)} addresses' if iprange is not None else 'default'
-            ])
+            )
 
-            set_table_data.append([
-                f'{IO.Fore.LIGHTYELLOW_EX}interval{IO.Style.RESET_ALL}',
+            set_table.add_row(
+                f'{IO.LIGHTYELLOW}interval{IO.END_LIGHTYELLOW}',
                 f'{interval}s'
-            ])
+            )
 
-            set_table_data.append([
-                f'{IO.Fore.LIGHTYELLOW_EX}intensity{IO.Style.RESET_ALL}',
-                intensity
-            ])
+            set_table.add_row(
+                f'{IO.LIGHTYELLOW}intensity{IO.END_LIGHTYELLOW}',
+                str(intensity)
+            )
 
             for host in self.host_watcher.hosts:
-                watch_table_data.append([
-                    f'{IO.Fore.LIGHTYELLOW_EX}{self._get_host_id(host)}{IO.Style.RESET_ALL}',
+                watch_table.add_row(
+                    f'{IO.LIGHTYELLOW}{self._get_host_id(host)}{IO.END_LIGHTYELLOW}',
                     host.ip,
                     host.mac
-                ])
+                )
 
             for recon in self.host_watcher.log_list:
-                hist_table_data.append([
+                hist_table.add_row(
                     recon['old'].mac,
                     recon['old'].ip,
                     recon['new'].ip,
                     recon['time']
-                ])
-
-            watch_table = SingleTable(watch_table_data, "Watchlist")
-            set_table = SingleTable(set_table_data, "Settings")
-            hist_table = SingleTable(hist_table_data, 'Reconnection History')
+                )
 
             IO.spacer()
-            IO.print(watch_table.table)
+            IO.print(watch_table)
             IO.spacer()
-            IO.print(set_table.table)
+            IO.print(set_table)
             IO.spacer()
-            IO.print(hist_table.table)
+            IO.print(hist_table)
             IO.spacer()
 
     def _watch_add_handler(self, args):
@@ -557,7 +562,7 @@ class MainMenu(CommandMenu):
             else:
                 IO.error('invalid scan intensity level.')
         else:
-            IO.error(f'{IO.Fore.LIGHTYELLOW_EX}{args.attribute}{IO.Style.RESET_ALL} is an invalid settings attribute.')
+            IO.error(f'{IO.LIGHTYELLOW}{args.attribute}{IO.END_LIGHTYELLOW} is an invalid settings attribute.')
 
     def _reconnect_callback(self, old_host, new_host):
         """
@@ -594,58 +599,59 @@ class MainMenu(CommandMenu):
         Prints help message including commands and usage
         """
         s = ' ' * 35
-        y = IO.Fore.LIGHTYELLOW_EX
-        r = IO.Style.RESET_ALL
-        b = IO.Style.BRIGHT
+        y = IO.LIGHTYELLOW
+        ry = IO.END_LIGHTYELLOW
+        b = IO.BOLD_LIGHT
+        rb = IO.END_BOLD_LIGHT
 
         IO.print(
             f"""
-{y}scan (--range [IP range]){r}{s[len('scan (--range [IP range])'):]}scans for online hosts on your network.
-{y}     (--intensity [(1,2,3)]){r}{s[len('     (--intensity [(1,2,3)])'):]}required to find the hosts you want to limit.
+{y}scan (--range [IP range]){ry}{s[len('scan (--range [IP range])'):]}scans for online hosts on your network.
+{y}     (--intensity [(1,2,3)]){ry}{s[len('     (--intensity [(1,2,3)])'):]}required to find the hosts you want to limit.
 {b}{s}e.g.: scan
 {s}      scan --range 192.168.178.1-192.168.178.50
-{s}      scan --range 192.168.178.1/24 --intensity 3{r}
+{s}      scan --range 192.168.178.1/24 --intensity 3{rb}
 
-{y}hosts (--force){r}{s[len('hosts (--force)'):]}lists all scanned hosts.
+{y}hosts (--force){ry}{s[len('hosts (--force)'):]}lists all scanned hosts.
 {s}contains host information, including IDs.
 
-{y}limit [ID1,ID2,...] [rate]{r}{s[len('limit [ID1,ID2,...] [rate]'):]}limits bandwith of host(s) (uload/dload).
-{y}      (--upload) (--download){r}{s[len('      (--upload) (--download)'):]}{b}e.g.: limit 4 100kbit
+{y}limit [ID1,ID2,...] [rate]{ry}{s[len('limit [ID1,ID2,...] [rate]'):]}limits bandwith of host(s) (uload/dload).
+{y}      (--upload) (--download){ry}{s[len('      (--upload) (--download)'):]}{b}e.g.: limit 4 100kbit
 {s}      limit 2,3,4 1gbit --download
-{s}      limit all 200kbit --upload{r}
+{s}      limit all 200kbit --upload{rb}
 
-{y}block [ID1,ID2,...]{r}{s[len('block [ID1,ID2,...]'):]}blocks internet access of host(s).
-{y}      (--upload) (--download){r}{s[len('      (--upload) (--download)'):]}{b}e.g.: block 3,2
-{s}      block all --upload{r}
+{y}block [ID1,ID2,...]{ry}{s[len('block [ID1,ID2,...]'):]}blocks internet access of host(s).
+{y}      (--upload) (--download){ry}{s[len('      (--upload) (--download)'):]}{b}e.g.: block 3,2
+{s}      block all --upload{rb}
 
-{y}free [ID1,ID2,...]{r}{s[len('free [ID1,ID2,...]'):]}unlimits/unblocks host(s).
+{y}free [ID1,ID2,...]{ry}{s[len('free [ID1,ID2,...]'):]}unlimits/unblocks host(s).
 {b}{s}e.g.: free 3
-{s}      free all{r}
+{s}      free all{rb}
 
-{y}add [IP] (--mac [MAC]){r}{s[len('add [IP] (--mac [MAC])'):]}adds custom host to host list.
+{y}add [IP] (--mac [MAC]){ry}{s[len('add [IP] (--mac [MAC])'):]}adds custom host to host list.
 {s}mac resolved automatically.
 {b}{s}e.g.: add 192.168.178.24
-{s}      add 192.168.1.50 --mac 1c:fc:bc:2d:a6:37{r}
+{s}      add 192.168.1.50 --mac 1c:fc:bc:2d:a6:37{rb}
 
-{y}monitor [ID1,ID2,...]{r}{s[len('monitor [ID1,ID2,...]'):]}monitors bandwidth usage of host(s).
-{y}        (--interval [time in ms]){r}{s[len('        (--interval [time in ms])'):]}{b}e.g.: monitor all --interval 600{r}
+{y}monitor [ID1,ID2,...]{ry}{s[len('monitor [ID1,ID2,...]'):]}monitors bandwidth usage of host(s).
+{y}        (--interval [time in ms]){ry}{s[len('        (--interval [time in ms])'):]}{b}e.g.: monitor all --interval 600{rb}
 
-{y}analyze [ID1,ID2,...]{r}{s[len('analyze [ID1,ID2,...]'):]}analyzes traffic of host(s) without limiting
-{y}        (--duration [time in s]){r}{s[len('        (--duration [time in s])'):]}to determine who uses how much bandwidth.
-{b}{s}e.g.: analyze 2,3 --duration 120{r}
+{y}analyze [ID1,ID2,...]{ry}{s[len('analyze [ID1,ID2,...]'):]}analyzes traffic of host(s) without limiting
+{y}        (--duration [time in s]){ry}{s[len('        (--duration [time in s])'):]}to determine who uses how much bandwidth.
+{b}{s}e.g.: analyze 2,3 --duration 120{rb}
 
-{y}watch{r}{s[len('watch'):]}detects host reconnects with different IP.
-{y}watch add [ID1,ID2,...]{r}{s[len('watch add [ID1,ID2,...]'):]}adds host to the reconnection watchlist.
-{b}{s}e.g.: watch add 3,4{r}
-{y}watch remove [ID1,ID2,...]{r}{s[len('watch remove [ID1,ID2,...]'):]}removes host from the reconnection watchlist.
-{b}{s}e.g.: watch remove all{r}
-{y}watch set [attr] [value]{r}{s[len('watch set [attr] [value]'):]}changes reconnect watch settings.
+{y}watch{ry}{s[len('watch'):]}detects host reconnects with different IP.
+{y}watch add [ID1,ID2,...]{ry}{s[len('watch add [ID1,ID2,...]'):]}adds host to the reconnection watchlist.
+{b}{s}e.g.: watch add 3,4{rb}
+{y}watch remove [ID1,ID2,...]{ry}{s[len('watch remove [ID1,ID2,...]'):]}removes host from the reconnection watchlist.
+{b}{s}e.g.: watch remove all{rb}
+{y}watch set [attr] [value]{ry}{s[len('watch set [attr] [value]'):]}changes reconnect watch settings.
 {b}{s}e.g.: watch set interval 120
-{s}      watch set intensity 1{r}
+{s}      watch set intensity 1{rb}
 
-{y}clear{r}{s[len('clear'):]}clears the terminal window.
+{y}clear{ry}{s[len('clear'):]}clears the terminal window.
 
-{y}quit{r}{s[len('quit'):]}quits the application.
+{y}quit{ry}{s[len('quit'):]}quits the application.
             """)
 
     def _quit_handler(self, args):
@@ -669,7 +675,7 @@ class MainMenu(CommandMenu):
         return ret
 
     def _print_help_reminder(self):
-        IO.print(f'type {IO.Fore.LIGHTYELLOW_EX}help{IO.Style.RESET_ALL} or {IO.Fore.LIGHTYELLOW_EX}?{IO.Style.RESET_ALL} to show command information.')
+        IO.print(f'type {IO.LIGHTYELLOW}help{IO.END_LIGHTYELLOW} or {IO.LIGHTYELLOW}?{IO.END_LIGHTYELLOW} to show command information.')
 
     def _get_hosts_by_ids(self, ids_string):
         if ids_string == 'all':
@@ -697,12 +703,12 @@ class MainMenu(CommandMenu):
                             hosts.add(host)
                             break
                     if not found:
-                        IO.error(f'no host matching {IO.Fore.LIGHTYELLOW_EX}{id_}{IO.Style.RESET_ALL}.')
+                        IO.error(f'no host matching {IO.LIGHTYELLOW}{id_}{IO.END_LIGHTYELLOW}.')
                         return
                 else:
                     id_ = int(id_)
                     if len(self.hosts) == 0 or id_ not in range(len(self.hosts)):
-                        IO.error(f'no host with id {IO.Fore.LIGHTYELLOW_EX}{id_}{IO.Style.RESET_ALL}.')
+                        IO.error(f'no host with id {IO.LIGHTYELLOW}{id_}{IO.END_LIGHTYELLOW}.')
                         return
                     hosts.add(self.hosts[id_])
 

@@ -12,7 +12,7 @@ _MAIN_BANNER = r"""{}
                 KevinCrrl    ~  Next Generation
                                     v[_V_]
 
-""".format(IO.Fore.LIGHTRED_EX, IO.Style.RESET_ALL + IO.Style.BRIGHT)
+""".format(IO.BOLD_LIGHTRED, IO.END_BOLD_LIGHTRED)
 
 
 def get_main_banner(version):

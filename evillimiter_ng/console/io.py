@@ -1,50 +1,43 @@
 import re
-import colorama
+from rich.console import Console
 
 from . import shell
 
 
 class IO(object):
-    _ANSI_CSI_RE = re.compile('\001?\033\\[((?:\\d|;)*)([a-zA-Z])\002?') 
+    _ANSI_CSI_RE = re.compile('\001?\033\\[((?:\\d|;)*)([a-zA-Z])\002?')
 
-    Back = colorama.Back
-    Fore = colorama.Fore
-    Style = colorama.Style
+    BOLD_LIGHTGREEN = "[bold bright_green]"
+    END_BOLD_LIGHTGREEN = "[/bold bright_green]"
+    BOLD_LIGHTRED = "[bold bright_red]"
+    END_BOLD_LIGHTRED = "[/bold bright_red]"
+    LIGHTYELLOW = "[bright_yellow]"
+    END_LIGHTYELLOW = "[/bright_yellow]"
+    BOLD_LIGHT = "[bright_white]"
+    END_BOLD_LIGHT = "[/bright_white]"
 
-    colorless = False
-
-    @staticmethod
-    def initialize(colorless=False):
-        """
-        Initializes console input and output.
-        """
-        IO.colorless = colorless
-        if not colorless:
-            colorama.init(autoreset=True)
+    console = Console(emoji=False)
 
     @staticmethod
-    def print(text, end='\n', flush=False):
+    def print(text, end='\n'):
         """
         Writes a given string to the console.
         """
-        if IO.colorless:
-            text = IO._remove_colors(text)
-
-        print(text, end=end, flush=flush)
+        IO.console.print(text, end=end, emoji=False)
 
     @staticmethod
     def ok(text, end='\n'):
         """
         Print a success status message
         """
-        IO.print(f'{IO.Style.BRIGHT + IO.Fore.LIGHTGREEN_EX}OK{IO.Style.RESET_ALL}   {text}', end=end)
+        IO.print(f'{IO.BOLD_LIGHTGREEN }OK{IO.END_BOLD_LIGHTGREEN}   {text}', end=end)
 
     @staticmethod
     def error(text):
         """
         Print an error status message
         """
-        IO.print(f'{IO.Style.BRIGHT + IO.Fore.LIGHTRED_EX}ERR{IO.Style.RESET_ALL}  {text}')
+        IO.print(f'{IO.BOLD_LIGHTRED}ERR{IO.END_BOLD_LIGHTRED}  {text}')
 
     @staticmethod
     def spacer():
@@ -58,10 +51,8 @@ class IO(object):
         """
         Prompts the user for input.
         """
-        if IO.colorless:
-            prompt = IO._remove_colors(prompt)
-
-        return input(prompt)
+        IO.print(prompt, "")
+        return input()
 
     @staticmethod
     def clear():
