@@ -63,11 +63,15 @@ python -m installer dist/*.whl
 - **Limits IPv4 connctions only**, since [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) requires the ARP packet that is only present  on IPv4 networks.
 
 ## Disclaimer
-[Evil Limiter Next Generation](https://github.com/KevinCrrl/evillimiter-ng) is provided by [KevinCrl](https://github.com/KevinCrrl) "as is" and "with all faults". The provider makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether Evil Limiter is compatible with your equipment and other software installed on your equipment. You are also solely responsible for the protection of your equipment and backup of your data, and the provider will not be liable for any damages you may suffer in connection with using, modifying, or distributing this software. 
+
+**Evil Limiter Next Generation** ([GitHub Link](https://github.com/KevinCrrl/evillimiter-ng)) is provided by [KevinCrrl](https://github.com/KevinCrrl) "as is" and "with all faults". The provider makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether **Evil Limiter** is compatible with your equipment and other software installed on your system. You are also solely responsible for the protection of your equipment and the backup of your data. The provider will not be liable for any damages you may suffer in connection with using, modifying, or distributing this software.
+
+This project is not an official continuation of the original **Evil Limiter**; it is a **fork** that does not signify the definitive end of maintenance of the original project. I, **KevinCrrl**, am not related to the original development of **Evil Limiter**, and the original creator of **Evil Limiter**, [bitbrute](https://github.com/bitbrute), is not associated with the development of this fork. His name remains in this fork solely for the purpose of giving him credit as the original creator of the codebase.
 
 ## License
 
-Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute). 
+Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute).
 
 Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl). Some rights reserved.
-[Evil Limiter Next Generation](https://github.com/KevinCrrl/evillimiter-ng) is licensed under the MIT License as stated in the [LICENSE file](LICENSE).
+
+**Evil Limiter Next Generation** ([GitHub Link](https://github.com/KevinCrrl/evillimiter-ng)) is licensed under the MIT License, as stated in the [LICENSE file](LICENSE).
