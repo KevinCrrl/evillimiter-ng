@@ -38,4 +38,4 @@ evillimiter-ng = "evillimiter_ng.evillimiter_ng:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["evillimiter*"]
+include = ["evillimiter_ng*"]
