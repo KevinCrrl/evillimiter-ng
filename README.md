@@ -38,7 +38,7 @@ python -m installer dist/*.whl
 | ```-f``` | Flushes current iptables and tc configuration. Ensures that packets are dealt with correctly.|
 | ```--colorless``` | Disables colored output |
 
-#### ```evillimiter``` Commands
+#### ```evillimiter-ng``` Commands
 
 | Command | Explanation |
 | ------- | ----------- |
