@@ -4,25 +4,24 @@ from evillimiter_ng.console.io import IO
 
 DEVNULL = open(os.devnull, 'w')
 
-
-def execute(command, root=True):
-    return subprocess.call('sudo ' + command if root else command, shell=True)
-
-
-def execute_suppressed(command, root=True):
-    return subprocess.call('sudo ' + command if root else command, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+def execute(command):
+    return subprocess.run(command, check=False).returncode
 
 
-def output(command, root=True):
-    return subprocess.check_output('sudo ' + command if root else command, shell=True).decode('utf-8')
+def execute_suppressed(command):
+    return subprocess.run(command, stdout=DEVNULL, stderr=DEVNULL, check=False).returncode
 
 
-def output_suppressed(command, root=True):
-    return subprocess.check_output('sudo ' + command if root else command, shell=True, stderr=DEVNULL).decode('utf-8')
+def output(command):
+    return subprocess.run(command, capture_output=True, text=True, check=False).stdout
+
+
+def output_suppressed(command: list):
+    return subprocess.run(command, capture_output=True, text=True, check=False).stdout
 
 
 def locate_bin(name):
     try:
-        return output_suppressed(f'which {name}').replace('\n', '')
+        return output_suppressed(['which', name]).replace('\n', '')
     except subprocess.CalledProcessError:
         IO.error(f'missing util: {name}, check your PATH')

@@ -25,18 +25,18 @@ class Limiter(object):
 
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
             # add a class to the root qdisc with specified rate
-            shell.execute_suppressed(f'{BIN_TC} class add dev {self.interface} parent 1:0 classid 1:{host_ids.upload_id} htb rate {rate} burst {rate * 1.1}')
+            shell.execute_suppressed([BIN_TC, 'class', 'add', 'dev', self.interface, 'parent', '1:0', 'classid', f'1:{host_ids.upload_id}', 'htb', 'rate', str(rate), 'burst', str(rate * 1.1)])
             # add a fw filter that filters packets marked with the corresponding ID
-            shell.execute_suppressed(f'{BIN_TC} filter add dev {self.interface} parent 1:0 protocol ip prio {host_ids.upload_id} handle {host_ids.upload_id} fw flowid 1:{host_ids.upload_id}')
+            shell.execute_suppressed([BIN_TC, 'filter', 'add', 'dev', self.interface, 'parent', '1:0', 'protocol', 'ip', 'prio', str(host_ids.upload_id), 'handle', str(host_ids.upload_id), 'fw', 'flowid', f'1:{host_ids.upload_id}'])
             # marks outgoing packets 
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -A POSTROUTING -s {host.ip} -j MARK --set-mark {host_ids.upload_id}')
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-A', 'POSTROUTING', '-s', host.ip, '-j', 'MARK', '--set-mark', str(host_ids.upload_id)])
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             # add a class to the root qdisc with specified rate
-            shell.execute_suppressed(f'{BIN_TC} class add dev {self.interface} parent 1:0 classid 1:{host_ids.download_id} htb rate {rate} burst {rate * 1.1}')
+            shell.execute_suppressed([BIN_TC, 'class', 'add', 'dev', self.interface, 'parent', '1:0', 'classid', f'1:{host_ids.download_id}', 'htb', 'rate', str(rate), 'burst', str(rate * 1.1)])
             # add a fw filter that filters packets marked with the corresponding ID
-            shell.execute_suppressed(f'{BIN_TC} filter add dev {self.interface} parent 1:0 protocol ip prio {host_ids.download_id} handle {host_ids.download_id} fw flowid 1:{host_ids.download_id}')
+            shell.execute_suppressed([BIN_TC, 'filter', 'add', 'dev', self.interface, 'parent', '1:0', 'protocol', 'ip', 'prio', str(host_ids.download_id), 'handle', str(host_ids.download_id), 'fw', 'flowid', f'1:{host_ids.download_id}'])
             # marks incoming packets
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -A PREROUTING -d {host.ip} -j MARK --set-mark {host_ids.download_id}')
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-A', 'PREROUTING', '-d', host.ip, '-j', 'MARK', '--set-mark', str(host_ids.download_id)])
 
         host.limited = True
 
@@ -48,10 +48,10 @@ class Limiter(object):
 
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
             # drops forwarded packets with matching source
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t filter -A FORWARD -s {host.ip} -j DROP')
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-A', 'FORWARD', '-s', host.ip, '-j', 'DROP'])
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             # drops forwarded packets with matching destination
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t filter -A FORWARD -d {host.ip} -j DROP')
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-A', 'FORWARD', '-d', host.ip, '-j', 'DROP'])
 
         host.blocked = True
 
@@ -161,19 +161,19 @@ class Limiter(object):
         Deletes the tc class and applied filters
         for a given ID (host)
         """
-        shell.execute_suppressed(f'{BIN_TC} filter del dev {self.interface} parent 1:0 prio {id_}')
-        shell.execute_suppressed(f'{BIN_TC} class del dev {self.interface} parent 1:0 classid 1:{id_}')
+        shell.execute_suppressed([BIN_TC, 'filter', 'del', 'dev', self.interface, 'parent', '1:0', 'prio', str(id_)])
+        shell.execute_suppressed([BIN_TC, 'class', 'del', 'dev', self.interface, 'parent', '1:0', 'classid', f'1:{id_}'])
 
     def _delete_iptables_entries(self, host, direction, id_):
         """
         Deletes iptables rules for a given ID (host)
         """
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -D POSTROUTING -s {host.ip} -j MARK --set-mark {id_}')
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t filter -D FORWARD -s {host.ip} -j DROP')
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-D', 'POSTROUTING', '-s', host.ip, '-j', 'MARK', '--set-mark', str(id_)])
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-D', 'FORWARD', '-s', host.ip, '-j', 'DROP'])
         if (direction & Direction.INCOMING) == Direction.INCOMING:
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -D PREROUTING -d {host.ip} -j MARK --set-mark {id_}')
-            shell.execute_suppressed(f'{BIN_IPTABLES} -t filter -D FORWARD -d {host.ip} -j DROP')
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-D', 'PREROUTING', '-d', host.ip, '-j', 'MARK', '--set-mark', str(id_)])
+            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-D', 'FORWARD', '-d', host.ip, '-j', 'DROP'])
 
 
 class Direction:
