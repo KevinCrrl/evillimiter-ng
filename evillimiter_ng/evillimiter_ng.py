@@ -148,11 +148,6 @@ def main():
     """
     Main entry point of the application
     """
-    version = get_version()
-    args = parse_arguments()
-
-    IO.print(get_main_banner(version))
-
     if not is_linux():
         IO.error('run under linux.')
         return
@@ -160,6 +155,11 @@ def main():
     if not is_privileged():
         IO.error('run as root.')
         return
+
+    version = get_version()
+    args = parse_arguments()
+
+    IO.print(get_main_banner(version))
 
     args = process_arguments(args)
 
