@@ -54,7 +54,6 @@ def parse_arguments():
     parser.add_argument('-m', '--gateway-mac', dest='gateway_mac', help='gateway mac address. automatically resolved if not specified.')
     parser.add_argument('-n', '--netmask', help='netmask for the network. automatically resolved if not specified.')
     parser.add_argument('-f', '--flush', action='store_true', help='flush current iptables (firewall) and tc (traffic control) settings.')
-    parser.add_argument('--colorless', action='store_true', help='disable colored output.')
 
     return parser.parse_args()
 

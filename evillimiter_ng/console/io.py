@@ -1,12 +1,9 @@
-import re
 from rich.console import Console
 
 from . import shell
 
 
 class IO(object):
-    _ANSI_CSI_RE = re.compile('\001?\033\\[((?:\\d|;)*)([a-zA-Z])\002?')
-
     BOLD_LIGHTGREEN = "[bold bright_green]"
     END_BOLD_LIGHTGREEN = "[/bold bright_green]"
     BOLD_LIGHTRED = "[bold bright_red]"
@@ -60,13 +57,3 @@ class IO(object):
         Clears the terminal screen
         """
         shell.execute('clear')
-
-    @staticmethod
-    def _remove_colors(text):
-        edited = text
-
-        for match in IO._ANSI_CSI_RE.finditer(text):
-            s, e = match.span()
-            edited = edited.replace(text[s:e], '')
-
-        return edited
