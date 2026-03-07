@@ -5,8 +5,8 @@ from scapy.all import sniff, IP # pylint: disable=no-name-in-module
 from .utils import ValueConverter, BitRate, ByteValue
 
 
-class BandwidthMonitor(object):
-    class BandwidthMonitorResult(object):
+class BandwidthMonitor():
+    class BandwidthMonitorResult():
         def __init__(self):
             self.upload_rate = BitRate()
             self.upload_total_size = ByteValue()

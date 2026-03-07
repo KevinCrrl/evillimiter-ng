@@ -3,7 +3,7 @@ from rich.console import Console
 from . import shell
 
 
-class IO(object):
+class IO():
     BOLD_LIGHTGREEN = "[bold bright_green]"
     END_BOLD_LIGHTGREEN = "[/bold bright_green]"
     BOLD_LIGHTRED = "[bold bright_red]"

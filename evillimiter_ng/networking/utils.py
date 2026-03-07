@@ -106,7 +106,7 @@ class ValueConverter:
         return v * 8
 
 
-class BitRate(object):
+class BitRate():
     def __init__(self, rate=0):
         self.rate = rate
 
@@ -179,7 +179,7 @@ class BitRate(object):
             raise Exception('Invalid bitrate')
 
 
-class ByteValue(object):
+class ByteValue():
     def __init__(self, value=0):
         self.value = value
 

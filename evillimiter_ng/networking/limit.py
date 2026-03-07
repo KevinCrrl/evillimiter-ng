@@ -5,8 +5,8 @@ from evillimiter_ng.common.globals import BIN_TC, BIN_IPTABLES
 from evillimiter_ng.console.io import IO
 
 
-class Limiter(object):
-    class HostLimitIDs(object):
+class Limiter():
+    class HostLimitIDs():
         def __init__(self, upload_id, download_id):
             self.upload_id = upload_id
             self.download_id = download_id
@@ -182,6 +182,7 @@ class Direction:
     INCOMING = 2
     BOTH = 3
 
+    @staticmethod
     def pretty_direction(direction):
         if direction == Direction.OUTGOING:
             return 'upload'

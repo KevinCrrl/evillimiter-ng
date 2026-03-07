@@ -9,7 +9,7 @@ from .host import Host
 from evillimiter_ng.console.io import IO
         
 
-class HostScanner(object):
+class HostScanner():
     Settings = collections.namedtuple('Settings', 'max_workers retries timeout')
 
     def __init__(self, interface, iprange):
