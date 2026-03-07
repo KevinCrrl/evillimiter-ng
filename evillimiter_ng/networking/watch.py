@@ -4,7 +4,7 @@ import threading
 from .scan import HostScanner, ScanIntensity
 
 
-class HostWatcher(object):
+class HostWatcher():
     def __init__(self, interface, iprange, reconnection_callback):
         self._scanner = HostScanner(interface, iprange)
         self._reconnection_callback = reconnection_callback

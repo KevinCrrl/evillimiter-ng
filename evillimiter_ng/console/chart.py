@@ -1,4 +1,4 @@
-class BarChart(object):
+class BarChart():
     def __init__(self, draw_char='▇', max_bar_length=30):
         self.draw_char = draw_char
         self.max_bar_length = max_bar_length

@@ -5,7 +5,7 @@ from scapy.all import ARP, send # pylint: disable=no-name-in-module
 from evillimiter_ng.common.globals import BROADCAST
 
 
-class ARPSpoofer(object):
+class ARPSpoofer():
     def __init__(self, interface, gateway_ip, gateway_mac):
         self.interface = interface
         self.gateway_ip = gateway_ip
