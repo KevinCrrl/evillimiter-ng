@@ -59,18 +59,18 @@ def flush_network_settings(interface):
     related to the given interface
     """
     # reset default policy
-    shell.execute_suppressed(f'{BIN_IPTABLES} -P INPUT ACCEPT')
-    shell.execute_suppressed(f'{BIN_IPTABLES} -P OUTPUT ACCEPT')
-    shell.execute_suppressed(f'{BIN_IPTABLES} -P FORWARD ACCEPT')
+    shell.execute_suppressed([BIN_IPTABLES, "-P", "INPUT", "ACCEPT"])
+    shell.execute_suppressed([BIN_IPTABLES, "-P", "OUTPUT", "ACCEPT"])
+    shell.execute_suppressed([BIN_IPTABLES, "-P", "FORWARD", "ACCEPT"])
 
     # flush all chains in all tables (including user-defined)
-    shell.execute_suppressed(f'{BIN_IPTABLES} -t mangle -F')
-    shell.execute_suppressed(f'{BIN_IPTABLES} -t nat -F')
-    shell.execute_suppressed(f'{BIN_IPTABLES} -F')
-    shell.execute_suppressed(f'{BIN_IPTABLES} -X')
+    shell.execute_suppressed([BIN_IPTABLES, "-t", "mangle", "-F"])
+    shell.execute_suppressed([BIN_IPTABLES, "-t", "nat", "-F"])
+    shell.execute_suppressed([BIN_IPTABLES, "-F"])
+    shell.execute_suppressed([BIN_IPTABLES, "-X"])
 
     # delete root qdisc for given interface
-    shell.execute_suppressed(f'{BIN_TC} qdisc del dev {interface} root')
+    shell.execute_suppressed([BIN_TC, "qdisc", "del", "dev", interface, "root"])
 
 
 def validate_ip_address(ip):
@@ -85,19 +85,19 @@ def create_qdisc_root(interface):
     """
     Creates a root htb qdisc in traffic control for a given interface
     """
-    return shell.execute_suppressed(f'{BIN_TC} qdisc add dev {interface} root handle 1:0 htb') == 0
+    return shell.execute_suppressed([BIN_TC, "qdisc", "add", "dev", interface, "root", "handle", "1:0", "htb"]) == 0
 
 
 def delete_qdisc_root(interface):
-    return shell.execute_suppressed(f'{BIN_TC} qdisc del dev {interface} root handle 1:0 htb')
+    return shell.execute_suppressed([BIN_TC, "qdisc", "del", "dev", interface, "root", "handle", "1:0", "htb"])
 
 
 def enable_ip_forwarding():
-    return shell.execute_suppressed(f'{BIN_SYSCTL} -w {IP_FORWARD_LOC}=1') == 0
+    return shell.execute_suppressed([BIN_SYSCTL, "-w", f"{IP_FORWARD_LOC}=1"]) == 0
 
 
 def disable_ip_forwarding():
-    return shell.execute_suppressed(f'{BIN_SYSCTL} -w {IP_FORWARD_LOC}=0') == 0
+    return shell.execute_suppressed([BIN_SYSCTL, "-w", f"{IP_FORWARD_LOC}=0"]) == 0
 
 
 class ValueConverter:

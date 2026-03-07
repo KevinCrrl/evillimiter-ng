@@ -56,4 +56,4 @@ class IO(object):
         """
         Clears the terminal screen
         """
-        shell.execute('clear')
+        shell.execute(['clear'])
