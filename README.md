@@ -9,7 +9,7 @@
 
 A tool to monitor, analyze and limit the bandwidth (upload/download) of devices on your local network without physical or administrative access.
 
-```evillimiter-ng``` employs [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) and [traffic shaping](https://en.wikipedia.org/wiki/Traffic_shaping) to throttle the bandwidth of hosts on the network.
+`evillimiter-ng` employs [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) and [traffic shaping](https://en.wikipedia.org/wiki/Traffic_shaping) to throttle the bandwidth of hosts on the network.
 
 ## Requirements
 - Linux distribution
@@ -26,52 +26,72 @@ python -m build
 python -m installer dist/*.whl
 ```
 
+## Quick Start Example
+
+After installation, you can start using the tool with the following basic workflow.
+
+1. Start the program and specify your network interface:
+
+```bash
+evillimiter-ng -i wlan0
+```
+
+2. Scan the network for connected hosts:
+
+```bash
+scan
+```
+
+3. Limit bandwidth of a device (example: device ID 3 to 200kbit):
+
+```bash
+limit 3 200kbit
+```
+
 #### Command-Line Arguments
 
 | Argument | Explanation |
 | -------- | ----------- |
-| ```-h``` | Displays help message listing all command-line arguments |
-| ```-i [Interface Name]``` | Specifies network interface (resolved if not specified)|
-| ```-g [Gateway IP Address]``` | Specifies gateway IP address (resolved if not specified)|
-| ```-m [Gateway MAC Address]``` | Specifies gateway MAC address (resolved if not specified)|
-| ```-n [Netmask Address]``` | Specifies netmask (resolved if not specified)|
-| ```-f``` | Flushes current iptables and tc configuration. Ensures that packets are dealt with correctly.|
-| ```--colorless``` | Disables colored output |
+| `-h` | Displays help message listing all command-line arguments |
+| `-i [Interface Name]` | Specifies network interface (resolved if not specified) |
+| `-g [Gateway IP Address]` | Specifies gateway IP address (resolved if not specified) |
+| `-m [Gateway MAC Address]` | Specifies gateway MAC address (resolved if not specified) |
+| `-n [Netmask Address]` | Specifies netmask (resolved if not specified) |
+| `-f` | Flushes current iptables and tc configuration. Ensures that packets are dealt with correctly. |
+| `--colorless` | Disables colored output |
 
-#### ```evillimiter-ng``` Commands
+#### `evillimiter-ng` Commands
 
 | Command | Explanation |
 | ------- | ----------- |
-| ```scan (--range [IP Range]) (--intensity [(1,2,3)])``` | Scans your network for online hosts. One of the first things to do after start.<br>```--range``` lets you specify a custom IP range.<br>```--intensity``` lets you specify the scan intensity / speed (```1``` = quick, ```2``` = normal (standard), ```3``` = intense).<br>For example: ```scan --range 192.168.178.1-192.168.178.40 --intensity 1``` or just ```scan``` to scan the entire subnet with the standard intensity.
-| ```hosts (--force)``` | Displays all the hosts/devices previously scanned and basic information. Shows ID for each host that is required for interaction.<br>```--force``` forces the table to be shown, even when it doesn't fit the terminal.
-| ```limit [ID1,ID2,...] [Rate] (--upload) (--download)``` | Limits bandwidth of host(s) associated to specified ID. Rate determines the internet speed.<br>```--upload``` limits outgoing traffic only.<br>```--download``` limits incoming traffic only.<br>Valid rates: ```bit```, ```kbit```, ```mbit```, ```gbit```<br>For example: ```limit 4,5,6 200kbit``` or ```limit all 1gbit```
-| ```block [ID1,ID2,...] (--upload) (--download)``` | Blocks internet connection of host(s) associated to specified ID.<br>```--upload``` limits outgoing traffic only <br>```--download``` limits incoming traffic only.
-| ```free [ID1,ID2,...]``` | Unlimits/Unblocks host(s) associated to specified ID. Removes all further restrictions.
-| ```add [IP] (--mac [MAC])``` | Adds custom host to host list. MAC-Address will be resolved automatically or can be specified manually.<br>For example: ```add 192.168.178.24``` or ```add 192.168.1.50 --mac 1c:fc:bc:2d:a6:37```
-| ```monitor [ID1,ID2,...] (--interval [time in ms])``` | Monitors bandwidth usage of host(s) (current usage, total bandwidth used, ...).<br>```--interval``` sets the interval after bandwidth information get refreshed in milliseconds (default 500ms).<br>For example: ```monitor all --interval 1000```
-| ```analyze [ID1,ID2,...] (--duration [time in s])``` | Analyzes traffic of host(s) without limiting to determine who uses how much bandwidth.<br>```--duration``` specifies the duration of the analysis in seconds (default 30s).<br>For example: ```analyze 2,3 --duration 120```
-| ```watch``` | Shows current watch status. The watch feature detects when a host reconnects with a different IP address.
-| ```watch add [ID1,ID2,...]``` | Adds specified host(s) to the watchlist.<br>For example: ```watch add 6,7,8```
-| ```watch remove [ID1,ID2,...]``` | Removes specified host(s) from the watchlist.<br>For example: ```watch remove all```
-| ```watch set [Attribute] [Value]``` | Changes current watch settings. The following attributes can be changed:<br>```range``` is the IP range to scan for reconnects.<br>```interval``` is the time to wait between each network scan (in seconds).<br>For example: ```watch set interval 120```
-| ```clear``` | Clears the terminal window.
-| ```quit``` | Quits the application.
-| ```?```, ```help``` | Displays command information similar to this one.
+| `scan (--range [IP Range]) (--intensity [(1,2,3)])` | Scans your network for online hosts. One of the first things to do after start.<br>`--range` lets you specify a custom IP range.<br>`--intensity` lets you specify the scan intensity / speed (`1` = quick, `2` = normal (standard), `3` = intense).<br>Example: `scan --range 192.168.178.1-192.168.178.40 --intensity 1` or just `scan`. |
+| `hosts (--force)` | Displays all scanned hosts and basic information. |
+| `limit [ID1,ID2,...] [Rate] (--upload) (--download)` | Limits bandwidth of host(s) associated with specified ID. |
+| `block [ID1,ID2,...] (--upload) (--download)` | Blocks internet connection of host(s). |
+| `free [ID1,ID2,...]` | Removes bandwidth restrictions. |
+| `add [IP] (--mac [MAC])` | Adds custom host manually. |
+| `monitor [ID1,ID2,...] (--interval [time in ms])` | Monitor bandwidth usage of host(s). |
+| `analyze [ID1,ID2,...] (--duration [time in s])` | Analyze traffic usage. |
+| `watch` | Shows current watch status. |
+| `watch add [ID1,ID2,...]` | Adds host(s) to watchlist. |
+| `watch remove [ID1,ID2,...]` | Removes host(s) from watchlist. |
+| `watch set [Attribute] [Value]` | Changes watch settings. |
+| `clear` | Clears terminal window. |
+| `quit` | Quits the application. |
+| `?`, `help` | Displays command help. |
 
 ## Restrictions
 
-- **Limits IPv4 connctions only**, since [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) requires the ARP packet that is only present  on IPv4 networks.
+- **Limits IPv4 connections only**, since [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) requires ARP packets which exist only in IPv4 networks.
 
 ## Disclaimer
 
-**Evil Limiter Next Generation** ([GitHub Link](https://github.com/KevinCrrl/evillimiter-ng)) is provided by [KevinCrrl](https://github.com/KevinCrrl) "as is" and "with all faults". The provider makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether **Evil Limiter** is compatible with your equipment and other software installed on your system. You are also solely responsible for the protection of your equipment and the backup of your data. The provider will not be liable for any damages you may suffer in connection with using, modifying, or distributing this software.
-
-This project is not an official continuation of the original **Evil Limiter**; it is a **fork** that does not signify the definitive end of maintenance of the original project. I, **KevinCrrl**, am not related to the original development of **Evil Limiter**, and the original creator of **Evil Limiter**, [bitbrute](https://github.com/bitbrute), is not associated with the development of this fork. His name remains in this fork solely for the purpose of giving him credit as the original creator of the codebase.
+**Evil Limiter Next Generation** is provided by [KevinCrrl](https://github.com/KevinCrrl) "as is".  
+You are responsible for determining whether the software is compatible with your system and network environment.
 
 ## License
 
-Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute).
+Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute).  
+Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl).
 
-Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl). Some rights reserved.
-
-**Evil Limiter Next Generation** ([GitHub Link](https://github.com/KevinCrrl/evillimiter-ng)) is licensed under the MIT License, as stated in the [LICENSE file](LICENSE).
+Licensed under the **MIT License**.
