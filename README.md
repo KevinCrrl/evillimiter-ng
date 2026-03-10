@@ -58,7 +58,6 @@ limit 3 200kbit
 | `-m [Gateway MAC Address]` | Specifies gateway MAC address (resolved if not specified) |
 | `-n [Netmask Address]` | Specifies netmask (resolved if not specified) |
 | `-f` | Flushes current iptables and tc configuration. Ensures that packets are dealt with correctly. |
-| `--colorless` | Disables colored output |
 
 #### `evillimiter-ng` Commands
 
