@@ -84,10 +84,11 @@ limit 3 200kbit
 
 - **Limits IPv4 connections only**, since [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) requires ARP packets which exist only in IPv4 networks.
 
-## Disclaimer
+## Legal Disclaimer
 
-**Evil Limiter Next Generation** is provided by [KevinCrrl](https://github.com/KevinCrrl) "as is".  
-You are responsible for determining whether the software is compatible with your system and network environment.
+Please read the full legal disclaimer here:
+
+[LEGAL.md](LEGAL.md)
 
 ## License
 
