@@ -23,7 +23,7 @@ Possibly missing python packages will be installed during the installation proce
 git clone https://github.com/KevinCrrl/evillimiter-ng.git
 cd evillimiter-ng
 
-# Arch-based systems
+# Arch-based systems (or using the AUR: https://aur.archlinux.org/packages/evillimiter-ng)
 cd pkgbuild
 makepkg -si
 
