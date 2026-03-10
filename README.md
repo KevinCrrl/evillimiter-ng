@@ -22,8 +22,18 @@ Possibly missing python packages will be installed during the installation proce
 ```bash
 git clone https://github.com/KevinCrrl/evillimiter-ng.git
 cd evillimiter-ng
+
+# Arch-based systems
+cd pkgbuild
+makepkg -si
+
+# Other GNU/Linux distros using a virtual env
 python -m build
 python -m installer dist/*.whl
+
+# or
+
+pip install .
 ```
 
 ## Quick Start Example
