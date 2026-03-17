@@ -1,4 +1,4 @@
-class Host():
+class Host:
     def __init__(self, ip, mac, name):
         self.ip = ip
         self.mac = mac

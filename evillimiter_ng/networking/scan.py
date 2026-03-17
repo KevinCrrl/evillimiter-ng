@@ -2,23 +2,29 @@ import socket
 import threading
 import collections
 from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
-from scapy.all import sr1, ARP # pylint: disable=no-name-in-module
+from scapy.all import sr1, ARP  # pylint: disable=no-name-in-module
 from concurrent.futures import ThreadPoolExecutor
 
 from .host import Host
 from evillimiter_ng.console.io import IO
-        
 
-class HostScanner():
-    Settings = collections.namedtuple('Settings', 'max_workers retries timeout')
+
+class HostScanner:
+    Settings = collections.namedtuple("Settings", "max_workers retries timeout")
 
     def __init__(self, interface, iprange):
         self.interface = interface
         self.iprange = iprange
 
-        self._quick_settings = HostScanner.Settings(max_workers=80, retries=0, timeout=2)
-        self._normal_settings = HostScanner.Settings(max_workers=80, retries=1, timeout=3)
-        self._intense_settings = HostScanner.Settings(max_workers=80, retries=5, timeout=10)
+        self._quick_settings = HostScanner.Settings(
+            max_workers=80, retries=0, timeout=2
+        )
+        self._normal_settings = HostScanner.Settings(
+            max_workers=80, retries=1, timeout=3
+        )
+        self._intense_settings = HostScanner.Settings(
+            max_workers=80, retries=5, timeout=10
+        )
 
         self._settings = self._normal_settings
         self._settings_lock = threading.Lock()
@@ -45,14 +51,14 @@ class HostScanner():
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             hosts = []
             iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
-            iterable=executor.map(self._sweep, iprange)
+            iterable = executor.map(self._sweep, iprange)
 
             with Progress(
-                    SpinnerColumn(),
-                    BarColumn(bar_width=None),
-                    TextColumn("({task.completed}/{task.total})"),
-                    console=IO.console
-                ) as progress:
+                SpinnerColumn(),
+                BarColumn(bar_width=None),
+                TextColumn("({task.completed}/{task.total})"),
+                console=IO.console,
+            ) as progress:
                 task = progress.add_task("Scaning...", total=len(iprange))
 
                 try:
@@ -60,14 +66,14 @@ class HostScanner():
                         if host is not None:
                             try:
                                 host_info = socket.gethostbyaddr(host.ip)
-                                name = '' if host_info is None else host_info[0]
+                                name = "" if host_info is None else host_info[0]
                                 host.name = name
                             except socket.herror:
                                 pass
                             hosts.append(host)
                         progress.update(task, advance=1)
                 except KeyboardInterrupt:
-                    IO.ok('aborted. waiting for shutdown...')
+                    IO.ok("aborted. waiting for shutdown...")
 
             return hosts
 
@@ -85,7 +91,7 @@ class HostScanner():
                     if host.mac == s_host.mac and host.ip != s_host.ip:
                         s_host.name = host.name
                         reconnected_hosts[host] = s_host
-            
+
             return reconnected_hosts
 
     def _sweep(self, ip):
@@ -96,10 +102,12 @@ class HostScanner():
         settings = self.settings
 
         packet = ARP(op=1, pdst=ip)
-        answer = sr1(packet, retry=settings.retries, timeout=settings.timeout, verbose=0)
-        
+        answer = sr1(
+            packet, retry=settings.retries, timeout=settings.timeout, verbose=0
+        )
+
         if answer is not None:
-            return Host(ip, answer.hwsrc, '')
+            return Host(ip, answer.hwsrc, "")
 
 
 class ScanIntensity:

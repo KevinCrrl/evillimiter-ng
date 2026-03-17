@@ -10,9 +10,9 @@ class CommandParser(object):
         FLAG_COMMAND = 2
         PARAMETERIZED_FLAG_COMMAND = 3
 
-    FlagCommand = collections.namedtuple('FlagCommand', 'type, identifier, name')
-    ParameterCommand = collections.namedtuple('ParameterCommand', 'type name')
-    Subparser = collections.namedtuple('Subparser', 'identifier subparser handler')
+    FlagCommand = collections.namedtuple("FlagCommand", "type, identifier, name")
+    ParameterCommand = collections.namedtuple("ParameterCommand", "type name")
+    Subparser = collections.namedtuple("Subparser", "identifier subparser handler")
 
     def __init__(self):
         self._flag_commands = []
@@ -28,8 +28,7 @@ class CommandParser(object):
         Both are standalone values (parameters).
         """
         command = CommandParser.ParameterCommand(
-            type=CommandParser.CommandType.PARAMETER_COMMAND,
-            name=name
+            type=CommandParser.CommandType.PARAMETER_COMMAND, name=name
         )
 
         self._parameter_commands.append(command)
@@ -43,7 +42,7 @@ class CommandParser(object):
         command = CommandParser.FlagCommand(
             type=CommandParser.CommandType.FLAG_COMMAND,
             identifier=identifier,
-            name=name
+            name=name,
         )
 
         self._flag_commands.append(command)
@@ -57,7 +56,7 @@ class CommandParser(object):
         command = CommandParser.FlagCommand(
             type=CommandParser.CommandType.PARAMETERIZED_FLAG_COMMAND,
             identifier=identifier,
-            name=name
+            name=name,
         )
 
         self._flag_commands.append(command)
@@ -72,9 +71,7 @@ class CommandParser(object):
         """
         subparser = CommandParser()
         command = CommandParser.Subparser(
-            identifier=identifier,
-            subparser=subparser,
-            handler=handler
+            identifier=identifier, subparser=subparser, handler=handler
         )
 
         self._subparsers.append(command)
@@ -100,13 +97,13 @@ class CommandParser(object):
                 for sp in self._subparsers:
                     if sp.identifier == arg:
                         # if subparser present, parse arguments there
-                        result = sp.subparser.parse(command[(i + 1):])
+                        result = sp.subparser.parse(command[(i + 1) :])
                         if result is not None and sp.handler is not None:
                             # call the subparser's handler if available
                             sp.handler(result)
 
                         return result
-            
+
             # indicates whether or not the argument has been processed
             is_arg_processed = False
 
@@ -120,7 +117,9 @@ class CommandParser(object):
                     if cmd.type == CommandParser.CommandType.PARAMETERIZED_FLAG_COMMAND:
                         if (len(command) - 1) < (i + 1):
                             # no more command arguments to process
-                            IO.error(f'parameter for flag {IO.LIGHTYELLOW}{cmd.name}{IO.END_LIGHTYELLOW} is missing')
+                            IO.error(
+                                f"parameter for flag {IO.LIGHTYELLOW}{cmd.name}{IO.END_LIGHTYELLOW} is missing"
+                            )
                             return
 
                         # if parameterized flag, set value to next argument
@@ -132,7 +131,7 @@ class CommandParser(object):
 
                         is_arg_processed = True
                         break
-            
+
             if not is_arg_processed:
                 for cmd in self._parameter_commands:
                     # parameter command, since a flag could not be found
@@ -143,13 +142,17 @@ class CommandParser(object):
                         break
 
             if not is_arg_processed:
-                IO.error(f'{IO.LIGHTYELLOW}{arg}{IO.END_LIGHTYELLOW} is an unknown command.')
+                IO.error(
+                    f"{IO.LIGHTYELLOW}{arg}{IO.END_LIGHTYELLOW} is an unknown command."
+                )
                 return
 
         # check if there are any parameters missing
         for cmd in self._parameter_commands:
             if result_dict[cmd.name] is None:
-                IO.error(f'parameter {IO.LIGHTYELLOW}{cmd.name}{IO.END_LIGHTYELLOW} is missing')
+                IO.error(
+                    f"parameter {IO.LIGHTYELLOW}{cmd.name}{IO.END_LIGHTYELLOW} is missing"
+                )
                 return
 
         # set unspecified flags to False instead of None
@@ -158,5 +161,5 @@ class CommandParser(object):
                 if result_dict[cmd.name] is None:
                     result_dict[cmd.name] = False
 
-        result_tuple = collections.namedtuple('ParseResult', sorted(result_dict))
+        result_tuple = collections.namedtuple("ParseResult", sorted(result_dict))
         return result_tuple(**result_dict)
