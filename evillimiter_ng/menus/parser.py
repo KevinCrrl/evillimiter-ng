@@ -97,7 +97,7 @@ class CommandParser(object):
                 for sp in self._subparsers:
                     if sp.identifier == arg:
                         # if subparser present, parse arguments there
-                        result = sp.subparser.parse(command[(i + 1) :])
+                        result = sp.subparser.parse(command[(i + 1) :])  # noqa: E203
                         if result is not None and sp.handler is not None:
                             # call the subparser's handler if available
                             sp.handler(result)
