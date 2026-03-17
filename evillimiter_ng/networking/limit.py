@@ -5,8 +5,8 @@ from evillimiter_ng.common.globals import BIN_TC, BIN_IPTABLES
 from evillimiter_ng.console.io import IO
 
 
-class Limiter():
-    class HostLimitIDs():
+class Limiter:
+    class HostLimitIDs:
         def __init__(self, upload_id, download_id):
             self.upload_id = upload_id
             self.download_id = download_id
@@ -25,45 +25,177 @@ class Limiter():
 
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
             # add a class to the root qdisc with specified rate
-            shell.execute_suppressed([BIN_TC, 'class', 'add', 'dev', self.interface, 'parent', '1:0', 'classid', f'1:{host_ids.upload_id}', 'htb', 'rate', str(rate), 'burst', str(rate * 1.1)])
+            shell.execute_suppressed(
+                [
+                    BIN_TC,
+                    "class",
+                    "add",
+                    "dev",
+                    self.interface,
+                    "parent",
+                    "1:0",
+                    "classid",
+                    f"1:{host_ids.upload_id}",
+                    "htb",
+                    "rate",
+                    str(rate),
+                    "burst",
+                    str(rate * 1.1),
+                ]
+            )
             # add a fw filter that filters packets marked with the corresponding ID
-            shell.execute_suppressed([BIN_TC, 'filter', 'add', 'dev', self.interface, 'parent', '1:0', 'protocol', 'ip', 'prio', str(host_ids.upload_id), 'handle', str(host_ids.upload_id), 'fw', 'flowid', f'1:{host_ids.upload_id}'])
-            # marks outgoing packets 
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-A', 'POSTROUTING', '-s', host.ip, '-j', 'MARK', '--set-mark', str(host_ids.upload_id)])
+            shell.execute_suppressed(
+                [
+                    BIN_TC,
+                    "filter",
+                    "add",
+                    "dev",
+                    self.interface,
+                    "parent",
+                    "1:0",
+                    "protocol",
+                    "ip",
+                    "prio",
+                    str(host_ids.upload_id),
+                    "handle",
+                    str(host_ids.upload_id),
+                    "fw",
+                    "flowid",
+                    f"1:{host_ids.upload_id}",
+                ]
+            )
+            # marks outgoing packets
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "mangle",
+                    "-A",
+                    "POSTROUTING",
+                    "-s",
+                    host.ip,
+                    "-j",
+                    "MARK",
+                    "--set-mark",
+                    str(host_ids.upload_id),
+                ]
+            )
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             # add a class to the root qdisc with specified rate
-            shell.execute_suppressed([BIN_TC, 'class', 'add', 'dev', self.interface, 'parent', '1:0', 'classid', f'1:{host_ids.download_id}', 'htb', 'rate', str(rate), 'burst', str(rate * 1.1)])
+            shell.execute_suppressed(
+                [
+                    BIN_TC,
+                    "class",
+                    "add",
+                    "dev",
+                    self.interface,
+                    "parent",
+                    "1:0",
+                    "classid",
+                    f"1:{host_ids.download_id}",
+                    "htb",
+                    "rate",
+                    str(rate),
+                    "burst",
+                    str(rate * 1.1),
+                ]
+            )
             # add a fw filter that filters packets marked with the corresponding ID
-            shell.execute_suppressed([BIN_TC, 'filter', 'add', 'dev', self.interface, 'parent', '1:0', 'protocol', 'ip', 'prio', str(host_ids.download_id), 'handle', str(host_ids.download_id), 'fw', 'flowid', f'1:{host_ids.download_id}'])
+            shell.execute_suppressed(
+                [
+                    BIN_TC,
+                    "filter",
+                    "add",
+                    "dev",
+                    self.interface,
+                    "parent",
+                    "1:0",
+                    "protocol",
+                    "ip",
+                    "prio",
+                    str(host_ids.download_id),
+                    "handle",
+                    str(host_ids.download_id),
+                    "fw",
+                    "flowid",
+                    f"1:{host_ids.download_id}",
+                ]
+            )
             # marks incoming packets
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-A', 'PREROUTING', '-d', host.ip, '-j', 'MARK', '--set-mark', str(host_ids.download_id)])
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "mangle",
+                    "-A",
+                    "PREROUTING",
+                    "-d",
+                    host.ip,
+                    "-j",
+                    "MARK",
+                    "--set-mark",
+                    str(host_ids.download_id),
+                ]
+            )
 
         host.limited = True
 
         with self._host_dict_lock:
-            self._host_dict[host] = { 'ids': host_ids, 'rate': rate, 'direction': direction }
+            self._host_dict[host] = {
+                "ids": host_ids,
+                "rate": rate,
+                "direction": direction,
+            }
 
     def block(self, host, direction):
         host_ids = self._new_host_limit_ids(host, direction)
 
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
             # drops forwarded packets with matching source
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-A', 'FORWARD', '-s', host.ip, '-j', 'DROP'])
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "filter",
+                    "-A",
+                    "FORWARD",
+                    "-s",
+                    host.ip,
+                    "-j",
+                    "DROP",
+                ]
+            )
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             # drops forwarded packets with matching destination
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-A', 'FORWARD', '-d', host.ip, '-j', 'DROP'])
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "filter",
+                    "-A",
+                    "FORWARD",
+                    "-d",
+                    host.ip,
+                    "-j",
+                    "DROP",
+                ]
+            )
 
         host.blocked = True
 
         with self._host_dict_lock:
-            self._host_dict[host] = { 'ids': host_ids, 'rate': None, 'direction': direction }
+            self._host_dict[host] = {
+                "ids": host_ids,
+                "rate": None,
+                "direction": direction,
+            }
 
     def unlimit(self, host, direction):
         if not host.limited and not host.blocked:
             return
-            
+
         with self._host_dict_lock:
-            host_ids = self._host_dict[host]['ids']
+            host_ids = self._host_dict[host]["ids"]
 
             if (direction & Direction.OUTGOING) == Direction.OUTGOING:
                 self._delete_tc_class(host_ids.upload_id)
@@ -85,10 +217,10 @@ class Limiter():
         if info is not None:
             self.unlimit(old_host, Direction.BOTH)
 
-            if info['rate'] is None:
-                self.block(new_host, info['direction'])
+            if info["rate"] is None:
+                self.block(new_host, info["direction"])
             else:
-                self.limit(new_host, info['direction'], info['rate'])
+                self.limit(new_host, info["direction"], info["rate"])
 
     def pretty_status(self, host):
         """
@@ -96,30 +228,30 @@ class Limiter():
         """
         with self._host_dict_lock:
             if host in self._host_dict:
-                rate = self._host_dict[host]['rate']
-                direction = self._host_dict[host]['direction']
+                rate = self._host_dict[host]["rate"]
+                direction = self._host_dict[host]["direction"]
                 uload = None
                 dload = None
-                final = ''
+                final = ""
 
                 if direction in (Direction.BOTH, Direction.OUTGOING):
-                    uload = '0bit' if rate is None else rate
+                    uload = "0bit" if rate is None else rate
                 if direction in (Direction.BOTH, Direction.INCOMING):
-                    dload = '0bit' if rate is None else rate
+                    dload = "0bit" if rate is None else rate
 
                 if uload is not None:
-                    final += f'{uload}↑'
+                    final += f"{uload}↑"
                 if dload is not None:
-                    final += f' {dload}↓'
+                    final += f" {dload}↓"
 
-                return f'{IO.LIGHTYELLOW}{final.strip()}{IO.END_LIGHTYELLOW}'
+                return f"{IO.LIGHTYELLOW}{final.strip()}{IO.END_LIGHTYELLOW}"
 
-            return f'{IO.BOLD_LIGHTGREEN}Free{IO.END_BOLD_LIGHTGREEN}'
+            return f"{IO.BOLD_LIGHTGREEN}Free{IO.END_BOLD_LIGHTGREEN}"
 
     def _new_host_limit_ids(self, host, direction):
         """
         Get limit information for corresponding host
-        If not present, create new 
+        If not present, create new
         """
         host_ids = None
 
@@ -128,16 +260,19 @@ class Limiter():
         self._host_dict_lock.release()
 
         if present:
-            host_ids = self._host_dict[host]['ids']
+            host_ids = self._host_dict[host]["ids"]
             self.unlimit(host, direction)
-        
-        return Limiter.HostLimitIDs(*self._create_ids()) if host_ids is None else host_ids
+
+        return (
+            Limiter.HostLimitIDs(*self._create_ids()) if host_ids is None else host_ids
+        )
 
     def _create_ids(self):
         """
         Returns unique IDs that are
         currently not in use
         """
+
         def generate_id(*exc):
             """
             Generates a unique, unused ID
@@ -148,8 +283,10 @@ class Limiter():
                 while True:
                     if id_ not in exc:
                         v = (x for x in self._host_dict.values())
-                        ids = (x['ids'] for x in v)
-                        if id_ not in (x for y in ids for x in [y.upload_id, y.download_id]):
+                        ids = (x["ids"] for x in v)
+                        if id_ not in (
+                            x for y in ids for x in [y.upload_id, y.download_id]
+                        ):
                             return id_
                     id_ += 1
 
@@ -161,19 +298,95 @@ class Limiter():
         Deletes the tc class and applied filters
         for a given ID (host)
         """
-        shell.execute_suppressed([BIN_TC, 'filter', 'del', 'dev', self.interface, 'parent', '1:0', 'prio', str(id_)])
-        shell.execute_suppressed([BIN_TC, 'class', 'del', 'dev', self.interface, 'parent', '1:0', 'classid', f'1:{id_}'])
+        shell.execute_suppressed(
+            [
+                BIN_TC,
+                "filter",
+                "del",
+                "dev",
+                self.interface,
+                "parent",
+                "1:0",
+                "prio",
+                str(id_),
+            ]
+        )
+        shell.execute_suppressed(
+            [
+                BIN_TC,
+                "class",
+                "del",
+                "dev",
+                self.interface,
+                "parent",
+                "1:0",
+                "classid",
+                f"1:{id_}",
+            ]
+        )
 
     def _delete_iptables_entries(self, host, direction, id_):
         """
         Deletes iptables rules for a given ID (host)
         """
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-D', 'POSTROUTING', '-s', host.ip, '-j', 'MARK', '--set-mark', str(id_)])
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-D', 'FORWARD', '-s', host.ip, '-j', 'DROP'])
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "mangle",
+                    "-D",
+                    "POSTROUTING",
+                    "-s",
+                    host.ip,
+                    "-j",
+                    "MARK",
+                    "--set-mark",
+                    str(id_),
+                ]
+            )
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "filter",
+                    "-D",
+                    "FORWARD",
+                    "-s",
+                    host.ip,
+                    "-j",
+                    "DROP",
+                ]
+            )
         if (direction & Direction.INCOMING) == Direction.INCOMING:
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'mangle', '-D', 'PREROUTING', '-d', host.ip, '-j', 'MARK', '--set-mark', str(id_)])
-            shell.execute_suppressed([BIN_IPTABLES, '-t', 'filter', '-D', 'FORWARD', '-d', host.ip, '-j', 'DROP'])
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "mangle",
+                    "-D",
+                    "PREROUTING",
+                    "-d",
+                    host.ip,
+                    "-j",
+                    "MARK",
+                    "--set-mark",
+                    str(id_),
+                ]
+            )
+            shell.execute_suppressed(
+                [
+                    BIN_IPTABLES,
+                    "-t",
+                    "filter",
+                    "-D",
+                    "FORWARD",
+                    "-d",
+                    host.ip,
+                    "-j",
+                    "DROP",
+                ]
+            )
 
 
 class Direction:
@@ -185,9 +398,9 @@ class Direction:
     @staticmethod
     def pretty_direction(direction):
         if direction == Direction.OUTGOING:
-            return 'upload'
+            return "upload"
         if direction == Direction.INCOMING:
-            return 'download'
+            return "download"
         if direction == Direction.BOTH:
-            return 'upload / download'    
-        return '-'
+            return "upload / download"
+        return "-"

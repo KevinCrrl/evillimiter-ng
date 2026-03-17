@@ -3,7 +3,7 @@ from rich.console import Console
 from . import shell
 
 
-class IO():
+class IO:
     BOLD_LIGHTGREEN = "[bold bright_green]"
     END_BOLD_LIGHTGREEN = "[/bold bright_green]"
     BOLD_LIGHTRED = "[bold bright_red]"
@@ -16,32 +16,32 @@ class IO():
     console = Console(emoji=False)
 
     @staticmethod
-    def print(text, end='\n'):
+    def print(text, end="\n"):
         """
         Writes a given string to the console.
         """
         IO.console.print(text, end=end, emoji=False)
 
     @staticmethod
-    def ok(text, end='\n'):
+    def ok(text, end="\n"):
         """
         Print a success status message
         """
-        IO.print(f'{IO.BOLD_LIGHTGREEN }OK{IO.END_BOLD_LIGHTGREEN}   {text}', end=end)
+        IO.print(f"{IO.BOLD_LIGHTGREEN }OK{IO.END_BOLD_LIGHTGREEN}   {text}", end=end)
 
     @staticmethod
     def error(text):
         """
         Print an error status message
         """
-        IO.print(f'{IO.BOLD_LIGHTRED}ERR{IO.END_BOLD_LIGHTRED}  {text}')
+        IO.print(f"{IO.BOLD_LIGHTRED}ERR{IO.END_BOLD_LIGHTRED}  {text}")
 
     @staticmethod
     def spacer():
         """
         Prints a blank line for attraction purposes
         """
-        IO.print('')
+        IO.print("")
 
     @staticmethod
     def input(prompt):
@@ -56,4 +56,4 @@ class IO():
         """
         Clears the terminal screen
         """
-        shell.execute(['clear'])
+        shell.execute(["clear"])

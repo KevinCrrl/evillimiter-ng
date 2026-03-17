@@ -4,7 +4,7 @@ from evillimiter_ng.console.io import IO
 
 class CommandMenu(object):
     def __init__(self):
-        self.prompt = '>>> '
+        self.prompt = ">>> "
         self.parser = CommandParser()
         self._active = False
 
