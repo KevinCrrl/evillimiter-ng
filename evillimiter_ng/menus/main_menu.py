@@ -27,7 +27,6 @@ class MainMenu():
         self.prompt = ">>> "
         self.parser = CommandParser()
         self._active = False
-        self.prompt = f"({IO.BOLD_LIGHT}Main{IO.END_BOLD_LIGHT}) >>> "
         self.parser.add_subparser("clear", self._clear_handler)
 
         hosts_parser = self.parser.add_subparser("hosts", self._hosts_handler)
