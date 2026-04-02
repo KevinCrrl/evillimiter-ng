@@ -1,4 +1,7 @@
+from prompt_toolkit import PromptSession
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from rich.console import Console
+from prompt_toolkit.completion import WordCompleter
 
 from . import shell
 
@@ -14,6 +17,7 @@ class IO:
     END_BOLD_LIGHT = "[/bright_white]"
 
     console = Console(emoji=False)
+    session = PromptSession()
 
     @staticmethod
     def print(text, end="\n"):
@@ -44,12 +48,20 @@ class IO:
         IO.print("")
 
     @staticmethod
-    def input(prompt):
+    def input(text):
         """
         Prompts the user for input.
         """
-        IO.print(prompt, "")
-        return input()
+        return IO.session.prompt(
+            text,
+            completer=WordCompleter(["scan", "hosts", "watch", "add", "limit", "block", "free",
+                                    "monitor", "analyzer", "quit", "clear", "remove", "set",
+                                     "--download", "--upload", "--range", "--force", "--mac",
+                                     "--duration", "--intensity", "--interval", "exit", "help"]),
+            complete_while_typing=True,
+            auto_suggest=AutoSuggestFromHistory(),
+            show_frame=True
+        )
 
     @staticmethod
     def clear():

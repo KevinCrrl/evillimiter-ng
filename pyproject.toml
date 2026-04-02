@@ -16,6 +16,7 @@ dependencies = [
     'netaddr',
     'netifaces',
     'scapy>2.5.0',
+    'prompt_toolkit>=3.0.0'
 ]
 
 classifiers = ['Environment :: Console',
