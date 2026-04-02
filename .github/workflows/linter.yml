@@ -1,17 +1,17 @@
-name: flake8 Lint
+name: CI
 
 on: [push, pull_request]
 
 jobs:
   flake8-lint:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
     name: Lint
     steps:
       - name: Check out source repository
         uses: actions/checkout@v5
-      - name: Set up Python environment
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
       - name: flake8 Lint
-        uses: py-actions/flake8@v2
+        run: |
+          pacman -Syu python python-flake8 --noconfirm
+          flake8 evillimiter_ng
