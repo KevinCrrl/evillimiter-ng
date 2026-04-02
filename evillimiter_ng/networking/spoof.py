@@ -1,6 +1,6 @@
 import time
 import threading
-from scapy.all import ARP, send  # pylint: disable=no-name-in-module
+from scapy.all import Ether, ARP, send  # pylint: disable=no-name-in-module
 
 from evillimiter_ng.common.globals import BROADCAST
 
@@ -60,8 +60,8 @@ class ARPSpoofer:
     def _send_spoofed_packets(self, host):
         # 2 packets = 1 gateway packet, 1 host packet
         packets = [
-            ARP(op=2, psrc=host.ip, pdst=self.gateway_ip, hwdst=self.gateway_mac),
-            ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac),
+            Ether() / ARP(op=2, psrc=host.ip, pdst=self.gateway_ip, hwdst=self.gateway_mac),
+            Ether() / ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac),
         ]
 
         [send(x, verbose=0) for x in packets]
@@ -72,14 +72,16 @@ class ARPSpoofer:
         """
         # 2 packets = 1 gateway packet, 1 host packet
         packets = [
-            ARP(
+            Ether()
+            / ARP(
                 op=2,
                 psrc=host.ip,
                 hwsrc=host.mac,
                 pdst=self.gateway_ip,
                 hwdst=BROADCAST,
             ),
-            ARP(
+            Ether()
+            / ARP(
                 op=2,
                 psrc=self.gateway_ip,
                 hwsrc=self.gateway_mac,
