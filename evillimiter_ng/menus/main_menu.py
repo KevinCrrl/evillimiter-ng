@@ -1,14 +1,14 @@
 import time
 import socket
 import curses
-import netaddr
 import threading
+from shlex import split
+import netaddr
 from rich.table import Table
 from rich.panel import Panel
 from rich.columns import Columns
 
 import evillimiter_ng.networking.utils as netutils
-from .menu import CommandMenu
 from evillimiter_ng.networking.utils import BitRate
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.console.chart import BarChart
@@ -19,11 +19,14 @@ from evillimiter_ng.networking.spoof import ARPSpoofer
 from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
 from evillimiter_ng.networking.monitor import BandwidthMonitor
 from evillimiter_ng.networking.watch import HostWatcher
+from .parser import CommandParser
 
 
-class MainMenu(CommandMenu):
+class MainMenu():
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
-        super().__init__()
+        self.prompt = ">>> "
+        self.parser = CommandParser()
+        self._active = False
         self.prompt = f"({IO.BOLD_LIGHT}Main{IO.END_BOLD_LIGHT}) >>> "
         self.parser.add_subparser("clear", self._clear_handler)
 
@@ -106,6 +109,29 @@ class MainMenu(CommandMenu):
         self.bandwidth_monitor.start()
         # start the host watch thread
         self.host_watcher.start()
+
+    def start(self):
+        """
+        Starts the menu input loop.
+        Commands will be processed and handled.
+        """
+        self._active = True
+
+        while self._active:
+            try:
+                command = IO.input(self.prompt)
+            except KeyboardInterrupt:
+                self.interrupt_handler()
+                break
+
+            # split command by spaces and parse the arguments
+            self.parser.parse(split(command))
+
+    def stop(self):
+        """
+        Breaks the menu input loop
+        """
+        self._active = False
 
     def interrupt_handler(self, ctrl_c=True):
         if ctrl_c:
