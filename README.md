@@ -74,7 +74,7 @@ limit 3 200kbit
 | Command | Explanation |
 | ------- | ----------- |
 | `scan (--range [IP Range]) (--intensity [(1,2,3)])` | Scans your network for online hosts. One of the first things to do after start.<br>`--range` lets you specify a custom IP range.<br>`--intensity` lets you specify the scan intensity / speed (`1` = quick, `2` = normal (standard), `3` = intense).<br>Example: `scan --range 192.168.178.1-192.168.178.40 --intensity 1` or just `scan`. |
-| `hosts (--force)` | Displays all scanned hosts and basic information. |
+| `hosts` | Displays all scanned hosts and basic information. |
 | `limit [ID1,ID2,...] [Rate] (--upload) (--download)` | Limits bandwidth of host(s) associated with specified ID. |
 | `block [ID1,ID2,...] (--upload) (--download)` | Blocks internet connection of host(s). |
 | `free [ID1,ID2,...]` | Removes bandwidth restrictions. |

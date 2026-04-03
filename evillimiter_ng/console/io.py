@@ -56,7 +56,7 @@ class IO:
             text,
             completer=WordCompleter(["scan", "hosts", "watch", "add", "limit", "block", "free",
                                     "monitor", "analyzer", "quit", "clear", "remove", "set",
-                                     "--download", "--upload", "--range", "--force", "--mac",
+                                     "--download", "--upload", "--range", "--mac",
                                      "--duration", "--intensity", "--interval", "exit", "help"]),
             complete_while_typing=True,
             auto_suggest=AutoSuggestFromHistory(),
