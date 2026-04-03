@@ -29,8 +29,7 @@ class MainMenu():
         self._active = False
         self.parser.add_subparser("clear", self._clear_handler)
 
-        hosts_parser = self.parser.add_subparser("hosts", self._hosts_handler)
-        hosts_parser.add_flag("--force", "force")
+        self.parser.add_subparser("hosts", self._hosts_handler)
 
         scan_parser = self.parser.add_subparser("scan", self._scan_handler)
         scan_parser.add_parameterized_flag("--range", "iprange")
@@ -654,7 +653,7 @@ class MainMenu():
 {s}      scan --range 192.168.178.1-192.168.178.50
 {s}      scan --range 192.168.178.1/24 --intensity 3{rb}
 
-{y}hosts (--force){ry}{s[len('hosts (--force)'):]}lists all scanned hosts.
+{y}hosts{ry}{s[len('hosts'):]}lists all scanned hosts.
 {s}contains host information, including IDs.
 
 {y}limit [ID1,ID2,...] [rate]{ry}{s[len('limit [ID1,ID2,...] [rate]'):]}limits bandwith of host(s) (uload/dload).
