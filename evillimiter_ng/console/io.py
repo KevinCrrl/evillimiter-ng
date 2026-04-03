@@ -55,7 +55,7 @@ class IO:
         return IO.session.prompt(
             text,
             completer=WordCompleter(["scan", "hosts", "watch", "add", "limit", "block", "free",
-                                    "monitor", "analyzer", "quit", "clear", "remove", "set",
+                                    "monitor", "analyze", "quit", "clear", "remove", "set",
                                      "--download", "--upload", "--range", "--mac",
                                      "--duration", "--intensity", "--interval", "exit", "help"]),
             complete_while_typing=True,
