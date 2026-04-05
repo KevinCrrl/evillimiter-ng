@@ -2,11 +2,12 @@ import socket
 import threading
 import collections
 from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
-from scapy.all import sr1, ARP  # pylint: disable=no-name-in-module
+from scapy.all import srp1, ARP, Ether  # pylint: disable=no-name-in-module
 from concurrent.futures import ThreadPoolExecutor
 
 from .host import Host
 from evillimiter_ng.console.io import IO
+from evillimiter_ng.common.globals import BROADCAST
 
 
 class HostScanner:
@@ -101,9 +102,15 @@ class HostScanner:
         """
         settings = self.settings
 
-        packet = ARP(op=1, pdst=ip)
-        answer = sr1(
-            packet, retry=settings.retries, timeout=settings.timeout, verbose=0
+        # Wrap ARP in Ethernet frame to resolve Scapy warnings
+        # Using the BROADCAST variable as requested by the maintainer
+        packet = Ether(dst=BROADCAST) / ARP(op=1, pdst=ip)
+        answer = srp1(
+            packet,
+            iface=self.interface,
+            retry=settings.retries,
+            timeout=settings.timeout,
+            verbose=0
         )
 
         if answer is not None:
