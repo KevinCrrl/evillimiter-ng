@@ -17,3 +17,6 @@ eggs/
 # Other
 TODO
 *json
+*gz
+*zst
+*txt
