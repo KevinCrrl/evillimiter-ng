@@ -1,8 +1,9 @@
 name: Update PKGBUILD on Tag
+
 on:
   push:
     tags:
-      - '*'  # Se activa con cualquier tag (2.2.0, 3.0, etc.)
+      - '*'
 
 jobs:
   update-arch:
@@ -10,31 +11,54 @@ jobs:
     container:
       image: archlinux:latest
     permissions:
-      contents: write  # Igual que el del README para poder hacer push
+      contents: write
 
     steps:
+      - name: Install git (needed before checkout)
+        run: pacman -Sy --noconfirm git
+
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # importante para tags
+          persist-credentials: true
 
       - name: Update PKGBUILD version
         run: |
-          pacman -Syu base-devel git pacman-contrib python nvchecker wget tar --noconfirm
+          pacman -Syu --noconfirm base-devel pacman-contrib python nvchecker wget python-build python-installer python-wheel python-setuptools
+
           mkdir python-pkgbuild-parser
           cd python-pkgbuild-parser
+
           wget https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=python-pkgbuild-parser -O PKGBUILD
+
           useradd -m build_user
           chown -R build_user:build_user .
-          su build_user -c "makepkg -sc"
+
+          su build_user -c "makepkg -c --noconfirm"
           pacman -U *.zst --noconfirm
-          cd ..
+
+          cd "$GITHUB_WORKSPACE"   # 🔥 VOLVER AL REPO
+
           wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/main.py
           wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/repo_bot.py
-          python main.py .
+
+          chmod -R 777 .
+
+          su build_user -c "python main.py ."
+
+          chown -R root:root .
 
       - name: Commit and Push changes
+        working-directory: ${{ github.workspace }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add pkgbuild/PKGBUILD
-          git commit -m "pkgbuild: bump PKGBUILD"
-          git push -u origin main
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add pkgbuild/PKGBUILD || true
+
+          git commit -m "pkgbuild: bump PKGBUILD" || echo "No changes to commit"
+
+          git push origin HEAD:main
