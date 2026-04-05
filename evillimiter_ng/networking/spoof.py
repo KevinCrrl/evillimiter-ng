@@ -91,4 +91,3 @@ class ARPSpoofer:
         ]
 
         [sendp(x, iface=self.interface, verbose=0, count=3) for x in packets]
-
