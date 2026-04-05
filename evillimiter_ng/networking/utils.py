@@ -8,6 +8,7 @@ from evillimiter_ng.common.globals import (
     BIN_IPTABLES,
     BIN_SYSCTL,
     IP_FORWARD_LOC,
+    BROADCAST,  # <-- Added this import
 )
 
 
@@ -44,7 +45,8 @@ def get_mac_by_ip(interface, address):
     and receiving ARP response
     """
     # ARP packet with operation 1 (who-is) encapsulated in Ethernet frame
-    packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, pdst=address)
+    # Using the BROADCAST global variable instead of hardcoded MAC
+    packet = Ether(dst=BROADCAST) / ARP(op=1, pdst=address)
     response = srp1(packet, timeout=3, verbose=0, iface=interface)
 
     if response is not None:

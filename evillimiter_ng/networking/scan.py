@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from .host import Host
 from evillimiter_ng.console.io import IO
+from evillimiter_ng.common.globals import BROADCAST
 
 
 class HostScanner:
@@ -102,7 +103,8 @@ class HostScanner:
         settings = self.settings
 
         # Wrap ARP in Ethernet frame to resolve Scapy warnings
-        packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, pdst=ip)
+        # Using the BROADCAST variable as requested by the maintainer
+        packet = Ether(dst=BROADCAST) / ARP(op=1, pdst=ip)
         answer = srp1(
             packet,
             iface=self.interface,
