@@ -2,7 +2,7 @@ import socket
 import threading
 import collections
 from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
-from scapy.all import sr1, ARP  # pylint: disable=no-name-in-module
+from scapy.all import srp1, ARP, Ether  # pylint: disable=no-name-in-module
 from concurrent.futures import ThreadPoolExecutor
 
 from .host import Host
@@ -101,9 +101,14 @@ class HostScanner:
         """
         settings = self.settings
 
-        packet = ARP(op=1, pdst=ip)
-        answer = sr1(
-            packet, retry=settings.retries, timeout=settings.timeout, verbose=0
+        # Wrap ARP in Ethernet frame to resolve Scapy warnings
+        packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, pdst=ip)
+        answer = srp1(
+            packet, 
+            iface=self.interface,
+            retry=settings.retries, 
+            timeout=settings.timeout, 
+            verbose=0
         )
 
         if answer is not None:

