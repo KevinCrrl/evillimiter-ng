@@ -4,7 +4,7 @@ import collections
 from evillimiter_ng.console.io import IO
 
 
-class CommandParser(object):
+class CommandParser:
     class CommandType(enum.Enum):
         PARAMETER_COMMAND = 1
         FLAG_COMMAND = 2

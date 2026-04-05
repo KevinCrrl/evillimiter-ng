@@ -58,6 +58,13 @@ scan
 limit 3 200kbit
 ```
 
+## Example of a single-use command in the shell
+
+```bash
+# Scan the network, list hosts, block everyone for 20 seconds, and then restore connection.
+echo "scan && hosts && block all && sleep 20 && free all && exit" | evillimiter-ng
+```
+
 #### Command-Line Arguments
 
 | Argument | Explanation |
