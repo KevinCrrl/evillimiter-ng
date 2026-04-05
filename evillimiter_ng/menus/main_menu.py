@@ -72,6 +72,9 @@ class MainMenu():
         watch_set_parser.add_parameter("attribute")
         watch_set_parser.add_parameter("value")
 
+        sleep_parser = self.parser.add_subparser("sleep", self._sleep_handler)
+        sleep_parser.add_parameter("seconds")
+
         self.parser.add_subparser("help", self._help_handler)
         self.parser.add_subparser("?", self._help_handler)
 
@@ -122,8 +125,9 @@ class MainMenu():
                 self.interrupt_handler()
                 break
 
-            # split command by spaces and parse the arguments
-            self.parser.parse(split(command))
+            # split command and parse the split subcommands by spaces
+            for subcommand in command.split("&&"):
+                self.parser.parse(split(subcommand.strip()))
 
     def stop(self):
         """
@@ -606,6 +610,12 @@ class MainMenu():
                 f"{IO.LIGHTYELLOW}{args.attribute}{IO.END_LIGHTYELLOW} is an invalid settings attribute."
             )
 
+    def _sleep_handler(self, args):
+        try:
+            time.sleep(float(args[0]))
+        except ValueError:
+            IO.error("seconds must be an int or float")
+
     def _reconnect_callback(self, old_host, new_host):
         """
         Callback that is called when a watched host reconnects
@@ -689,6 +699,8 @@ class MainMenu():
 {y}watch set [attr] [value]{ry}{s[len('watch set [attr] [value]'):]}changes reconnect watch settings.
 {b}{s}e.g.: watch set interval 120
 {s}      watch set intensity 1{rb}
+
+{y}sleep{ry}{s[len('sleep'):]}Waits for <n> seconds
 
 {y}clear{ry}{s[len('clear'):]}clears the terminal window.
 

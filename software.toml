@@ -1,0 +1,8 @@
+[__config__]
+oldver = "old_version.json"
+newver = "new_version.json"
+
+[pkgbuild]
+source = "github"
+github = "KevinCrrl/evillimiter-ng"
+use_max_tag   = true

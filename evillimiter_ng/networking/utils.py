@@ -181,14 +181,13 @@ class BitRate:
 
         if unit == "bit":
             return number
-        elif unit == "kbit":
+        if unit == "kbit":
             return number * 1000
-        elif unit == "mbit":
+        if unit == "mbit":
             return number * 1000**2
-        elif unit == "gbit":
+        if unit == "gbit":
             return number * 1000**3
-        else:
-            raise Exception("Invalid bitrate")
+        raise Exception("Invalid bitrate")
 
 
 class ByteValue:
