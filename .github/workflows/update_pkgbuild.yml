@@ -1,0 +1,40 @@
+name: Update PKGBUILD on Tag
+on:
+  push:
+    tags:
+      - '*'  # Se activa con cualquier tag (2.2.0, 3.0, etc.)
+
+jobs:
+  update-arch:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    permissions:
+      contents: write  # Igual que el del README para poder hacer push
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update PKGBUILD version
+        run: |
+          pacman -Syu base-devel git pacman-contrib python nvchecker wget tar --noconfirm
+          mkdir python-pkgbuild-parser
+          cd python-pkgbuild-parser
+          wget https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=python-pkgbuild-parser -O PKGBUILD
+          useradd -m build_user
+          chown -R build_user:build_user .
+          su build_user -c "makepkg -sc"
+          pacman -U *.zst --noconfirm
+          cd ..
+          wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/main.py
+          wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/repo_bot.py
+          python main.py .
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add pkgbuild/PKGBUILD
+          git commit -m "pkgbuild: bump PKGBUILD"
+          git push -u origin main
