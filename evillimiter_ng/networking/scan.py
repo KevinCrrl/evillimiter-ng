@@ -104,10 +104,10 @@ class HostScanner:
         # Wrap ARP in Ethernet frame to resolve Scapy warnings
         packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, pdst=ip)
         answer = srp1(
-            packet, 
+            packet,
             iface=self.interface,
-            retry=settings.retries, 
-            timeout=settings.timeout, 
+            retry=settings.retries,
+            timeout=settings.timeout,
             verbose=0
         )
 
