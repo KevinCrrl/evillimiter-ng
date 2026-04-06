@@ -1,12 +1,12 @@
 import time
 import socket
-import curses
 import threading
 from shlex import split
 import netaddr
 from rich.table import Table
 from rich.panel import Panel
 from rich.columns import Columns
+from rich.live import Live
 
 import evillimiter_ng.networking.utils as netutils
 from evillimiter_ng.networking.utils import BitRate
@@ -324,66 +324,25 @@ class MainMenu():
                     key=lambda h: not (h[0].limited or h[0].blocked),
                 )
 
-        def display(stdscr, interval):
+        def gen_table():
+            table = Table()
+            columns = ["ID", "IP address", "Hostname", "Current (per s)", "total", "Packets"]
+            for column in columns:
+                table.add_column(column)
+
             host_results = get_bandwidth_results()
-            hname_max_len = max([len(x[0].name) for x in host_results])
 
-            header_off = [
-                ("ID", 5),
-                ("IP address", 18),
-                ("Hostname", hname_max_len + 2),
-                ("Current (per s)", 20),
-                ("Total", 16),
-                ("Packets", 0),
-            ]
+            for host, result in host_results:
+                table.add_row(
+                    str(self._get_host_id(host)),
+                    host.ip,
+                    host.name,
+                    f"{result.upload_rate}↑ {result.download_rate}↓",
+                    f"{result.upload_total_size}↑ {result.download_total_size}↓",
+                    f"{result.upload_total_count}↑ {result.download_total_count}↓"
+                )
 
-            y_rst = 1
-            x_rst = 2
-
-            while True:
-                y_off = y_rst
-                x_off = x_rst
-
-                stdscr.clear()
-
-                for header in header_off:
-                    stdscr.addstr(y_off, x_off, header[0])
-                    x_off += header[1]
-
-                y_off += 2
-                x_off = x_rst
-                temps_reached = False
-
-                for host, result in host_results:
-                    result_data = [
-                        str(self._get_host_id(host)),
-                        host.ip,
-                        host.name,
-                        f"{result.upload_rate}↑ {result.download_rate}↓",
-                        f"{result.upload_total_size}↑ {result.download_total_size}↓",
-                        f"{result.upload_total_count}↑ {result.download_total_count}↓",
-                    ]
-
-                    if not temps_reached and host in hosts_to_be_freed:
-                        temps_reached = True
-                        y_off += 1
-
-                    for j, string in enumerate(result_data):
-                        stdscr.addstr(y_off, x_off, string)
-                        x_off += header_off[j][1]
-
-                    y_off += 1
-                    x_off = x_rst
-
-                y_off += 2
-                stdscr.addstr(y_off, x_off, "press 'ctrl+c' to exit.")
-
-                try:
-                    stdscr.refresh()
-                    time.sleep(interval)
-                    host_results = get_bandwidth_results()
-                except KeyboardInterrupt:
-                    return
+            return table
 
         hosts = self._get_hosts_by_ids(args.id)
         hosts_to_be_freed = set()
@@ -396,21 +355,26 @@ class MainMenu():
 
             interval = int(args.interval) / 1000  # from ms to s
 
-        for host in hosts:
-            if not host.spoofed:
-                hosts_to_be_freed.add(host)
-
-            self.arp_spoofer.add(host)
-            self.bandwidth_monitor.add(host)
+        try:
+            for host in hosts:
+                if not host.spoofed:
+                    hosts_to_be_freed.add(host)
+                self.arp_spoofer.add(host)
+                self.bandwidth_monitor.add(host)
+        except TypeError:
+            IO.error("Host not found.")
 
         if len(get_bandwidth_results()) == 0:
             IO.error("no hosts to be monitored.")
             return
 
-        try:
-            curses.wrapper(display, interval)
-        except curses.error:
-            IO.error("monitor error occurred. maybe terminal too small?")
+        with Live(gen_table(), refresh_per_second=interval, screen=True, transient=True) as live:
+            while True:
+                try:
+                    live.update(gen_table())
+                except KeyboardInterrupt:
+                    live.stop()
+                    break
 
         for host in hosts_to_be_freed:
             self._free_host(host)
