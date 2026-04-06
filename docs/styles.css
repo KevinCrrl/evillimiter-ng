@@ -1,0 +1,21 @@
+body {
+    background-color: black;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 50px;
+}
+
+p, a {
+    color: rgb(9, 209, 9);
+}
+
+pre {
+    color: rgb(247, 45, 45)
+}
+
+h1, h2 {
+    color: rgb(7, 161, 27);
+}
+
+li {
+    color: rgb(19, 238, 249);
+}
