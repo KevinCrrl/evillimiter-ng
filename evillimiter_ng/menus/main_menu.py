@@ -27,63 +27,79 @@ class MainMenu():
         self.prompt = ">>> "
         self.parser = CommandParser()
         self._active = False
-        self.parser.add_subparser("clear", self._clear_handler)
+        self.parser.add_subparser("clear", self._clear_handler, [
+            "clear", "clears the terminal window."])
 
-        self.parser.add_subparser("hosts", self._hosts_handler)
+        self.parser.add_subparser("hosts", self._hosts_handler, [
+            "hosts", "lists all scanned hosts.\ncontains host information, including IDs."])
 
-        scan_parser = self.parser.add_subparser("scan", self._scan_handler)
+        scan_parser = self.parser.add_subparser("scan", self._scan_handler, [
+            "scan (--range [IP range])\n(--intensity [(1,2,3)])",
+            "scans for online hosts on your network.\nrequired to find the hosts you want to limit.\ne.g.: scan\nscan --range 192.168.178.1-192.168.178.50\nscan --range 192.168.178.1/24 --intensity 3"])
         scan_parser.add_parameterized_flag("--range", "iprange")
         scan_parser.add_parameterized_flag("--intensity", "intensity")
 
-        limit_parser = self.parser.add_subparser("limit", self._limit_handler)
+        limit_parser = self.parser.add_subparser("limit", self._limit_handler, [
+            "limit [ID1,ID2,...] [rate]\n(--upload) (--download)",
+            "limits bandwith of host(s) (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit --download\nlimit all 200kbit --upload"])
         limit_parser.add_parameter("id")
         limit_parser.add_parameter("rate")
         limit_parser.add_flag("--upload", "upload")
         limit_parser.add_flag("--download", "download")
 
-        block_parser = self.parser.add_subparser("block", self._block_handler)
+        block_parser = self.parser.add_subparser("block", self._block_handler, [
+            "block [ID1,ID2,...]\n(--upload) (--download)",
+            "blocks internet access of host(s).\ne.g.: block 3,2\nblock all --upload"])
         block_parser.add_parameter("id")
         block_parser.add_flag("--upload", "upload")
         block_parser.add_flag("--download", "download")
 
-        free_parser = self.parser.add_subparser("free", self._free_handler)
+        free_parser = self.parser.add_subparser("free", self._free_handler, [
+            "free [ID1,ID2,...]",
+            "unlimits/unblocks host(s).\ne.g.: free 3\nfree all"])
         free_parser.add_parameter("id")
 
-        add_parser = self.parser.add_subparser("add", self._add_handler)
+        add_parser = self.parser.add_subparser("add", self._add_handler, [
+            "add [IP] (--mac [MAC])",
+            "adds custom host to host list.\nmac resolved automatically.\ne.g.: add 192.168.178.24\nadd 192.168.1.50 --mac 1c:fc:bc:2d:a6:37"])
         add_parser.add_parameter("ip")
         add_parser.add_parameterized_flag("--mac", "mac")
 
-        monitor_parser = self.parser.add_subparser(
-            "monitor", self._monitor_handler)
+        monitor_parser = self.parser.add_subparser("monitor", self._monitor_handler, [
+            "monitor [ID1,ID2,...]\n(--interval [time in ms])",
+            "monitors bandwidth usage of host(s).\ne.g.: monitor all --interval 600"])
         monitor_parser.add_parameter("id")
         monitor_parser.add_parameterized_flag("--interval", "interval")
 
-        analyze_parser = self.parser.add_subparser(
-            "analyze", self._analyze_handler)
+        analyze_parser = self.parser.add_subparser("analyze", self._analyze_handler, [
+            "analyze [ID1,ID2,...]\n(--duration [time in s])",
+            "analyzes traffic of host(s) without limiting\nto determine who uses how much bandwidth.\ne.g.: analyze 2,3 --duration 120"])
         analyze_parser.add_parameter("id")
         analyze_parser.add_parameterized_flag("--duration", "duration")
 
-        watch_parser = self.parser.add_subparser("watch", self._watch_handler)
-        watch_add_parser = watch_parser.add_subparser(
-            "add", self._watch_add_handler)
+        watch_parser = self.parser.add_subparser("watch", self._watch_handler, [
+            "watch", "detects host reconnects with different IP."])
+
+        watch_add_parser = watch_parser.add_subparser("add", self._watch_add_handler, [
+            "watch add [ID1,ID2,...]", "adds host to the reconnection watchlist.\ne.g.: watch add 3,4"])
         watch_add_parser.add_parameter("id")
-        watch_remove_parser = watch_parser.add_subparser(
-            "remove", self._watch_remove_handler
-        )
+
+        watch_remove_parser = watch_parser.add_subparser("remove", self._watch_remove_handler, [
+            "watch remove [ID1,ID2,...]", "removes host from the reconnection watchlist.\ne.g.: watch remove all"])
         watch_remove_parser.add_parameter("id")
-        watch_set_parser = watch_parser.add_subparser(
-            "set", self._watch_set_handler)
+
+        watch_set_parser = watch_parser.add_subparser("set", self._watch_set_handler, [
+            "watch set [attr] [value]", "changes reconnect watch settings.\ne.g.: watch set interval 120\nwatch set intensity 1"])
         watch_set_parser.add_parameter("attribute")
         watch_set_parser.add_parameter("value")
 
-        sleep_parser = self.parser.add_subparser("sleep", self._sleep_handler)
-        sleep_parser.add_parameter("seconds")
+        self.parser.add_subparser("sleep", self._sleep_handler, [
+            "sleep", "Waits for <n> seconds"])
 
-        self.parser.add_subparser("help", self._help_handler)
-        self.parser.add_subparser("?", self._help_handler)
-
-        self.parser.add_subparser("quit", self._quit_handler)
-        self.parser.add_subparser("exit", self._quit_handler)
+        self.parser.add_subparser("help", self._help_handler, ["help", "Shows this help."])
+        self.parser.add_subparser("?", self._help_handler, ["?", "Shows this help."])
+        self.parser.add_subparser("quit", self._quit_handler, ["quit", "quits the application."])
+        self.parser.add_subparser("exit", self._quit_handler, ["exit", "quits the application."])
 
         self.version = version  # application version
         self.interface = interface  # specified IPv4 interface
@@ -377,7 +393,9 @@ class MainMenu():
             IO.error("no hosts to be monitored.")
             return
 
-        with Live(gen_table(), refresh_per_second=interval, screen=True, transient=True) as live:
+        with Live(
+            gen_table(), IO.console, True, refresh_per_second=interval, transient=True
+        ) as live:
             while True:
                 try:
                     live.update(gen_table())
@@ -626,62 +644,7 @@ class MainMenu():
         Handles 'help' command-line argument
         Prints help message including commands and usage
         """
-        s = " " * 35
-        y = IO.LIGHTYELLOW
-        ry = IO.END_LIGHTYELLOW
-        b = IO.BOLD_LIGHT
-        rb = IO.END_BOLD_LIGHT
-
-        IO.print(f"""
-{y}scan (--range [IP range]){ry}{s[len('scan (--range [IP range])'):]}scans for online hosts on your network.
-{y}     (--intensity [(1,2,3)]){ry}{s[len('     (--intensity [(1,2,3)])'):]}required to find the hosts you want to limit.
-{b}{s}e.g.: scan
-{s}      scan --range 192.168.178.1-192.168.178.50
-{s}      scan --range 192.168.178.1/24 --intensity 3{rb}
-
-{y}hosts{ry}{s[len('hosts'):]}lists all scanned hosts.
-{s}contains host information, including IDs.
-
-{y}limit [ID1,ID2,...] [rate]{ry}{s[len('limit [ID1,ID2,...] [rate]'):]}limits bandwith of host(s) (uload/dload).
-{y}      (--upload) (--download){ry}{s[len('      (--upload) (--download)'):]}{b}e.g.: limit 4 100kbit
-{s}      limit 2,3,4 1gbit --download
-{s}      limit all 200kbit --upload{rb}
-
-{y}block [ID1,ID2,...]{ry}{s[len('block [ID1,ID2,...]'):]}blocks internet access of host(s).
-{y}      (--upload) (--download){ry}{s[len('      (--upload) (--download)'):]}{b}e.g.: block 3,2
-{s}      block all --upload{rb}
-
-{y}free [ID1,ID2,...]{ry}{s[len('free [ID1,ID2,...]'):]}unlimits/unblocks host(s).
-{b}{s}e.g.: free 3
-{s}      free all{rb}
-
-{y}add [IP] (--mac [MAC]){ry}{s[len('add [IP] (--mac [MAC])'):]}adds custom host to host list.
-{s}mac resolved automatically.
-{b}{s}e.g.: add 192.168.178.24
-{s}      add 192.168.1.50 --mac 1c:fc:bc:2d:a6:37{rb}
-
-{y}monitor [ID1,ID2,...]{ry}{s[len('monitor [ID1,ID2,...]'):]}monitors bandwidth usage of host(s).
-{y}        (--interval [time in ms]){ry}{s[len('        (--interval [time in ms])'):]}{b}e.g.: monitor all --interval 600{rb}
-
-{y}analyze [ID1,ID2,...]{ry}{s[len('analyze [ID1,ID2,...]'):]}analyzes traffic of host(s) without limiting
-{y}        (--duration [time in s]){ry}{s[len('        (--duration [time in s])'):]}to determine who uses how much bandwidth.
-{b}{s}e.g.: analyze 2,3 --duration 120{rb}
-
-{y}watch{ry}{s[len('watch'):]}detects host reconnects with different IP.
-{y}watch add [ID1,ID2,...]{ry}{s[len('watch add [ID1,ID2,...]'):]}adds host to the reconnection watchlist.
-{b}{s}e.g.: watch add 3,4{rb}
-{y}watch remove [ID1,ID2,...]{ry}{s[len('watch remove [ID1,ID2,...]'):]}removes host from the reconnection watchlist.
-{b}{s}e.g.: watch remove all{rb}
-{y}watch set [attr] [value]{ry}{s[len('watch set [attr] [value]'):]}changes reconnect watch settings.
-{b}{s}e.g.: watch set interval 120
-{s}      watch set intensity 1{rb}
-
-{y}sleep{ry}{s[len('sleep'):]}Waits for <n> seconds
-
-{y}clear{ry}{s[len('clear'):]}clears the terminal window.
-
-{y}quit{ry}{s[len('quit'):]}quits the application.
-            """)
+        IO.print(self.parser.return_table())
 
     def _quit_handler(self, args):
         self.interrupt_handler(False)

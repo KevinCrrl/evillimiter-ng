@@ -1,5 +1,6 @@
 import enum
 import collections
+from rich.table import Table
 
 from evillimiter_ng.console.io import IO
 
@@ -20,6 +21,9 @@ class CommandParser:
         self._flag_commands = []
         self._parameter_commands = []
         self._subparsers = []
+        self.help_table = Table()
+        self.help_table.add_column("Command")
+        self.help_table.add_column("Description")
 
     def add_parameter(self, name):
         """
@@ -63,7 +67,7 @@ class CommandParser:
 
         self._flag_commands.append(command)
 
-    def add_subparser(self, identifier, handler=None):
+    def add_subparser(self, identifier, handler=None, help_list=["", ""]):
         """
         Creates a subparser and adds a command to this parser, making it its parent.
         A subparser is a standalone parser that can contain commands itself.
@@ -77,6 +81,7 @@ class CommandParser:
         )
 
         self._subparsers.append(command)
+        self.help_table.add_row(f"{IO.LIGHTYELLOW}{help_list[0]}{IO.END_LIGHTYELLOW}", f"{help_list[1]}\n")
         return subparser
 
     def parse(self, command):
@@ -167,3 +172,6 @@ class CommandParser:
         result_tuple = collections.namedtuple(
             "ParseResult", sorted(result_dict))
         return result_tuple(**result_dict)
+
+    def return_table(self):
+        return self.help_table
