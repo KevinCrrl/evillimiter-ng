@@ -1,6 +1,6 @@
 body {
     background-color: black;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrainsMono Nerd Font Mono', monospace;
     margin: 50px;
 }
 
@@ -9,7 +9,7 @@ p, a {
 }
 
 pre {
-    color: rgb(247, 45, 45)
+    color: rgb(247, 45, 45);
 }
 
 h1, h2 {

@@ -77,7 +77,8 @@ def flush_network_settings(interface):
     shell.execute_suppressed([BIN_IPTABLES, "-X"])
 
     # delete root qdisc for given interface
-    shell.execute_suppressed([BIN_TC, "qdisc", "del", "dev", interface, "root"])
+    shell.execute_suppressed(
+        [BIN_TC, "qdisc", "del", "dev", interface, "root"])
 
 
 def validate_ip_address(ip):
@@ -94,7 +95,8 @@ def create_qdisc_root(interface):
     """
     return (
         shell.execute_suppressed(
-            [BIN_TC, "qdisc", "add", "dev", interface, "root", "handle", "1:0", "htb"]
+            [BIN_TC, "qdisc", "add", "dev", interface,
+                "root", "handle", "1:0", "htb"]
         )
         == 0
     )

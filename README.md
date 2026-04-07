@@ -94,6 +94,7 @@ echo "scan && hosts && block all && sleep 20 && free all && exit" | evillimiter-
 | `watch set [Attribute] [Value]` | Changes watch settings. |
 | `clear` | Clears terminal window. |
 | `quit` | Quits the application. |
+| `sleep` | Waits for <n> seconds. |
 | `?`, `help` | Displays command help. |
 
 ## Restrictions

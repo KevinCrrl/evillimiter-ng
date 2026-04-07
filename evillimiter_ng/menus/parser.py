@@ -10,9 +10,11 @@ class CommandParser:
         FLAG_COMMAND = 2
         PARAMETERIZED_FLAG_COMMAND = 3
 
-    FlagCommand = collections.namedtuple("FlagCommand", "type, identifier, name")
+    FlagCommand = collections.namedtuple(
+        "FlagCommand", "type, identifier, name")
     ParameterCommand = collections.namedtuple("ParameterCommand", "type name")
-    Subparser = collections.namedtuple("Subparser", "identifier subparser handler")
+    Subparser = collections.namedtuple(
+        "Subparser", "identifier subparser handler")
 
     def __init__(self):
         self._flag_commands = []
@@ -81,7 +83,8 @@ class CommandParser:
         """
         Parses a given list of arguments
         """
-        names = [x.name for x in (self._flag_commands + self._parameter_commands)]
+        names = [x.name for x in (
+            self._flag_commands + self._parameter_commands)]
         result_dict = dict.fromkeys(names, None)
 
         # indicates whether or not to skip the next command argument
@@ -97,7 +100,7 @@ class CommandParser:
                 for sp in self._subparsers:
                     if sp.identifier == arg:
                         # if subparser present, parse arguments there
-                        result = sp.subparser.parse(command[(i + 1) :])  # noqa: E203
+                        result = sp.subparser.parse(command[(i + 1):])  # noqa: E203
                         if result is not None and sp.handler is not None:
                             # call the subparser's handler if available
                             sp.handler(result)
@@ -161,5 +164,6 @@ class CommandParser:
                 if result_dict[cmd.name] is None:
                     result_dict[cmd.name] = False
 
-        result_tuple = collections.namedtuple("ParseResult", sorted(result_dict))
+        result_tuple = collections.namedtuple(
+            "ParseResult", sorted(result_dict))
         return result_tuple(**result_dict)

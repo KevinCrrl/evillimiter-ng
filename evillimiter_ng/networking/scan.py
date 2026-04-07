@@ -11,7 +11,8 @@ from evillimiter_ng.common.globals import BROADCAST
 
 
 class HostScanner:
-    Settings = collections.namedtuple("Settings", "max_workers retries timeout")
+    Settings = collections.namedtuple(
+        "Settings", "max_workers retries timeout")
 
     def __init__(self, interface, iprange):
         self.interface = interface
@@ -51,7 +52,8 @@ class HostScanner:
     def scan(self, iprange=None):
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             hosts = []
-            iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
+            iprange = [str(x)
+                       for x in (self.iprange if iprange is None else iprange)]
             iterable = executor.map(self._sweep, iprange)
 
             with Progress(
@@ -81,7 +83,8 @@ class HostScanner:
     def scan_for_reconnects(self, hosts, iprange=None):
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             scanned_hosts = []
-            iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
+            iprange = [str(x)
+                       for x in (self.iprange if iprange is None else iprange)]
             for host in executor.map(self._sweep, iprange):
                 if host is not None:
                     scanned_hosts.append(host)

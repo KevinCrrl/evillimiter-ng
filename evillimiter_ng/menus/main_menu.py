@@ -53,22 +53,26 @@ class MainMenu():
         add_parser.add_parameter("ip")
         add_parser.add_parameterized_flag("--mac", "mac")
 
-        monitor_parser = self.parser.add_subparser("monitor", self._monitor_handler)
+        monitor_parser = self.parser.add_subparser(
+            "monitor", self._monitor_handler)
         monitor_parser.add_parameter("id")
         monitor_parser.add_parameterized_flag("--interval", "interval")
 
-        analyze_parser = self.parser.add_subparser("analyze", self._analyze_handler)
+        analyze_parser = self.parser.add_subparser(
+            "analyze", self._analyze_handler)
         analyze_parser.add_parameter("id")
         analyze_parser.add_parameterized_flag("--duration", "duration")
 
         watch_parser = self.parser.add_subparser("watch", self._watch_handler)
-        watch_add_parser = watch_parser.add_subparser("add", self._watch_add_handler)
+        watch_add_parser = watch_parser.add_subparser(
+            "add", self._watch_add_handler)
         watch_add_parser.add_parameter("id")
         watch_remove_parser = watch_parser.add_subparser(
             "remove", self._watch_remove_handler
         )
         watch_remove_parser.add_parameter("id")
-        watch_set_parser = watch_parser.add_subparser("set", self._watch_set_handler)
+        watch_set_parser = watch_parser.add_subparser(
+            "set", self._watch_set_handler)
         watch_set_parser.add_parameter("attribute")
         watch_set_parser.add_parameter("value")
 
@@ -88,10 +92,12 @@ class MainMenu():
         self.netmask = netmask
 
         # range of IP address calculated from gateway IP and netmask
-        self.iprange = list(netaddr.IPNetwork(f"{self.gateway_ip}/{self.netmask}"))
+        self.iprange = list(netaddr.IPNetwork(
+            f"{self.gateway_ip}/{self.netmask}"))
 
         self.host_scanner = HostScanner(self.interface, self.iprange)
-        self.arp_spoofer = ARPSpoofer(self.interface, self.gateway_ip, self.gateway_mac)
+        self.arp_spoofer = ARPSpoofer(
+            self.interface, self.gateway_ip, self.gateway_mac)
         self.limiter = Limiter(self.interface)
         self.bandwidth_monitor = BandwidthMonitor(self.interface, 1)
         self.host_watcher = HostWatcher(
@@ -191,7 +197,8 @@ class MainMenu():
         """
 
         table = Table(title="Hosts")
-        table.add_column(f"{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}", style="yellow")
+        table.add_column(
+            f"{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}", style="yellow")
         table.add_column(f"{IO.BOLD_LIGHT}IP address{IO.END_BOLD_LIGHT}")
         table.add_column(f"{IO.BOLD_LIGHT}MAC address{IO.END_BOLD_LIGHT}")
         table.add_column(f"{IO.BOLD_LIGHT}Hostname{IO.END_BOLD_LIGHT}")
@@ -284,7 +291,8 @@ class MainMenu():
         else:
             mac = netutils.get_mac_by_ip(self.interface, ip)
             if mac is None:
-                IO.error("unable to resolve mac address. specify manually (--mac).")
+                IO.error(
+                    "unable to resolve mac address. specify manually (--mac).")
                 return
 
         name = None
@@ -326,7 +334,8 @@ class MainMenu():
 
         def gen_table():
             table = Table()
-            columns = ["ID", "IP address", "Hostname", "Current (per s)", "total", "Packets"]
+            columns = ["ID", "IP address", "Hostname",
+                       "Current (per s)", "total", "Packets"]
             for column in columns:
                 table.add_column(column)
 
@@ -448,11 +457,13 @@ class MainMenu():
             prefix = f"{IO.LIGHTYELLOW}{self._get_host_id(host)}{IO.END_LIGHTYELLOW} ({host.ip}, {host.name})"
 
             upload_chart.add_value(upload_value.value, prefix, upload_value)
-            download_chart.add_value(download_value.value, prefix, download_value)
+            download_chart.add_value(
+                download_value.value, prefix, download_value)
 
         up_panel = Panel(upload_chart.get(), title="Upload", expand=False)
 
-        down_panel = Panel(download_chart.get(), title="Download", expand=False)
+        down_panel = Panel(download_chart.get(),
+                           title="Download", expand=False)
 
         IO.console.print(Columns([up_panel, down_panel]))
 
@@ -500,7 +511,8 @@ class MainMenu():
             )
 
             set_table.add_row(
-                f"{IO.LIGHTYELLOW}intensity{IO.END_LIGHTYELLOW}", str(intensity)
+                f"{IO.LIGHTYELLOW}intensity{IO.END_LIGHTYELLOW}", str(
+                    intensity)
             )
 
             for host in self.host_watcher.hosts:

@@ -31,7 +31,7 @@ class IO:
         """
         Print a success status message
         """
-        IO.print(f"{IO.BOLD_LIGHTGREEN }OK{IO.END_BOLD_LIGHTGREEN}   {text}", end=end)  # noqa: E202
+        IO.print(f"{IO.BOLD_LIGHTGREEN}OK{IO.END_BOLD_LIGHTGREEN}   {text}", end=end)  # noqa: E202
 
     @staticmethod
     def error(text):

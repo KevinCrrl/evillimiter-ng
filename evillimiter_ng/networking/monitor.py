@@ -48,7 +48,8 @@ class BandwidthMonitor:
         if self._running:
             return
 
-        sniff_thread = threading.Thread(target=self._sniff, args=[], daemon=True)
+        sniff_thread = threading.Thread(
+            target=self._sniff, args=[], daemon=True)
         sniff_thread.start()
 
         self._running = True
@@ -64,13 +65,15 @@ class BandwidthMonitor:
                 result = self._host_result_dict[host]["result"]
                 result.upload_rate = BitRate(
                     int(
-                        ValueConverter.byte_to_bit(result._upload_temp_size.value)
+                        ValueConverter.byte_to_bit(
+                            result._upload_temp_size.value)
                         / time_passed
                     )
                 )
                 result.download_rate = BitRate(
                     int(
-                        ValueConverter.byte_to_bit(result._download_temp_size.value)
+                        ValueConverter.byte_to_bit(
+                            result._download_temp_size.value)
                         / time_passed
                     )
                 )

@@ -17,7 +17,8 @@ InitialArguments = collections.namedtuple(
 
 def get_init_content():
     with open(
-        os.path.join(os.path.abspath(os.path.dirname(__file__)), "__init__.py"),
+        os.path.join(os.path.abspath(
+            os.path.dirname(__file__)), "__init__.py"),
         "r",
         encoding="utf-8",
     ) as f:
@@ -99,7 +100,8 @@ def process_arguments(args):
     if args.interface is None:
         interface = netutils.get_default_interface()
         if interface is None:
-            IO.error("default interface could not be resolved. specify manually (-i).")
+            IO.error(
+                "default interface could not be resolved. specify manually (-i).")
             return
     else:
         interface = args.interface

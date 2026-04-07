@@ -199,10 +199,12 @@ class Limiter:
 
             if (direction & Direction.OUTGOING) == Direction.OUTGOING:
                 self._delete_tc_class(host_ids.upload_id)
-                self._delete_iptables_entries(host, direction, host_ids.upload_id)
+                self._delete_iptables_entries(
+                    host, direction, host_ids.upload_id)
             if (direction & Direction.INCOMING) == Direction.INCOMING:
                 self._delete_tc_class(host_ids.download_id)
-                self._delete_iptables_entries(host, direction, host_ids.download_id)
+                self._delete_iptables_entries(
+                    host, direction, host_ids.download_id)
 
             del self._host_dict[host]
 
@@ -264,7 +266,8 @@ class Limiter:
             self.unlimit(host, direction)
 
         return (
-            Limiter.HostLimitIDs(*self._create_ids()) if host_ids is None else host_ids
+            Limiter.HostLimitIDs(*self._create_ids()
+                                 ) if host_ids is None else host_ids
         )
 
     def _create_ids(self):
