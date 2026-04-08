@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Monitors, analyzes and limits the bandwidth of devices on the local network (Next Generation)."
 requires-python = ">=3.10"
-license = "MIT"
+license = "GPL-2.0-only"
 dependencies = [
     'rich',
     'netaddr',

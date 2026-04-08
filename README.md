@@ -2,7 +2,7 @@
 
 # Evil Limiter Next Generation
 
-[![License Badge](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License Badge](https://img.shields.io/badge/license-GPLv2-blue.svg)](LICENSE)
 [![Compatibility](https://img.shields.io/badge/python-3-brightgreen.svg)](PROJECT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/KevinCrrl/evillimiter-ng/graphs/commit-activity)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
@@ -109,7 +109,8 @@ Please read the full legal disclaimer here:
 
 ## License
 
-Copyright (c) 2019 by [bitbrute](https://github.com/bitbrute).  
 Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl).
 
-Licensed under the **MIT License**.
+Licensed under the **GPLv2 License**.
+
+For a detailed list of original authors, dependencies, and their respective licenses, see the [CREDITS](CREDITS.md) file.
