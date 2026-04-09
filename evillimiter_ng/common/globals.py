@@ -1,3 +1,5 @@
+# Copyright (C) 2026 KevinCrrl GPL-2.0-only
+
 from evillimiter_ng.console import shell
 
 BROADCAST = "ff:ff:ff:ff:ff:ff"

@@ -1,3 +1,20 @@
+"""
+    Copyright (C) 2026 KevinCrrl
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; only version 2 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, see <https://www.gnu.org/licenses/>.
+"""
+
+
 class BarChart:
     def __init__(self, draw_char="▇", max_bar_length=30):
         self.draw_char = draw_char
