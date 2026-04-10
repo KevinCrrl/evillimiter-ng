@@ -16,8 +16,8 @@
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from rich.console import Console
 from prompt_toolkit.completion import WordCompleter
+from rich.console import Console
 
 from . import shell
 
@@ -68,16 +68,20 @@ class IO:
         """
         Prompts the user for input.
         """
-        return IO.session.prompt(
-            text,
-            completer=WordCompleter(["scan", "hosts", "watch", "add", "limit", "block", "free",
-                                    "monitor", "analyze", "quit", "clear", "remove", "set",
-                                     "--download", "--upload", "--range", "--mac",
-                                     "--duration", "--intensity", "--interval", "exit", "help"]),
-            complete_while_typing=True,
-            auto_suggest=AutoSuggestFromHistory(),
-            show_frame=True
-        )
+        try:
+            return IO.session.prompt(
+                text,
+                completer=WordCompleter(["scan", "hosts", "watch", "add", "limit", "block", "free",
+                                        "monitor", "analyze", "quit", "clear", "remove", "set",
+                                         "--download", "--upload", "--range", "--mac", "sleep",
+                                         "--duration", "--intensity", "--interval", "exit", "help"]
+                                        ),
+                complete_while_typing=True,
+                auto_suggest=AutoSuggestFromHistory(),
+                show_frame=True
+            )
+        except EOFError:
+            return "exit"
 
     @staticmethod
     def clear():
