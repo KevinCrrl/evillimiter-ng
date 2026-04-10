@@ -1,3 +1,4 @@
 # Copyright (C) 2026 KevinCrrl GPL-2.0-only
-__version__ = "2.2.0"
-__description__ = "Monitors, analyzes and limits the bandwidth of devices on the local network (Next Generation)."
+from evillimiter_ng.common import globals as gb
+__version__ = gb.VERSION
+__description__ = gb.DESCRIPTION

@@ -14,7 +14,6 @@
     with this program; if not, see <https://www.gnu.org/licenses/>.
 """
 
-import re
 import os
 import os.path
 import argparse
@@ -25,40 +24,19 @@ import evillimiter_ng.networking.utils as netutils
 from evillimiter_ng.menus.main_menu import MainMenu
 from evillimiter_ng.console.banner import get_main_banner
 from evillimiter_ng.console.io import IO
+from evillimiter_ng.common import globals as gb
 
 InitialArguments = collections.namedtuple(
     "InitialArguments", "interface, gateway_ip, netmask, gateway_mac"
 )
 
 
-def get_init_content():
-    with open(
-        os.path.join(os.path.abspath(
-            os.path.dirname(__file__)), "__init__.py"),
-        "r",
-        encoding="utf-8",
-    ) as f:
-        return f.read()
-
-
 def get_version():
-    version_match = re.search(
-        r'^__version__ = [\'"](\d\.\d\.\d)[\'"]', get_init_content(), re.M
-    )
-    if version_match:
-        return version_match.group(1)
-
-    raise RuntimeError("Unable to locate version string.")
+    return gb.VERSION
 
 
 def get_description():
-    desc_match = re.search(
-        r'^__description__ = [\'"]((.)*)[\'"]', get_init_content(), re.M
-    )
-    if desc_match:
-        return desc_match.group(1)
-
-    raise RuntimeError("Unable to locate description string.")
+    return gb.DESCRIPTION
 
 
 def is_privileged():
