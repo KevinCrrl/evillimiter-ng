@@ -28,7 +28,7 @@ import evillimiter_ng.networking.utils as netutils
 from evillimiter_ng.networking.utils import BitRate
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.console.chart import BarChart
-from evillimiter_ng.console.banner import get_main_banner
+from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.limit import Limiter, Direction
 from evillimiter_ng.networking.spoof import ARPSpoofer
@@ -109,13 +109,18 @@ class MainMenu():
         watch_set_parser.add_parameter("attribute")
         watch_set_parser.add_parameter("value")
 
-        self.parser.add_subparser("sleep", self._sleep_handler, [
+        sleep_parser = self.parser.add_subparser("sleep", self._sleep_handler, [
             "sleep", "Waits for <n> seconds"])
+        sleep_parser.add_parameter("seconds")
 
-        self.parser.add_subparser("help", self._help_handler, ["help", "Shows this help."])
-        self.parser.add_subparser("?", self._help_handler, ["?", "Shows this help."])
-        self.parser.add_subparser("quit", self._quit_handler, ["quit", "quits the application."])
-        self.parser.add_subparser("exit", self._quit_handler, ["exit", "quits the application."])
+        self.parser.add_subparser("help", self._help_handler, [
+                                  "help", "Shows this help."])
+        self.parser.add_subparser("?", self._help_handler, [
+                                  "?", "Shows this help."])
+        self.parser.add_subparser("quit", self._quit_handler, [
+                                  "quit", "quits the application."])
+        self.parser.add_subparser("exit", self._quit_handler, [
+                                  "exit", "quits the application."])
 
         self.version = version  # application version
         self.interface = interface  # specified IPv4 interface
@@ -652,7 +657,7 @@ class MainMenu():
         Clears the terminal window and re-prints the banner
         """
         IO.clear()
-        IO.print(get_main_banner(self.version))
+        IO.print(MAIN_BANNER)
         self._print_help_reminder()
 
     def _help_handler(self, args):

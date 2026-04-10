@@ -97,7 +97,8 @@ class CommandParser:
         )
 
         self._subparsers.append(command)
-        self.help_table.add_row(f"{IO.LIGHTYELLOW}{help_list[0]}{IO.END_LIGHTYELLOW}", f"{help_list[1]}\n")
+        self.help_table.add_row(
+            f"{IO.LIGHTYELLOW}{help_list[0]}{IO.END_LIGHTYELLOW}", f"{help_list[1]}\n")
         return subparser
 
     def parse(self, command):

@@ -15,8 +15,9 @@
 """
 
 from .io import IO
+from evillimiter_ng.common import globals as bg
 
-_MAIN_BANNER = f"""{IO.BOLD_LIGHTRED}
+MAIN_BANNER = f"""{IO.BOLD_LIGHTRED}
  ███████╗██╗   ██╗██╗██╗      ██╗      ██╗███╗   ███╗██╗████████╗███████╗██████╗         ███╗   ██╗ ██████╗
  ██╔════╝██║   ██║██║██║      ██║      ██║████╗ ████║██║╚══██╔══╝██╔════╝██╔══██╗        ████╗  ██║██╔════╝
  █████╗  ██║   ██║██║██║      ██║      ██║██╔████╔██║██║   ██║   █████╗  ██████╔╝        ██╔██╗ ██║██║  ███╗
@@ -25,10 +26,6 @@ _MAIN_BANNER = f"""{IO.BOLD_LIGHTRED}
  ╚══════╝  ╚═══╝  ╚═╝╚══════╝ ╚══════╝ ╚═╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝        ╚═╝  ╚═══╝ ╚═════╝
                 {IO.END_BOLD_LIGHTRED}by bitbrute  ~  limit devices on your network :3
                 KevinCrrl    ~  Next Generation
-                                    v[_V_]
+                                    v{bg.VERSION}
 
 """
-
-
-def get_main_banner(version):
-    return _MAIN_BANNER.replace("[_V_]", version)

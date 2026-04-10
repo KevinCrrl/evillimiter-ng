@@ -15,28 +15,20 @@
 """
 
 import os
-import os.path
+import sys
 import argparse
 import platform
 import collections
 
 import evillimiter_ng.networking.utils as netutils
 from evillimiter_ng.menus.main_menu import MainMenu
-from evillimiter_ng.console.banner import get_main_banner
+from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.common import globals as gb
 
 InitialArguments = collections.namedtuple(
     "InitialArguments", "interface, gateway_ip, netmask, gateway_mac"
 )
-
-
-def get_version():
-    return gb.VERSION
-
-
-def get_description():
-    return gb.DESCRIPTION
 
 
 def is_privileged():
@@ -52,7 +44,7 @@ def parse_arguments():
     Parses the main command-line arguments (sys.argv)
     using argparse
     """
-    parser = argparse.ArgumentParser(description=get_description())
+    parser = argparse.ArgumentParser(description=gb.DESCRIPTION)
     parser.add_argument(
         "-i",
         "--interface",
@@ -81,6 +73,12 @@ def parse_arguments():
         action="store_true",
         help="flush current iptables (firewall) and tc (traffic control) settings.",
     )
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="store_true",
+        help="displays the version of the program currently in use."
+    )
 
     return parser.parse_args()
 
@@ -91,6 +89,11 @@ def process_arguments(args):
     and returns.
     Executes actions specified in the command line, e.g. flush network settings
     """
+    if args.version:
+        IO.print(
+            f"EvilLimiter Next Generation Version {IO.BOLD_LIGHTGREEN}{gb.VERSION}{IO.END_BOLD_LIGHTGREEN}")
+        sys.exit(0)
+
     if args.interface is None:
         interface = netutils.get_default_interface()
         if interface is None:
@@ -195,12 +198,11 @@ def main():
         IO.error("run as root.")
         return
 
-    version = get_version()
     args = parse_arguments()
 
-    IO.print(get_main_banner(version))
-
     args = process_arguments(args)
+
+    IO.print(MAIN_BANNER)
 
     if args is None:
         return
@@ -208,7 +210,7 @@ def main():
     if initialize(args.interface):
         IO.spacer()
         menu = MainMenu(
-            version, args.interface, args.gateway_ip, args.gateway_mac, args.netmask
+            gb.VERSION, args.interface, args.gateway_ip, args.gateway_mac, args.netmask
         )
         menu.start()
         cleanup(args.interface)
