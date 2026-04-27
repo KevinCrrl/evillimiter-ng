@@ -16,7 +16,7 @@
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.completion import NestedCompleter
 from rich.console import Console
 
 from . import shell
@@ -71,11 +71,22 @@ class IO:
         try:
             return IO.session.prompt(
                 text,
-                completer=WordCompleter(["scan", "hosts", "watch", "add", "limit", "block", "free",
-                                        "monitor", "analyze", "quit", "clear", "remove", "set",
-                                         "--download", "--upload", "--range", "--mac", "sleep",
-                                         "--duration", "--intensity", "--interval", "exit", "help"]
-                                        ),
+                completer=NestedCompleter.from_nested_dict({
+                    "scan": {"--range", "--intensity"},
+                    "hosts": None,
+                    "limit": {"--upload", "--download"},
+                    "block": {"--upload", "--download"},
+                    "free": None,
+                    "add": {"--mac"},
+                    "monitor": {"--interval"},
+                    "analyze": {"--duration"},
+                    "watch": {"add", "remove", "set"},
+                    "sleep": None,
+                    "clear": None,
+                    "quit": None,
+                    "exit": None,
+                    "help": None
+                                        }),
                 complete_while_typing=True,
                 auto_suggest=AutoSuggestFromHistory(),
                 show_frame=True
