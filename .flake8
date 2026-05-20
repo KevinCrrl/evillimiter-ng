@@ -1,3 +1,2 @@
 [flake8]
-extend-ignore = E501
 exclude = .git,__pycache__,build,dist,pkgbuild,evillimiter_ng.egg-info

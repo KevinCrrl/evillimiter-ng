@@ -85,7 +85,9 @@ class CommandParser:
 
     def add_subparser(self, identifier, handler=None, help_list=["", ""]):
         """
-        Creates a subparser and adds a command to this parser, making it its parent.
+        Creates a subparser and adds a command to this parser,
+        making it its parent.
+
         A subparser is a standalone parser that can contain commands itself.
 
         E.g. 'git clone'
@@ -98,7 +100,8 @@ class CommandParser:
 
         self._subparsers.append(command)
         self.help_table.add_row(
-            f"{IO.LIGHTYELLOW}{help_list[0]}{IO.END_LIGHTYELLOW}", f"{help_list[1]}\n")
+            f"{IO.LIGHTYELLOW}{help_list[0]}{IO.END_LIGHTYELLOW}",
+            f"{help_list[1]}\n")
         return subparser
 
     def parse(self, command):
@@ -122,7 +125,7 @@ class CommandParser:
                 for sp in self._subparsers:
                     if sp.identifier == arg:
                         # if subparser present, parse arguments there
-                        result = sp.subparser.parse(command[(i + 1):])  # noqa: E203
+                        result = sp.subparser.parse(command[(i + 1):])  # noqa
                         if result is not None and sp.handler is not None:
                             # call the subparser's handler if available
                             sp.handler(result)
@@ -139,11 +142,13 @@ class CommandParser:
                         result_dict[cmd.name] = True
                         is_arg_processed = True
                         break
-                    if cmd.type == CommandParser.CommandType.PARAMETERIZED_FLAG_COMMAND:
+                    if cmd.type == CommandParser.CommandType.\
+                            PARAMETERIZED_FLAG_COMMAND:
                         if (len(command) - 1) < (i + 1):
                             # no more command arguments to process
                             IO.error(
-                                f"parameter for flag {IO.LIGHTYELLOW}{cmd.name}{IO.END_LIGHTYELLOW} is missing"
+                                f"parameter for flag {IO.LIGHTYELLOW}\
+                                    {cmd.name}{IO.END_LIGHTYELLOW} is missing"
                             )
                             return
 
@@ -168,7 +173,8 @@ class CommandParser:
 
             if not is_arg_processed:
                 IO.error(
-                    f"{IO.LIGHTYELLOW}{arg}{IO.END_LIGHTYELLOW} is an unknown command."
+                    f"{IO.LIGHTYELLOW}{arg}{IO.END_LIGHTYELLOW} \
+                        is an unknown command."
                 )
                 return
 
@@ -176,7 +182,8 @@ class CommandParser:
         for cmd in self._parameter_commands:
             if result_dict[cmd.name] is None:
                 IO.error(
-                    f"parameter {IO.LIGHTYELLOW}{cmd.name}{IO.END_LIGHTYELLOW} is missing"
+                    f"parameter {IO.LIGHTYELLOW}{cmd.name}\
+                        {IO.END_LIGHTYELLOW} is missing"
                 )
                 return
 

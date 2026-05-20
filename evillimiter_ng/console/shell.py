@@ -32,11 +32,13 @@ def execute_suppressed(command):
 
 
 def output(command):
-    return subprocess.run(command, capture_output=True, text=True, check=False).stdout
+    return subprocess.run(command, capture_output=True,
+                          text=True, check=False).stdout
 
 
 def output_suppressed(command: list):
-    return subprocess.run(command, capture_output=True, text=True, check=False).stdout
+    return subprocess.run(command, capture_output=True,
+                          text=True, check=False).stdout
 
 
 def locate_bin(name):

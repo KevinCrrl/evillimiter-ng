@@ -120,16 +120,19 @@ def create_qdisc_root(interface):
 
 def delete_qdisc_root(interface):
     return shell.execute_suppressed(
-        [BIN_TC, "qdisc", "del", "dev", interface, "root", "handle", "1:0", "htb"]
+        [BIN_TC, "qdisc", "del", "dev",
+            interface, "root", "handle", "1:0", "htb"]
     )
 
 
 def enable_ip_forwarding():
-    return shell.execute_suppressed([BIN_SYSCTL, "-w", f"{IP_FORWARD_LOC}=1"]) == 0
+    return shell.execute_suppressed([BIN_SYSCTL, "-w",
+                                    f"{IP_FORWARD_LOC}=1"]) == 0
 
 
 def disable_ip_forwarding():
-    return shell.execute_suppressed([BIN_SYSCTL, "-w", f"{IP_FORWARD_LOC}=0"]) == 0
+    return shell.execute_suppressed([BIN_SYSCTL, "-w",
+                                    f"{IP_FORWARD_LOC}=0"]) == 0
 
 
 class ValueConverter:

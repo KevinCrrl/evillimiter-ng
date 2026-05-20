@@ -33,7 +33,8 @@ class BarChart:
 
         self._data.sort(reverse=reverse, key=lambda x: x["value"])
 
-        max_value = self._data[0]["value"] if reverse else self._data[-1]["value"]
+        max_value = self._data[0]["value"] if reverse \
+            else self._data[-1]["value"]
         max_prefix_length = max([len(x["prefix"]) for x in self._data]) + 1
 
         chart = ""
@@ -46,6 +47,7 @@ class BarChart:
                     remap(value["value"], 0, max_value, 0, self.max_bar_length)
                 )
 
-            chart += f"{value['prefix']}{' ' * (max_prefix_length - len(value['prefix']))}: {self.draw_char * bar_length} {value['suffix']}\n"
+            chart += f"{value['prefix']}{' ' * (max_prefix_length - len(value['prefix']))}\
+                : {self.draw_char * bar_length} {value['suffix']}\n"  # noqa
 
         return chart[:-1]

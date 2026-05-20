@@ -59,7 +59,8 @@ class Limiter:
                     str(rate * 1.1),
                 ]
             )
-            # add a fw filter that filters packets marked with the corresponding ID
+            # add a fw filter that filters packets marked with the
+            # corresponding ID
             shell.execute_suppressed(
                 [
                     BIN_TC,
@@ -116,7 +117,8 @@ class Limiter:
                     str(rate * 1.1),
                 ]
             )
-            # add a fw filter that filters packets marked with the corresponding ID
+            # add a fw filter that filters packets marked with the
+            # corresponding ID
             shell.execute_suppressed(
                 [
                     BIN_TC,
@@ -229,7 +231,8 @@ class Limiter:
 
     def replace(self, old_host, new_host):
         self._host_dict_lock.acquire()
-        info = self._host_dict[old_host] if old_host in self._host_dict else None
+        info = \
+            self._host_dict[old_host] if old_host in self._host_dict else None
         self._host_dict_lock.release()
 
         if info is not None:
@@ -304,7 +307,8 @@ class Limiter:
                         v = (x for x in self._host_dict.values())
                         ids = (x["ids"] for x in v)
                         if id_ not in (
-                            x for y in ids for x in [y.upload_id, y.download_id]
+                            x for y in ids for x in
+                                [y.upload_id, y.download_id]
                         ):
                             return id_
                     id_ += 1

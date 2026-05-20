@@ -66,7 +66,8 @@ class HostScanner:
             self.settings = self._intense_settings
 
     def scan(self, iprange=None):
-        with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
+        with ThreadPoolExecutor(max_workers=self.settings.max_workers)\
+             as executor:
             hosts = []
             iprange = [str(x)
                        for x in (self.iprange if iprange is None else iprange)]
@@ -85,7 +86,8 @@ class HostScanner:
                         if host is not None:
                             try:
                                 host_info = socket.gethostbyaddr(host.ip)
-                                name = "" if host_info is None else host_info[0]
+                                name = \
+                                    "" if host_info is None else host_info[0]
                                 host.name = name
                             except socket.herror:
                                 pass
@@ -97,7 +99,8 @@ class HostScanner:
             return hosts
 
     def scan_for_reconnects(self, hosts, iprange=None):
-        with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
+        with ThreadPoolExecutor(max_workers=self.settings.max_workers)\
+             as executor:
             scanned_hosts = []
             iprange = [str(x)
                        for x in (self.iprange if iprange is None else iprange)]

@@ -48,13 +48,15 @@ def parse_arguments():
     parser.add_argument(
         "-i",
         "--interface",
-        help="network interface connected to the target network. automatically resolved if not specified.",
+        help="network interface connected to the target network. \
+            automatically resolved if not specified.",
     )
     parser.add_argument(
         "-g",
         "--gateway-ip",
         dest="gateway_ip",
-        help="default gateway ip address. automatically resolved if not specified.",
+        help="default gateway ip address. automatically resolved \
+            if not specified.",
     )
     parser.add_argument(
         "-m",
@@ -65,13 +67,15 @@ def parse_arguments():
     parser.add_argument(
         "-n",
         "--netmask",
-        help="netmask for the network. automatically resolved if not specified.",
+        help="netmask for the network. automatically resolved if \
+            not specified.",
     )
     parser.add_argument(
         "-f",
         "--flush",
         action="store_true",
-        help="flush current iptables (firewall) and tc (traffic control) settings.",
+        help="flush current iptables (firewall) and tc \
+            (traffic control) settings.",
     )
     parser.add_argument(
         "-v",
@@ -91,20 +95,23 @@ def process_arguments(args):
     """
     if args.version:
         IO.print(
-            f"EvilLimiter Next Generation Version {IO.BOLD_LIGHTGREEN}{gb.VERSION}{IO.END_BOLD_LIGHTGREEN}")
+            f"EvilLimiter Next Generation Version \
+                {IO.BOLD_LIGHTGREEN}{gb.VERSION}{IO.END_BOLD_LIGHTGREEN}")
         sys.exit(0)
 
     if args.interface is None:
         interface = netutils.get_default_interface()
         if interface is None:
             IO.error(
-                "default interface could not be resolved. specify manually (-i).")
+                "default interface could not be resolved. specify \
+                    manually (-i).")
             return
     else:
         interface = args.interface
         if not netutils.exists_interface(interface):
             IO.error(
-                f"interface {IO.LIGHTYELLOW}{interface}{IO.END_LIGHTYELLOW} does not exist."
+                f"interface {IO.LIGHTYELLOW}{interface}\
+                    {IO.END_LIGHTYELLOW} does not exist."
             )
             return
 
@@ -114,7 +121,8 @@ def process_arguments(args):
         gateway_ip = netutils.get_default_gateway()
         if gateway_ip is None:
             IO.error(
-                "default gateway address could not be resolved. specify manually (-g)."
+                "default gateway address could not be \
+                    resolved. specify manually (-g)."
             )
             return
     else:
@@ -166,7 +174,8 @@ def initialize(interface):
     if not netutils.create_qdisc_root(interface):
         IO.spacer()
         IO.error(
-            "qdisc root handle could not be created. maybe flush network settings (--flush)."
+            "qdisc root handle could not be created. \
+                Maybe flush network settings (--flush)."
         )
         return False
 
@@ -210,7 +219,8 @@ def main():
     if initialize(args.interface):
         IO.spacer()
         menu = MainMenu(
-            gb.VERSION, args.interface, args.gateway_ip, args.gateway_mac, args.netmask
+            gb.VERSION, args.interface, args.gateway_ip,
+            args.gateway_mac, args.netmask
         )
         menu.start()
         cleanup(args.interface)
