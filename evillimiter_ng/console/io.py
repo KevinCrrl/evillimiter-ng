@@ -47,15 +47,15 @@ class IO:
         """
         Print a success status message
         """
-        IO.print(f"{IO.BOLD_LIGHTGREEN}OK\
-{IO.END_BOLD_LIGHTGREEN}   {text}", end=end)  # noqa: E202
+        IO.print(f"[{IO.BOLD_LIGHTGREEN}  OK\
+{IO.END_BOLD_LIGHTGREEN}  ]   {text}", end=end)  # noqa: E202
 
     @staticmethod
     def error(text):
         """
         Print an error status message
         """
-        IO.print(f"{IO.BOLD_LIGHTRED}ERR{IO.END_BOLD_LIGHTRED}  {text}")
+        IO.print(f"[{IO.BOLD_LIGHTRED}ERROR!{IO.END_BOLD_LIGHTRED}]  {text}")
 
     @staticmethod
     def spacer():

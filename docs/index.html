@@ -26,10 +26,36 @@
     </ul>
 
     <h2>Screenshots</h2>
-    <img src="assets/scan.webp" alt="evillimiter-ng scan and hosts commands" width="800px">
-    <br>
-    <br>
-    <img src="assets/echo.webp" alt="evillimiter-ng scan and hosts commands" width="800px">
+    <img src="assets/scan.webp" alt="evillimiter-ng scan and hosts commands" width="550px">
+    <img src="assets/echo.webp" alt="evillimiter-ng scan and hosts commands" width="415px">
+
+    <h2>What's New in Next Generation</h2>
+    <p>EvilLimiter-NG includes numerous updates aimed at modernization, compatibility with modern Python, and a
+        reduction in dependencies, among many other changes.</p>
+    <p>This list includes most of the major changes made and the version in which they were implemented. You can use
+        this list as a changelog without needing to access the GitHub repository.</p>
+    <ul>
+        <li><b>Migration from netifaces to netifaces-2: </b>Upgraded the core networking dependency to improve library
+            compatibility and system stability. (Version 2.3.0)</li><br>
+        <li><b>Autocomplete system upgrade: </b>Replaced the old input prompt with NestedCompleter for smarter and
+            dynamic command autocompletion. (Version 2.3.0)</li><br>
+        <li><b>Modern live rendering migration: </b>Replaced the old curses interface entirely with rich.live for
+            dynamic and modern terminal UI updates. (Version 2.3.0)</li><br>
+        <li><b>Fix for warning messages in packet handling: </b>Encapsulated ARP packets inside Ethernet frames to
+            completely resolve annoying Scapy terminal warnings. (Version 2.2.0)</li><br>
+        <li><b>Multi-command support and sleep function: </b>Enhanced the interface to accept multiple sequential
+            commands and integrated a new sleep utility. (Version 2.2.0)</li><br>
+        <li><b>Interactive terminal input prompt: </b>Integrated prompt_toolkit to provide a much more robust and
+            responsive user input prompt. (Version 2.2.0)</li><br>
+        <li><b>Official AUR deployment: </b>Added a custom PKGBUILD for Arch Linux users and published the official
+            package link in the Arch User Repository. (Version 2.1.0)</li><br>
+        <li><b>Network quick start guide: </b>Overhauled documentation with a practical guide showing users how to scan
+            networks and limit device bandwidth instantly. (Version 2.1.0)</li><br>
+        <li><b>Rich Migration: </b>Removed terminaltables, colorama, and tqdm, migrating the CLI to Rich. (Version
+            2.0.0)</li><br>
+        <li><b>Pyproject.toml packaging adoption: </b>Modernized project deployment by deleting legacy setup scripts and
+            adopting pyproject.toml standard. (Version 2.0.0)</li><br>
+    </ul>
 </body>
 
 </html>
