@@ -48,6 +48,6 @@ class BarChart:
                 )
 
             chart += f"{value['prefix']}{' ' * (max_prefix_length - len(value['prefix']))}\
-                : {self.draw_char * bar_length} {value['suffix']}\n"  # noqa
+: {self.draw_char * bar_length} {value['suffix']}\n"  # noqa
 
         return chart[:-1]

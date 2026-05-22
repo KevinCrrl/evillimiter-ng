@@ -147,8 +147,8 @@ class CommandParser:
                         if (len(command) - 1) < (i + 1):
                             # no more command arguments to process
                             IO.error(
-                                f"parameter for flag {IO.LIGHTYELLOW}\
-                                    {cmd.name}{IO.END_LIGHTYELLOW} is missing"
+                                f"Parameter for flag {IO.LIGHTYELLOW}\
+{cmd.name}{IO.END_LIGHTYELLOW} is missing."
                             )
                             return
 
@@ -174,7 +174,7 @@ class CommandParser:
             if not is_arg_processed:
                 IO.error(
                     f"{IO.LIGHTYELLOW}{arg}{IO.END_LIGHTYELLOW} \
-                        is an unknown command."
+is an unknown command."
                 )
                 return
 
@@ -182,8 +182,8 @@ class CommandParser:
         for cmd in self._parameter_commands:
             if result_dict[cmd.name] is None:
                 IO.error(
-                    f"parameter {IO.LIGHTYELLOW}{cmd.name}\
-                        {IO.END_LIGHTYELLOW} is missing"
+                    f"Parameter {IO.LIGHTYELLOW}{cmd.name}\
+{IO.END_LIGHTYELLOW} is missing."
                 )
                 return
 

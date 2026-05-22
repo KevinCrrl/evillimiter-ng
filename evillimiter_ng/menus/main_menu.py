@@ -48,22 +48,22 @@ class MainMenu():
 
         self.parser.add_subparser("hosts", self._hosts_handler, [
             "hosts", "lists all scanned hosts.\ncontains host information, \
-                including IDs."])
+including IDs."])
 
         scan_parser = self.parser.add_subparser("scan", self._scan_handler, [
             "scan (--range [IP range])\n(--intensity [(1,2,3)])",
             "scans for online hosts on your network.\nrequired to \
-            find the hosts you want to limit.\ne.g.: scan\nscan --range \
-            192.168.178.1-192.168.178.50\nscan --range 192.168.178.1/24 \
-            --intensity 3"])
+find the hosts you want to limit.\ne.g.: scan\nscan --range \
+192.168.178.1-192.168.178.50\nscan --range 192.168.178.1/24 \
+--intensity 3"])
         scan_parser.add_parameterized_flag("--range", "iprange")
         scan_parser.add_parameterized_flag("--intensity", "intensity")
 
         limit_parser = self.parser.add_subparser(
             "limit", self._limit_handler, ["limit [ID1,ID2,...] [rate]\n\
-            (--upload) (--download)", "limits bandwith of host(s) \
-            (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
-            --download\nlimit all 200kbit --upload"])
+(--upload) (--download)", "limits bandwith of host(s) \
+(uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
+--download\nlimit all 200kbit --upload"])
         limit_parser.add_parameter("id")
         limit_parser.add_parameter("rate")
         limit_parser.add_flag("--upload", "upload")
@@ -71,8 +71,8 @@ class MainMenu():
 
         block_parser = self.parser.add_subparser(
             "block", self._block_handler, ["block [ID1,ID2,...]\n\
-            (--upload) (--download)", "blocks internet access of \
-            host(s).\ne.g.: block 3,2\nblock all --upload"])
+(--upload) (--download)", "blocks internet access of \
+host(s).\ne.g.: block 3,2\nblock all --upload"])
         block_parser.add_parameter("id")
         block_parser.add_flag("--upload", "upload")
         block_parser.add_flag("--download", "download")
@@ -85,45 +85,45 @@ class MainMenu():
         add_parser = self.parser.add_subparser("add", self._add_handler, [
             "add [IP] (--mac [MAC])",
             "adds custom host to host list.\nmac resolved automatically.\n\
-            e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
-            1c:fc:bc:2d:a6:37"])
+e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
+1c:fc:bc:2d:a6:37"])
         add_parser.add_parameter("ip")
         add_parser.add_parameterized_flag("--mac", "mac")
 
         monitor_parser = self.parser.add_subparser(
             "monitor", self._monitor_handler, ["monitor [ID1,ID2,...]\n\
-            (--interval [time in ms])", "monitors bandwidth usage of \
-            host(s).\ne.g.: monitor all --interval 600"])
+(--interval [time in ms])", "monitors bandwidth usage of \
+host(s).\ne.g.: monitor all --interval 600"])
         monitor_parser.add_parameter("id")
         monitor_parser.add_parameterized_flag("--interval", "interval")
 
         analyze_parser = self.parser.add_subparser(
             "analyze", self._analyze_handler, ["analyze [ID1,ID2,...]\n\
-            (--duration [time in s])", "analyzes traffic of host(s) \
-            without limiting\nto determine who uses how much bandwidth.\
-            \ne.g.: analyze 2,3 --duration 120"])
+(--duration [time in s])", "analyzes traffic of host(s) \
+without limiting\nto determine who uses how much bandwidth.\
+\ne.g.: analyze 2,3 --duration 120"])
         analyze_parser.add_parameter("id")
         analyze_parser.add_parameterized_flag("--duration", "duration")
 
         watch_parser = self.parser.add_subparser(
             "watch", self._watch_handler, ["watch", "detects host \
-            reconnects with different IP."])
+reconnects with different IP."])
 
         watch_add_parser = watch_parser.add_subparser(
             "add", self._watch_add_handler, ["watch add [ID1,ID2,...]", "\
-            adds host to the reconnection watchlist.\ne.g.: watch add 3,4"])
+adds host to the reconnection watchlist.\ne.g.: watch add 3,4"])
         watch_add_parser.add_parameter("id")
 
         watch_remove_parser = watch_parser.add_subparser(
             "remove", self._watch_remove_handler, ["watch remove [ID1,ID2,...]\
-            ", "removes host from the reconnection watchlist.\ne.g.: watch \
-            remove all"])
+", "removes host from the reconnection watchlist.\ne.g.: watch \
+remove all"])
         watch_remove_parser.add_parameter("id")
 
         watch_set_parser = watch_parser.add_subparser(
             "set", self._watch_set_handler, ["watch set [attr] [value]", "\
-            changes reconnect watch settings.\ne.g.: watch set interval \
-            120\nwatch set intensity 1"])
+changes reconnect watch settings.\ne.g.: watch set interval \
+120\nwatch set intensity 1"])
         watch_set_parser.add_parameter("attribute")
         watch_set_parser.add_parameter("value")
 
@@ -200,7 +200,7 @@ class MainMenu():
         if ctrl_c:
             IO.spacer()
 
-        IO.ok("cleaning up... stand by...")
+        IO.ok("Cleaning up... stand by...")
 
         self.arp_spoofer.stop()
         self.bandwidth_monitor.stop()
@@ -224,7 +224,7 @@ class MainMenu():
         if args.intensity:
             intensity = self._parse_scan_intensity(args.intensity)
             if intensity is None:
-                IO.error("invalid intensity level.")
+                IO.error("Invalid intensity level.")
                 return
         else:
             intensity = ScanIntensity.NORMAL
@@ -243,7 +243,7 @@ class MainMenu():
         self.hosts_lock.release()
 
         IO.ok(f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
-            hosts discovered.")
+hosts discovered.")
         IO.spacer()
 
     def _hosts_handler(self, args):
@@ -264,7 +264,7 @@ class MainMenu():
             for host in self.hosts:
                 table.add_row(
                     f"{IO.LIGHTYELLOW}{self._get_host_id(host, lock=False)}\
-                        {IO.END_LIGHTYELLOW}",
+{IO.END_LIGHTYELLOW}",
                     host.ip,
                     host.mac,
                     host.name,
@@ -287,7 +287,7 @@ class MainMenu():
         try:
             rate = BitRate.from_rate_string(args.rate)
         except Exception:
-            IO.error("limit rate is invalid.")
+            IO.error("Limit rate is invalid.")
             return
 
         direction = self._parse_direction_args(args)
@@ -299,8 +299,8 @@ class MainMenu():
 
             IO.ok(
                 f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
-                    {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
-                    limited{IO.END_BOLD_LIGHTRED} to {rate}."
+{Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
+limited{IO.END_BOLD_LIGHTRED} to {rate}."
             )
 
     def _block_handler(self, args):
@@ -320,8 +320,8 @@ class MainMenu():
                 self.bandwidth_monitor.add(host)
                 IO.ok(
                     f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
-                    {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
-                    blocked{IO.END_BOLD_LIGHTRED}."
+{Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
+blocked{IO.END_BOLD_LIGHTRED}."
                 )
 
     def _free_handler(self, args):
@@ -341,19 +341,19 @@ class MainMenu():
         """
         ip = args.ip
         if not netutils.validate_ip_address(ip):
-            IO.error("invalid ip address.")
+            IO.error("Invalid ip address.")
             return
 
         if args.mac:
             mac = args.mac
             if not netutils.validate_mac_address(mac):
-                IO.error("invalid mac address.")
+                IO.error("Invalid mac address.")
                 return
         else:
             mac = netutils.get_mac_by_ip(self.interface, ip)
             if mac is None:
                 IO.error(
-                    "unable to resolve mac address. specify manually (--mac).")
+                    "Unable to resolve mac address. Specify manually (--mac).")
                 return
 
         name = None
@@ -367,12 +367,12 @@ class MainMenu():
 
         with self.hosts_lock:
             if host in self.hosts:
-                IO.error("host does already exist.")
+                IO.error("Host does already exist.")
                 return
 
             self.hosts.append(host)
 
-        IO.ok("host added.")
+        IO.ok("Host added.")
 
     def _monitor_handler(self, args):
         """
@@ -422,7 +422,7 @@ class MainMenu():
         interval = 0.5  # in s
         if args.interval:
             if not args.interval.isdigit():
-                IO.error("invalid interval.")
+                IO.error("Invalid interval.")
                 return
 
             interval = int(args.interval) / 1000  # from ms to s
@@ -437,12 +437,12 @@ class MainMenu():
             IO.error("Host not found.")
 
         if len(get_bandwidth_results()) == 0:
-            IO.error("no hosts to be monitored.")
+            IO.error("No hosts to be monitored.")
             return
 
         with Live(
-            gen_table(), IO.console, True, refresh_per_second=interval,
-            transient=True
+            gen_table(), console=IO.console, screen=True,
+            refresh_per_second=interval, transient=True
         ) as live:
             while True:
                 try:
@@ -457,13 +457,13 @@ class MainMenu():
     def _analyze_handler(self, args):
         hosts = self._get_hosts_by_ids(args.id)
         if hosts is None or len(hosts) == 0:
-            IO.error("no hosts to be analyzed.")
+            IO.error("No hosts to be analyzed.")
             return
 
         duration = 30  # in s
         if args.duration:
             if not args.duration.isdigit():
-                IO.error("invalid duration.")
+                IO.error("Invalid duration.")
                 return
 
             duration = int(args.duration)
@@ -485,7 +485,7 @@ class MainMenu():
                 host_result.download_total_size,
             )
 
-        IO.ok(f"analyzing traffic for {duration}s.")
+        IO.ok(f"Analyzing traffic for {duration}s.")
         time.sleep(duration)
 
         error_occurred = False
@@ -494,7 +494,7 @@ class MainMenu():
 
             if host_result is None:
                 # host reconnected during analysis
-                IO.error("host reconnected during analysis.")
+                IO.error("Host reconnected during analysis.")
                 error_occurred = True
             else:
                 host_values[host]["current"] = (
@@ -502,7 +502,7 @@ class MainMenu():
                     host_result.download_total_size,
                 )
 
-        IO.ok("cleaning up...")
+        IO.ok("Cleaning up...")
         for host in hosts_to_be_freed:
             self._free_host(host)
 
@@ -638,29 +638,29 @@ class MainMenu():
             if iprange is not None:
                 self.host_watcher.iprange = iprange
             else:
-                IO.error("invalid ip range.")
+                IO.error("Invalid IP range.")
         elif args.attribute.lower() in ("interval"):
             if args.value.isdigit():
                 self.host_watcher.interval = int(args.value)
             else:
-                IO.error("invalid interval.")
+                IO.error("Invalid interval.")
         elif args.attribute.lower() in ("intensity", "scan_intensity"):
             intensity = self._parse_scan_intensity(args.value)
             if intensity is not None:
                 self.host_watcher.intensity = intensity
             else:
-                IO.error("invalid scan intensity level.")
+                IO.error("Invalid scan intensity level.")
         else:
             IO.error(
                 f"{IO.LIGHTYELLOW}{args.attribute}{IO.END_LIGHTYELLOW} is \
-                    an invalid settings attribute."
+an invalid settings attribute."
             )
 
     def _sleep_handler(self, args):
         try:
             time.sleep(float(args[0]))
         except ValueError:
-            IO.error("seconds must be an int or float")
+            IO.error("Seconds must be an int or float")
 
     def _reconnect_callback(self, old_host, new_host):
         """
@@ -720,9 +720,9 @@ class MainMenu():
 
     def _print_help_reminder(self):
         IO.print(
-            f"type {IO.LIGHTYELLOW}help{IO.END_LIGHTYELLOW} or \
-            {IO.LIGHTYELLOW}?{IO.END_LIGHTYELLOW} to show command \
-            information."
+            f"Type {IO.LIGHTYELLOW}help{IO.END_LIGHTYELLOW} or \
+{IO.LIGHTYELLOW}?{IO.END_LIGHTYELLOW} to show command \
+information."
         )
 
     def _get_hosts_by_ids(self, ids_string):
@@ -740,7 +740,7 @@ class MainMenu():
                 is_id_ = id_.isdigit()
 
                 if not is_mac and not is_ip and not is_id_:
-                    IO.error(f"invalid identifier(s): '{ids_string}'.")
+                    IO.error(f"Invalid identifier(s): '{ids_string}'.")
                     return
 
                 if is_mac or is_ip:
@@ -752,8 +752,8 @@ class MainMenu():
                             break
                     if not found:
                         IO.error(
-                            f"no host matching {IO.LIGHTYELLOW}{id_}\
-                                {IO.END_LIGHTYELLOW}."
+                            f"No host matching {IO.LIGHTYELLOW}{id_}\
+{IO.END_LIGHTYELLOW}."
                         )
                         return
                 else:
@@ -761,8 +761,8 @@ class MainMenu():
                     if (len(self.hosts) == 0 or
                             id_ not in range(len(self.hosts))):
                         IO.error(
-                            f"no host with id {IO.LIGHTYELLOW}{id_}\
-                                {IO.END_LIGHTYELLOW}."
+                            f"No host with id {IO.LIGHTYELLOW}{id_}\
+{IO.END_LIGHTYELLOW}."
                         )
                         return
                     hosts.add(self.hosts[id_])

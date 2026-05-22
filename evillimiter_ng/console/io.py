@@ -48,7 +48,7 @@ class IO:
         Print a success status message
         """
         IO.print(f"{IO.BOLD_LIGHTGREEN}OK\
-            {IO.END_BOLD_LIGHTGREEN}   {text}", end=end)  # noqa: E202
+{IO.END_BOLD_LIGHTGREEN}   {text}", end=end)  # noqa: E202
 
     @staticmethod
     def error(text):
@@ -87,7 +87,7 @@ class IO:
                     "quit": None,
                     "exit": None,
                     "help": None
-                                        }),
+                }),
                 complete_while_typing=True,
                 auto_suggest=AutoSuggestFromHistory(),
                 show_frame=True

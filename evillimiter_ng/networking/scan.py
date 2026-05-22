@@ -14,16 +14,17 @@
     with this program; if not, see <https://www.gnu.org/licenses/>.
 """
 
+# pylint: disable=no-name-in-module
 import socket
 import threading
 import collections
-from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
-from scapy.all import srp1, ARP, Ether  # pylint: disable=no-name-in-module
 from concurrent.futures import ThreadPoolExecutor
+from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
+from scapy.all import srp1, ARP, Ether
 
-from .host import Host
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.common.globals import BROADCAST
+from .host import Host
 
 
 class HostScanner:
@@ -67,7 +68,7 @@ class HostScanner:
 
     def scan(self, iprange=None):
         with ThreadPoolExecutor(max_workers=self.settings.max_workers)\
-             as executor:
+                as executor:
             hosts = []
             iprange = [str(x)
                        for x in (self.iprange if iprange is None else iprange)]
@@ -100,7 +101,7 @@ class HostScanner:
 
     def scan_for_reconnects(self, hosts, iprange=None):
         with ThreadPoolExecutor(max_workers=self.settings.max_workers)\
-             as executor:
+                as executor:
             scanned_hosts = []
             iprange = [str(x)
                        for x in (self.iprange if iprange is None else iprange)]

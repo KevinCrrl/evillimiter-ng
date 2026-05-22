@@ -48,40 +48,40 @@ def parse_arguments():
     parser.add_argument(
         "-i",
         "--interface",
-        help="network interface connected to the target network. \
-            automatically resolved if not specified.",
+        help="Network interface connected to the target network. \
+automatically resolved if not specified.",
     )
     parser.add_argument(
         "-g",
         "--gateway-ip",
         dest="gateway_ip",
-        help="default gateway ip address. automatically resolved \
-            if not specified.",
+        help="Default gateway ip address. automatically resolved \
+if not specified.",
     )
     parser.add_argument(
         "-m",
         "--gateway-mac",
         dest="gateway_mac",
-        help="gateway mac address. automatically resolved if not specified.",
+        help="Gateway mac address. automatically resolved if not specified.",
     )
     parser.add_argument(
         "-n",
         "--netmask",
-        help="netmask for the network. automatically resolved if \
-            not specified.",
+        help="Netmask for the network. automatically resolved if \
+not specified.",
     )
     parser.add_argument(
         "-f",
         "--flush",
         action="store_true",
-        help="flush current iptables (firewall) and tc \
-            (traffic control) settings.",
+        help="Flush current iptables (firewall) and tc \
+(traffic control) settings.",
     )
     parser.add_argument(
         "-v",
         "--version",
         action="store_true",
-        help="displays the version of the program currently in use."
+        help="Displays the version of the program currently in use."
     )
 
     return parser.parse_args()
@@ -96,7 +96,7 @@ def process_arguments(args):
     if args.version:
         IO.print(
             f"EvilLimiter Next Generation Version \
-                {IO.BOLD_LIGHTGREEN}{gb.VERSION}{IO.END_BOLD_LIGHTGREEN}")
+{IO.BOLD_LIGHTGREEN}{gb.VERSION}{IO.END_BOLD_LIGHTGREEN}")
         sys.exit(0)
 
     if args.interface is None:
@@ -104,14 +104,14 @@ def process_arguments(args):
         if interface is None:
             IO.error(
                 "default interface could not be resolved. specify \
-                    manually (-i).")
+manually (-i).")
             return
     else:
         interface = args.interface
         if not netutils.exists_interface(interface):
             IO.error(
                 f"interface {IO.LIGHTYELLOW}{interface}\
-                    {IO.END_LIGHTYELLOW} does not exist."
+{IO.END_LIGHTYELLOW} does not exist."
             )
             return
 
@@ -122,42 +122,42 @@ def process_arguments(args):
         if gateway_ip is None:
             IO.error(
                 "default gateway address could not be \
-                    resolved. specify manually (-g)."
+resolved. specify manually (-g)."
             )
             return
     else:
         gateway_ip = args.gateway_ip
 
-    IO.ok(f"gateway ip: {IO.LIGHTYELLOW}{gateway_ip}{IO.END_LIGHTYELLOW}")
+    IO.ok(f"Gateway ip: {IO.LIGHTYELLOW}{gateway_ip}{IO.END_LIGHTYELLOW}")
 
     if args.gateway_mac is None:
         gateway_mac = netutils.get_mac_by_ip(interface, gateway_ip)
         if gateway_mac is None:
-            IO.error("gateway mac address could not be resolved.")
+            IO.error("Gateway mac address could not be resolved.")
             return
     else:
         if netutils.validate_mac_address(args.gateway_mac):
             gateway_mac = args.gateway_mac.lower()
         else:
-            IO.error("gateway mac is invalid.")
+            IO.error("Gateway mac is invalid.")
             return
 
-    IO.ok(f"gateway mac: {IO.LIGHTYELLOW}{gateway_mac}{IO.END_LIGHTYELLOW}")
+    IO.ok(f"Gateway mac: {IO.LIGHTYELLOW}{gateway_mac}{IO.END_LIGHTYELLOW}")
 
     if args.netmask is None:
         netmask = netutils.get_default_netmask(interface)
         if netmask is None:
-            IO.error("netmask could not be resolved. specify manually (-n).")
+            IO.error("Netmask could not be resolved. specify manually (-n).")
             return
     else:
         netmask = args.netmask
 
-    IO.ok(f"netmask: {IO.LIGHTYELLOW}{netmask}{IO.END_LIGHTYELLOW}")
+    IO.ok(f"Netmask: {IO.LIGHTYELLOW}{netmask}{IO.END_LIGHTYELLOW}")
 
     if args.flush:
         netutils.flush_network_settings(interface)
         IO.spacer()
-        IO.ok("flushed network settings")
+        IO.ok("Flushed network settings")
 
     return InitialArguments(
         interface=interface,
@@ -175,13 +175,13 @@ def initialize(interface):
         IO.spacer()
         IO.error(
             "qdisc root handle could not be created. \
-                Maybe flush network settings (--flush)."
+Maybe flush network settings (--flush)."
         )
         return False
 
     if not netutils.enable_ip_forwarding():
         IO.spacer()
-        IO.error("ip forwarding could not be enabled.")
+        IO.error("IP forwarding could not be enabled.")
         return False
 
     return True
@@ -200,11 +200,11 @@ def main():
     Main entry point of the application
     """
     if not is_linux():
-        IO.error("run under linux.")
+        IO.error("Run under linux.")
         return
 
     if not is_privileged():
-        IO.error("run as root.")
+        IO.error("Run as root.")
         return
 
     args = parse_arguments()

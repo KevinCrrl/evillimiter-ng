@@ -12,4 +12,4 @@ IP_FORWARD_LOC = "net.ipv4.ip_forward"
 
 VERSION = "2.2.0"
 DESCRIPTION = "Monitors, analyzes and limits the bandwidth of devices \
-    on the local network (Next Generation)."
+on the local network (Next Generation)."
