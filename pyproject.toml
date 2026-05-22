@@ -14,7 +14,7 @@ license = "GPL-2.0-only"
 dependencies = [
     'rich',
     'netaddr',
-    'netifaces',
+    'netifaces2',
     'scapy>2.5.0',
     'prompt_toolkit>=3.0.0'
 ]

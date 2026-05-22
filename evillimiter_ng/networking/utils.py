@@ -32,18 +32,18 @@ def get_default_interface():
     """
     Returns the default IPv4 interface
     """
-    gateways = netifaces.gateways()
-    if "default" in gateways and netifaces.AF_INET in gateways["default"]:
-        return gateways["default"][netifaces.AF_INET][1]
+    gateway = netifaces.default_gateway()
+    if netifaces.AF_INET in gateway:
+        return gateway[netifaces.AF_INET][1]
 
 
 def get_default_gateway():
     """
     Returns the default IPv4 gateway address
     """
-    gateways = netifaces.gateways()
-    if "default" in gateways and netifaces.AF_INET in gateways["default"]:
-        return gateways["default"][netifaces.AF_INET][0]
+    gateway = netifaces.default_gateway()
+    if netifaces.AF_INET in gateway:
+        return gateway[netifaces.AF_INET][0]
 
 
 def get_default_netmask(interface):
@@ -52,7 +52,7 @@ def get_default_netmask(interface):
     """
     ifaddrs = netifaces.ifaddresses(interface)
     if netifaces.AF_INET in ifaddrs:
-        return ifaddrs[netifaces.AF_INET][0].get("netmask")
+        return ifaddrs[netifaces.AF_INET][0].get("mask")
 
 
 def get_mac_by_ip(interface, address):
