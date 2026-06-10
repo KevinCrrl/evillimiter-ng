@@ -1,4 +1,4 @@
-<p align="center"><img src="evillimiter_ng_screenshot.png" /></p>
+<p align="center"><img src="https://github.com/KevinCrrl/evillimiter-ng/blob/main/evillimiter_ng_screenshot.png?raw=true"/></p>
 
 # Evil Limiter Next Generation
 
@@ -19,7 +19,14 @@ Possibly missing python packages will be installed during the installation proce
 
 ## Installation
 
+
 ```bash
+# Using Pypi and Pip
+
+pip install evillimiter-ng
+
+# Without Pypi and Pip
+
 git clone https://github.com/KevinCrrl/evillimiter-ng.git
 cd evillimiter-ng
 
@@ -31,7 +38,7 @@ makepkg -si
 python -m build
 python -m installer dist/*.whl
 
-# or
+# or without pypi, just with pip
 
 pip install .
 ```
