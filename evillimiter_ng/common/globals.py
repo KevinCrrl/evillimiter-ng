@@ -1,4 +1,5 @@
-# Copyright (C) 2026 KevinCrrl GPL-2.0-only
+# Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
+# SPDX-License-Identifier: GPL-2.0-only
 
 from evillimiter_ng.console import shell
 
