@@ -12,7 +12,7 @@ depends=(
   'python-prompt_toolkit' 'iptables'
 )
 makedepends=(
-  'python-build' 'python-installer' 'python-wheel' 'python-setuptools'
+  'python-build' 'python-installer' 'python-wheel' 'python-hatchling'
 )
 source=("${url}/archive/refs/tags/${pkgver}/${pkgver}.tar.gz")
 sha512sums=('56d68d7d1275821d77c80439ccb465847e05b61371f729838e266ad983ddba86391d2e47a1d8e989e8ca737234a7feb521d3db78c7d9c0bff1e282ce5492fc7f')

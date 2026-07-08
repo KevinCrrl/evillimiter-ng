@@ -4,6 +4,7 @@
 
 [![License Badge](https://img.shields.io/badge/license-GPLv2-blue.svg)](LICENSE)
 [![Compatibility](https://img.shields.io/badge/python-3-brightgreen.svg)](PROJECT)
+[![Hatch project](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pypa/hatch/master/docs/assets/badge/v0.json)](https://github.com/pypa/hatch)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/KevinCrrl/evillimiter-ng/graphs/commit-activity)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
@@ -80,8 +81,7 @@ echo "scan && hosts && block all && sleep 20 && free all && exit" | evillimiter-
 | `-i [Interface Name]` | Specifies network interface (resolved if not specified) |
 | `-g [Gateway IP Address]` | Specifies gateway IP address (resolved if not specified) |
 | `-m [Gateway MAC Address]` | Specifies gateway MAC address (resolved if not specified) |
-| `-n [Netmask Address]` | Specifies netmask (resolved if not specified) |
-| `-f` | Flushes current iptables and tc configuration. Ensures that packets are dealt with correctly. |
+| `-n [Netmask Address]` | Specifies netmask (resolved if not specified)
 
 #### `evillimiter-ng` Commands
 
@@ -103,6 +103,7 @@ echo "scan && hosts && block all && sleep 20 && free all && exit" | evillimiter-
 | `quit` | Quits the application. |
 | `sleep` | Waits for <n> seconds. |
 | `?`, `help` | Displays command help. |
+| `import-json, export-json [JSON_FILE_PATH]` | Import/Export a JSON file containing IP addresses and MAC addresses encoded in base64. |
 
 ## Restrictions
 
@@ -112,7 +113,7 @@ echo "scan && hosts && block all && sleep 20 && free all && exit" | evillimiter-
 
 Please read the full legal disclaimer here:
 
-[LEGAL.md](LEGAL.md)
+[LEGAL.md](https://github.com/KevinCrrl/evillimiter-ng/blob/main/LEGAL.md)
 
 ## License
 
@@ -120,4 +121,4 @@ Copyright (c) 2026 by [KevinCrrl](https://github.com/KevinCrrl).
 
 Licensed under the **GPLv2 License**.
 
-For a detailed list of original authors, dependencies, and their respective licenses, see the [CREDITS](CREDITS.md) file.
+For a detailed list of original authors, dependencies, and their respective licenses, see the [CREDITS](https://github.com/KevinCrrl/evillimiter-ng/blob/main/CREDITS.md) file.

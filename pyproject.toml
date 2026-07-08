@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "evillimiter-ng"
@@ -38,6 +38,15 @@ classifiers = ['Environment :: Console',
 [project.scripts]
 evillimiter-ng = "evillimiter_ng.evillimiter_ng:main"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["evillimiter_ng*"]
+[tool.hatch.build.targets.sdist]
+packages = ["evillimiter_ng"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"CREDITS.md" = "CREDITS.md"
+"CODE_OF_CONDUCT.md" = "CODE_OF_CONDUCT.md"
+"CONTRIBUTING.md" = "CONTRIBUTING.md"
+"LEGAL.md" = "LEGAL.md"
+"evillimiter_ng_screenshot.png" = "evillimiter_ng_screenshot.png"
+
+[tool.hatch.build.targets.wheel]
+packages = ["evillimiter_ng"]

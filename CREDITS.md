@@ -8,3 +8,4 @@ This project is made possible by the original evillimiter code and various libra
 * [Python-Prompt-Toolkit by prompt-toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit): under the BSD-3-Clause License
 * [Netifaces-2 by SamuelYvon](https://github.com/SamuelYvon/netifaces-2): under the MIT License
 * [Netaddr by netaddr](https://github.com/netaddr/netaddr): under the BSD-3-Clause License
+* [Hatchling by Pypa](https://github.com/pypa/hatch): under the MIT license
