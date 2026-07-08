@@ -58,13 +58,6 @@ if not specified.",
 not specified.",
     )
     parser.add_argument(
-        "-f",
-        "--flush",
-        action="store_true",
-        help="Flush current iptables (firewall) and tc \
-(traffic control) settings.",
-    )
-    parser.add_argument(
         "-v",
         "--version",
         action="store_true",
@@ -83,7 +76,7 @@ def process_arguments(args):
     if args.version:
         IO.print(
             f"EvilLimiter Next Generation Version \
-{IO.BOLD_LIGHTGREEN}{gb.VERSION}{IO.END_BOLD_LIGHTGREEN}")
+{IO.BOLD_LIGHTBLUE}{gb.VERSION}{IO.END_BOLD_LIGHTBLUE}")
         sys.exit(0)
 
     if args.interface is None:
@@ -141,11 +134,6 @@ resolved. specify manually (-g)."
 
     IO.ok(f"Netmask: {IO.LIGHTYELLOW}{netmask}{IO.END_LIGHTYELLOW}")
 
-    if args.flush:
-        netutils.flush_network_settings(interface)
-        IO.spacer()
-        IO.ok("Flushed network settings")
-
     return InitialArguments(
         interface=interface,
         gateway_ip=gateway_ip,
@@ -160,11 +148,10 @@ def initialize(interface):
     """
     if not netutils.create_qdisc_root(interface):
         IO.spacer()
-        IO.error(
-            "qdisc root handle could not be created. \
-Maybe flush network settings (--flush)."
-        )
-        return False
+        IO.error("qdisc root handle could not be created.")
+        netutils.flush_network_settings(interface)
+        IO.spacer()
+        IO.ok("Flushed network settings\n")
 
     if not netutils.enable_ip_forwarding():
         IO.spacer()
@@ -204,7 +191,6 @@ def main():
         return
 
     if initialize(args.interface):
-        IO.spacer()
         menu = MainMenu(
             gb.VERSION, args.interface, args.gateway_ip,
             args.gateway_mac, args.netmask

@@ -3,6 +3,7 @@
 
 import os
 import subprocess
+from shutil import which
 from evillimiter_ng.console.io import IO
 
 DEVNULL = open(os.devnull, "w")
@@ -29,7 +30,6 @@ def output_suppressed(command: list):
 
 
 def locate_bin(name):
-    try:
-        return output_suppressed(["which", name]).replace("\n", "")
-    except subprocess.CalledProcessError:
-        IO.error(f"missing util: {name}, check your PATH")
+    search_bin = which(name)
+    return search_bin if search_bin is not None else IO.error(f"missing util: \
+{name}, check your PATH")

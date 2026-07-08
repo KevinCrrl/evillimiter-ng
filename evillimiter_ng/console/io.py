@@ -10,8 +10,8 @@ from . import shell
 
 
 class IO:
-    BOLD_LIGHTGREEN = "[bold bright_green]"
-    END_BOLD_LIGHTGREEN = "[/bold bright_green]"
+    BOLD_LIGHTBLUE = "[bold bright_blue]"
+    END_BOLD_LIGHTBLUE = "[/bold bright_blue]"
     BOLD_LIGHTRED = "[bold bright_red]"
     END_BOLD_LIGHTRED = "[/bold bright_red]"
     LIGHTYELLOW = "[bright_yellow]"
@@ -34,8 +34,8 @@ class IO:
         """
         Print a success status message
         """
-        IO.print(f"[{IO.BOLD_LIGHTGREEN}  OK\
-{IO.END_BOLD_LIGHTGREEN}  ]   {text}", end=end)  # noqa: E202
+        IO.print(f"[{IO.BOLD_LIGHTBLUE}  OK\
+{IO.END_BOLD_LIGHTBLUE}  ]   {text}", end=end)  # noqa: E202
 
     @staticmethod
     def error(text):

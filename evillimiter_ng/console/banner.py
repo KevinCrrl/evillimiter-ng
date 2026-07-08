@@ -11,8 +11,6 @@ MAIN_BANNER = f"""{IO.BOLD_LIGHTRED}
  ██╔══╝  ╚██╗ ██╔╝██║██║      ██║      ██║██║╚██╔╝██║██║   ██║   ██╔══╝  ██╔══██╗  ████  ██║╚██╗██║██║   ██║
  ███████╗ ╚████╔╝ ██║███████╗ ███████╗ ██║██║ ╚═╝ ██║██║   ██║   ███████╗██║  ██║        ██║ ╚████║╚██████╔╝
  ╚══════╝  ╚═══╝  ╚═╝╚══════╝ ╚══════╝ ╚═╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝        ╚═╝  ╚═══╝ ╚═════╝
-                {IO.END_BOLD_LIGHTRED}by bitbrute  ~  limit devices on your network :3
-                KevinCrrl    ~  Next Generation
+                        {IO.END_BOLD_LIGHTRED}by KevinCrrl   ~   Next Generation
                                     v{bg.VERSION}
-
 """  # noqa

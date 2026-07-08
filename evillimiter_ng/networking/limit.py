@@ -254,7 +254,7 @@ class Limiter:
 
                 return f"{IO.LIGHTYELLOW}{final.strip()}{IO.END_LIGHTYELLOW}"
 
-            return f"{IO.BOLD_LIGHTGREEN}Free{IO.END_BOLD_LIGHTGREEN}"
+            return f"{IO.BOLD_LIGHTBLUE}Free{IO.END_BOLD_LIGHTBLUE}"
 
     def _new_host_limit_ids(self, host, direction):
         """

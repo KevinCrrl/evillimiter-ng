@@ -1,7 +1,10 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
+import binascii
 import time
+import json
+import base64
 import socket
 import threading
 from shlex import split
@@ -32,6 +35,23 @@ class MainMenu():
         self._active = False
         self.parser.add_subparser("clear", self._clear_handler, [
             "clear", "clears the terminal window."])
+
+        import_parser = self.parser.add_subparser(
+            "import-json", self._import_handler, [
+                "import-json [JSON FILE PATH]",
+                "Import a JSON file containing IP addresses and MAC \
+addresses encoded in base64."
+            ])
+        import_parser.add_parameter("json_path")
+
+        export_parser = self.parser.add_subparser(
+            "export-json", self._export_handler, [
+                "export-json [JSON FILE PATH]",
+                "Export a JSON file containing IP addresses and MAC \
+addresses encoded in base64."
+            ]
+        )
+        export_parser.add_parameter("json_path")
 
         self.parser.add_subparser("hosts", self._hosts_handler, [
             "hosts", "lists all scanned hosts.\ncontains host information, \
@@ -147,7 +167,7 @@ changes reconnect watch settings.\ne.g.: watch set interval \
         )
 
         # holds discovered hosts
-        self.hosts = []
+        self.hosts: list[Host] = []
         self.hosts_lock = threading.Lock()
 
         self._print_help_reminder()
@@ -648,6 +668,40 @@ an invalid settings attribute."
             time.sleep(float(args[0]))
         except ValueError:
             IO.error("Seconds must be an int or float")
+
+    def _export_handler(self, args):
+        info: dict = {}
+        for host in self.hosts:
+            info[host.get_ip()] = {"mac": host.get_mac()}
+        try:
+            with open(args.json_path, "w", encoding="utf-8") as f:
+                f.write(base64.b64encode(str(info).encode()).decode())
+        except (FileNotFoundError, IsADirectoryError) as e:
+            IO.error(e)
+
+    def _import_handler(self, args):
+        try:
+            with open(args.json_path, "r", encoding="utf-8") as f:
+                try:
+                    json_dict = json.loads(base64.b64decode(
+                        f.read(), validate=True).decode().replace("'", '"'))
+                except binascii.Error:
+                    IO.error("The Base64 encoding of the JSON appears to \
+be corrupted.")
+                else:
+                    for ip_arg, sub_dict in json_dict.items():
+                        IO.print(f"Adding host {ip_arg}")
+
+                        class SubArgs:
+                            ip = ip_arg
+                            try:
+                                mac = sub_dict["mac"]
+                            except KeyError:
+                                mac = None
+
+                        self._add_handler(SubArgs)
+        except (FileNotFoundError, IsADirectoryError) as e:
+            IO.error(e)
 
     def _reconnect_callback(self, old_host, new_host):
         """

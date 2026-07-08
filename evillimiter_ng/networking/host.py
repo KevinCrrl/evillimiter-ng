@@ -17,3 +17,9 @@ class Host:
 
     def __hash__(self):
         return hash((self.mac, self.ip))
+
+    def get_ip(self) -> str:
+        return self.ip
+
+    def get_mac(self) -> str:
+        return self.mac
