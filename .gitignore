@@ -21,3 +21,5 @@ TODO
 *zst
 *txt
 *pkgbuild_parser*
+.idea/
+*sh

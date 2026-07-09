@@ -23,11 +23,11 @@ class IO:
     session = PromptSession()
 
     @staticmethod
-    def print(text, end="\n"):
+    def print(text="", end="\n"):
         """
         Writes a given string to the console.
         """
-        IO.console.print(text, end=end, emoji=False)
+        IO.console.print(text, end=end)
 
     @staticmethod
     def ok(text, end="\n"):
@@ -43,13 +43,6 @@ class IO:
         Print an error status message
         """
         IO.print(f"[{IO.BOLD_LIGHTRED}ERROR!{IO.END_BOLD_LIGHTRED}]  {text}")
-
-    @staticmethod
-    def spacer():
-        """
-        Prints a blank line for attraction purposes
-        """
-        IO.print("")
 
     @staticmethod
     def input(text):

@@ -125,7 +125,7 @@ class CommandParser:
             for cmd in self._flag_commands:
                 if cmd.identifier == arg:
                     if cmd.type == CommandParser.CommandType.FLAG_COMMAND:
-                        # if its a flag, set the flag to true
+                        # if it's a flag, set the flag to true
                         result_dict[cmd.name] = True
                         is_arg_processed = True
                         break

@@ -11,6 +11,7 @@ import socket
 import threading
 from shlex import split
 import netaddr
+from prompt_toolkit.shortcuts import yes_no_dialog
 from rich.table import Table
 from rich.panel import Panel
 from rich.columns import Columns
@@ -30,30 +31,13 @@ from evillimiter_ng.networking.watch import HostWatcher
 from .parser import CommandParser
 
 
-class MainMenu():
+class MainMenu:
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         self.prompt = ">>> "
         self.parser = CommandParser()
         self._active = False
         self.parser.add_subparser("clear", self._clear_handler, [
             "clear", "clears the terminal window."])
-
-        import_parser = self.parser.add_subparser(
-            "import-json", self._import_handler, [
-                "import-json [JSON FILE PATH]",
-                "Import a JSON file containing IP addresses and MAC \
-addresses encoded in base64."
-            ])
-        import_parser.add_parameter("json_path")
-
-        export_parser = self.parser.add_subparser(
-            "export-json", self._export_handler, [
-                "export-json [JSON FILE PATH]",
-                "Export a JSON file containing IP addresses and MAC \
-addresses encoded in base64."
-            ]
-        )
-        export_parser.add_parameter("json_path")
 
         self.parser.add_subparser("hosts", self._hosts_handler, [
             "hosts", "lists all scanned hosts.\ncontains host information, \
@@ -98,6 +82,23 @@ e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
 1c:fc:bc:2d:a6:37"])
         add_parser.add_parameter("ip")
         add_parser.add_parameterized_flag("--mac", "mac")
+
+        import_parser = self.parser.add_subparser(
+            "import-json", self._import_handler, [
+                "import-json [JSON FILE PATH]",
+                "Import a JSON file containing IP addresses and MAC \
+addresses encoded in base64."
+            ])
+        import_parser.add_parameter("json_path")
+
+        export_parser = self.parser.add_subparser(
+            "export-json", self._export_handler, [
+                "export-json [JSON FILE PATH]",
+                "Export a JSON file containing IP addresses and MAC \
+addresses encoded in base64."
+            ]
+        )
+        export_parser.add_parameter("json_path")
 
         monitor_parser = self.parser.add_subparser(
             "monitor", self._monitor_handler, ["monitor [ID1,ID2,...]\n\
@@ -207,7 +208,7 @@ changes reconnect watch settings.\ne.g.: watch set interval \
 
     def interrupt_handler(self, ctrl_c=True):
         if ctrl_c:
-            IO.spacer()
+            IO.print()
 
         IO.ok("Cleaning up... stand by...")
 
@@ -244,7 +245,7 @@ changes reconnect watch settings.\ne.g.: watch set interval \
             for host in self.hosts:
                 self._free_host(host)
 
-        IO.spacer()
+        IO.print()
         hosts = self.host_scanner.scan(iprange)
 
         self.hosts_lock.acquire()
@@ -253,7 +254,7 @@ changes reconnect watch settings.\ne.g.: watch set interval \
 
         IO.ok(f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
 hosts discovered.")
-        IO.spacer()
+        IO.print()
 
     def _hosts_handler(self, args):
         """
@@ -280,9 +281,9 @@ hosts discovered.")
                     self.limiter.pretty_status(host),
                 )
 
-        IO.spacer()
+        IO.print()
         IO.print(table)
-        IO.spacer()
+        IO.print()
 
     def _limit_handler(self, args):
         """
@@ -605,13 +606,13 @@ blocked{IO.END_BOLD_LIGHTRED}."
                     recon["new"].ip, recon["time"]
                 )
 
-            IO.spacer()
+            IO.print()
             IO.print(watch_table)
-            IO.spacer()
+            IO.print()
             IO.print(set_table)
-            IO.spacer()
+            IO.print()
             IO.print(hist_table)
-            IO.spacer()
+            IO.print()
 
     def _watch_add_handler(self, args):
         """
@@ -640,7 +641,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
     def _watch_set_handler(self, args):
         """
         Handles 'watch set' command-line argument
-        Modifies settings of the reconnection reconnection watcher
+        Modifies settings of the reconnection watcher
         """
         if args.attribute.lower() in ("range", "iprange", "ip_range"):
             iprange = self._parse_iprange(args.value)
@@ -672,19 +673,25 @@ an invalid settings attribute."
             IO.error("Seconds must be an int or float")
 
     def _export_handler(self, args):
-        info: dict = {}
-        for host in self.hosts:
-            info[host.get_ip()] = {"mac": host.get_mac()}
-        try:
-            # Read and Write for owner (root)
-            fd: int = os.open(args.json_path,
-                              os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
-                              stat.S_IRUSR | stat.S_IWUSR)
+        write: bool = True
+        if os.path.exists(args.json_path):
+            write = yes_no_dialog(title="There is already a file with that path and name.",
+                                  text="Want to overwrite the file?").run()
 
-            with os.fdopen(fd, "w", encoding="utf-8") as f:
-                f.write(base64.b64encode(str(info).encode()).decode())
-        except (FileNotFoundError, IsADirectoryError) as e:
-            IO.error(e)
+        if write:
+            info: dict = {}
+            for host in self.hosts:
+                info[host.get_ip()] = {"mac": host.get_mac()}
+            try:
+                # Read and Write for owner (root)
+                fd: int = os.open(args.json_path,
+                                  os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                                  stat.S_IRUSR | stat.S_IWUSR)
+
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    f.write(base64.b64encode(str(info).encode()).decode())
+            except (FileNotFoundError, IsADirectoryError) as e:
+                IO.error(e)
 
     def _import_handler(self, args):
         try:
