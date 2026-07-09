@@ -4,6 +4,8 @@
 import binascii
 import time
 import json
+import os
+import stat
 import base64
 import socket
 import threading
@@ -674,7 +676,12 @@ an invalid settings attribute."
         for host in self.hosts:
             info[host.get_ip()] = {"mac": host.get_mac()}
         try:
-            with open(args.json_path, "w", encoding="utf-8") as f:
+            # Read and Write for owner (root)
+            fd: int = os.open(args.json_path,
+                              os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                              stat.S_IRUSR | stat.S_IWUSR)
+
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
                 f.write(base64.b64encode(str(info).encode()).decode())
         except (FileNotFoundError, IsADirectoryError) as e:
             IO.error(e)

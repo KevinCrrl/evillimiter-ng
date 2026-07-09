@@ -92,8 +92,8 @@ import-json my_network.json
 > 
 > **Base64 is NOT encryption (like PGP).** It only obfuscates sensitive data (local IPs, MAC addresses) so they aren't visible to the naked eye. **Any user or program can easily decode this file.**
 > 
-> * **Permissions:** The file is readable by all users, but write-protected (root only) to prevent corruption. 
-> * **Risk:** Even if a malicious user obtains root access, they cannot decrypt what was never encrypted, but they *can* corrupt or destroy the information. Do not rely on this file for confidentiality.
+> * **Permissions:** The file is read-proctected and write-protected (root only) to prevent corruption. 
+> * **Risk:** Even if a malicious user obtains root access, they cannot decrypt what was never encrypted, but they *can* read, corrupt or destroy the information. Do not rely on this file for confidentiality.
 
 #### Command-Line Arguments
 
