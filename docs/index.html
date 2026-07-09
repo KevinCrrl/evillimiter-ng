@@ -36,6 +36,12 @@
     <p>This list includes most of the major changes made and the version in which they were implemented. You can use
         this list as a changelog without needing to access the GitHub repository.</p>
     <ul>
+        <li><b>Several cleanups: </b>Deleting code that: not used, is obsolete, can be replaced by modern libraries, can
+            introduce vulnerabilities, etc. (ALL versions)</li><br>
+        <li><b>Save scans in JSON files: </b>Export/Import JSON files containing IPs and MACs encoded in base64.
+            (Warning: Not encryption) (Version 2.4.0 - 2.4.2)</li><br>
+        <li><b>Remove --flush argument: </b>Automatic flush when qdisc creation fails. (Version 2.4.0 - 2.4.2)</li><br>
+        <li><b>Migration to hatchling: </b>Migrating from setuptools to hatchling (Version 2.4.0)</li><br>
         <li><b>PyPi releases: </b>Package available on PyPi starting with: (Version 2.3.2)</li><br>
         <li><b>Migration from netifaces to netifaces-2: </b>Upgraded the core networking dependency to improve library
             compatibility and system stability. (Version 2.3.0)</li><br>
