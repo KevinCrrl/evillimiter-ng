@@ -31,12 +31,14 @@ pip install evillimiter-ng
 git clone https://github.com/KevinCrrl/evillimiter-ng.git
 cd evillimiter-ng
 
-# Arch-based systems (or using the AUR: https://aur.archlinux.org/packages/evillimiter-ng)
+## Arch-based systems (or using the AUR: https://aur.archlinux.org/packages/evillimiter-ng)
 cd pkgbuild
 makepkg -si
 
-# Other GNU/Linux distros using a virtual env
-python -m build
+## Other GNU/Linux distros using a virtual env
+python -m build # Using python3-build
+hatch build # Using hatch CLI
+
 python -m installer dist/*.whl
 
 # or without pypi, just with pip
@@ -66,12 +68,32 @@ scan
 limit 3 200kbit
 ```
 
-## Example of a single-use command in the shell
+### Example of a single-use command in the shell
 
 ```bash
 # Scan the network, list hosts, block everyone for 20 seconds, and then restore connection.
 echo "scan && hosts && block all && sleep 20 && free all && exit" | evillimiter-ng
 ```
+
+### Exporting/Importing a JSON file to save scans
+
+```bash
+# Scan the network, and save the results in a JSON file encoded in base64
+scan && export-json my_network.json
+```
+
+With it, you can restore these results without a new scan in a future session:
+
+```bash
+import-json my_network.json
+```
+
+> 🛑 **CRITICAL SECURITY WARNING**
+> 
+> **Base64 is NOT encryption (like PGP).** It only obfuscates sensitive data (local IPs, MAC addresses) so they aren't visible to the naked eye. **Any user or program can easily decode this file.**
+> 
+> * **Permissions:** The file is readable by all users, but write-protected (root only) to prevent corruption. 
+> * **Risk:** Even if a malicious user obtains root access, they cannot decrypt what was never encrypted, but they *can* corrupt or destroy the information. Do not rely on this file for confidentiality.
 
 #### Command-Line Arguments
 
