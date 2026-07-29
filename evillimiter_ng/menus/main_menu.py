@@ -37,8 +37,9 @@ class MainMenu:
         self.parser = ArgumentParser()
         self._active = False
         self.subp = self.parser.add_subparsers()
-        self.subp.add_parser("clear", self._clear_handler, [
+        clearp = self.subp.add_parser("clear", self._clear_handler, [
             "clear", "clears the terminal window."])
+        clearp.set_defaults(func=self._clear_handler)
 
         self.subp.add_parser("hosts", self._hosts_handler, [
             "hosts", "lists all scanned hosts.\ncontains host information, \
@@ -144,10 +145,6 @@ changes reconnect watch settings.\ne.g.: watch set interval \
 
         self.subp.add_parser("help", self._help_handler, [
                                   "help", "Shows this help."])
-        self.subp.add_parser("?", self._help_handler, [
-                                  "?", "Shows this help."])
-        self.subp.add_parser("quit", self._quit_handler, [
-                                  "quit", "quits the application."])
         self.subp.add_parser("exit", self._quit_handler, [
                                   "exit", "quits the application."])
 
