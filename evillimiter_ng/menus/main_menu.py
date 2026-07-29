@@ -9,6 +9,7 @@ import stat
 import base64
 import socket
 import threading
+from argparse import ArgumentParser
 from shlex import split
 import netaddr
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -28,22 +29,22 @@ from evillimiter_ng.networking.spoof import ARPSpoofer
 from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
 from evillimiter_ng.networking.monitor import BandwidthMonitor
 from evillimiter_ng.networking.watch import HostWatcher
-from .parser import CommandParser
 
 
 class MainMenu:
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         self.prompt = ">>> "
-        self.parser = CommandParser()
+        self.parser = ArgumentParser()
         self._active = False
-        self.parser.add_subparser("clear", self._clear_handler, [
+        self.subp = self.parser.add_subparsers()
+        self.subp.add_parser("clear", self._clear_handler, [
             "clear", "clears the terminal window."])
 
-        self.parser.add_subparser("hosts", self._hosts_handler, [
+        self.subp.add_parser("hosts", self._hosts_handler, [
             "hosts", "lists all scanned hosts.\ncontains host information, \
 including IDs."])
 
-        scan_parser = self.parser.add_subparser("scan", self._scan_handler, [
+        scan_parser = self.subp.add_parser("scan", self._scan_handler, [
             "scan (--range [IP range])\n(--intensity [(1,2,3)])",
             "scans for online hosts on your network.\nrequired to \
 find the hosts you want to limit.\ne.g.: scan\nscan --range \
@@ -52,7 +53,7 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
         scan_parser.add_parameterized_flag("--range", "iprange")
         scan_parser.add_parameterized_flag("--intensity", "intensity")
 
-        limit_parser = self.parser.add_subparser(
+        limit_parser = self.subp.add_parser(
             "limit", self._limit_handler, ["limit [ID1,ID2,...] [rate]\n\
 (--upload) (--download)", "limits bandwith of host(s) \
 (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
@@ -62,7 +63,7 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
         limit_parser.add_flag("--upload", "upload")
         limit_parser.add_flag("--download", "download")
 
-        block_parser = self.parser.add_subparser(
+        block_parser = self.subp.add_parser(
             "block", self._block_handler, ["block [ID1,ID2,...]\n\
 (--upload) (--download)", "blocks internet access of \
 host(s).\ne.g.: block 3,2\nblock all --upload"])
@@ -70,12 +71,12 @@ host(s).\ne.g.: block 3,2\nblock all --upload"])
         block_parser.add_flag("--upload", "upload")
         block_parser.add_flag("--download", "download")
 
-        free_parser = self.parser.add_subparser("free", self._free_handler, [
+        free_parser = self.subp.add_parser("free", self._free_handler, [
             "free [ID1,ID2,...]",
             "unlimits/unblocks host(s).\ne.g.: free 3\nfree all"])
         free_parser.add_parameter("id")
 
-        add_parser = self.parser.add_subparser("add", self._add_handler, [
+        add_parser = self.subp.add_parser("add", self._add_handler, [
             "add [IP] (--mac [MAC])",
             "adds custom host to host list.\nmac resolved automatically.\n\
 e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
@@ -83,7 +84,7 @@ e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
         add_parser.add_parameter("ip")
         add_parser.add_parameterized_flag("--mac", "mac")
 
-        import_parser = self.parser.add_subparser(
+        import_parser = self.subp.add_parser(
             "import-json", self._import_handler, [
                 "import-json [JSON FILE PATH]",
                 "Import a JSON file containing IP addresses and MAC \
@@ -91,7 +92,7 @@ addresses encoded in base64."
             ])
         import_parser.add_parameter("json_path")
 
-        export_parser = self.parser.add_subparser(
+        export_parser = self.subp.add_parser(
             "export-json", self._export_handler, [
                 "export-json [JSON FILE PATH]",
                 "Export a JSON file containing IP addresses and MAC \
@@ -100,14 +101,14 @@ addresses encoded in base64."
         )
         export_parser.add_parameter("json_path")
 
-        monitor_parser = self.parser.add_subparser(
+        monitor_parser = self.subp.add_parser(
             "monitor", self._monitor_handler, ["monitor [ID1,ID2,...]\n\
 (--interval [time in ms])", "monitors bandwidth usage of \
 host(s).\ne.g.: monitor all --interval 600"])
         monitor_parser.add_parameter("id")
         monitor_parser.add_parameterized_flag("--interval", "interval")
 
-        analyze_parser = self.parser.add_subparser(
+        analyze_parser = self.subp.add_parser(
             "analyze", self._analyze_handler, ["analyze [ID1,ID2,...]\n\
 (--duration [time in s])", "analyzes traffic of host(s) \
 without limiting\nto determine who uses how much bandwidth.\
@@ -115,39 +116,39 @@ without limiting\nto determine who uses how much bandwidth.\
         analyze_parser.add_parameter("id")
         analyze_parser.add_parameterized_flag("--duration", "duration")
 
-        watch_parser = self.parser.add_subparser(
+        watch_parser = self.subp.add_parser(
             "watch", self._watch_handler, ["watch", "detects host \
 reconnects with different IP."])
 
-        watch_add_parser = watch_parser.add_subparser(
+        watch_add_parser = watch_parser.add_parser(
             "add", self._watch_add_handler, ["watch add [ID1,ID2,...]", "\
 adds host to the reconnection watchlist.\ne.g.: watch add 3,4"])
         watch_add_parser.add_parameter("id")
 
-        watch_remove_parser = watch_parser.add_subparser(
+        watch_remove_parser = watch_parser.add_parser(
             "remove", self._watch_remove_handler, ["watch remove [ID1,ID2,...]\
 ", "removes host from the reconnection watchlist.\ne.g.: watch \
 remove all"])
         watch_remove_parser.add_parameter("id")
 
-        watch_set_parser = watch_parser.add_subparser(
+        watch_set_parser = watch_parser.add_parser(
             "set", self._watch_set_handler, ["watch set [attr] [value]", "\
 changes reconnect watch settings.\ne.g.: watch set interval \
 120\nwatch set intensity 1"])
         watch_set_parser.add_parameter("attribute")
         watch_set_parser.add_parameter("value")
 
-        sleep_parser = self.parser.add_subparser(
+        sleep_parser = self.subp.add_parser(
             "sleep", self._sleep_handler, ["sleep", "Waits for <n> seconds"])
         sleep_parser.add_parameter("seconds")
 
-        self.parser.add_subparser("help", self._help_handler, [
+        self.subp.add_parser("help", self._help_handler, [
                                   "help", "Shows this help."])
-        self.parser.add_subparser("?", self._help_handler, [
+        self.subp.add_parser("?", self._help_handler, [
                                   "?", "Shows this help."])
-        self.parser.add_subparser("quit", self._quit_handler, [
+        self.subp.add_parser("quit", self._quit_handler, [
                                   "quit", "quits the application."])
-        self.parser.add_subparser("exit", self._quit_handler, [
+        self.subp.add_parser("exit", self._quit_handler, [
                                   "exit", "quits the application."])
 
         self.version = version  # application version
@@ -198,7 +199,7 @@ changes reconnect watch settings.\ne.g.: watch set interval \
 
             # split command and parse the split subcommands by spaces
             for subcommand in command.split("&&"):
-                self.parser.parse(split(subcommand.strip()))
+                self.subp.parse(split(subcommand.strip()))
 
     def stop(self):
         """
@@ -675,8 +676,9 @@ an invalid settings attribute."
     def _export_handler(self, args):
         write: bool = True
         if os.path.exists(args.json_path):
-            write = yes_no_dialog(title="There is already a file with that path and name.",
-                                  text="Want to overwrite the file?").run()
+            write = yes_no_dialog(
+                            "There is already a file with that path and name.",
+                            "Want to overwrite the file?").run()
 
         if write:
             info: dict = {}
@@ -751,7 +753,7 @@ be corrupted.")
         Handles 'help' command-line argument
         Prints help message including commands and usage
         """
-        IO.print(self.parser.return_table())
+        IO.print(self.parser.print_help())
 
     def _quit_handler(self, args):
         self.interrupt_handler(False)
