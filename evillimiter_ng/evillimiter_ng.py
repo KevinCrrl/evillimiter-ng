@@ -152,9 +152,9 @@ def initialize(interface):
         netutils.flush_network_settings(interface)
         IO.ok("Flushed network settings\n")
         if not netutils.create_qdisc_root(interface):
-            IO.error("""The qdisc root handle could not be created even after the flush,
-your system may need to be restarted if you updated a critical
-low-level component such as the kernel.""")
+            IO.error("""The qdisc root handle could not be created even after
+the flush, your system may need to be restarted if you
+updated a critical low-level component such as the kernel.""")
             return False
 
     if not netutils.enable_ip_forwarding():
