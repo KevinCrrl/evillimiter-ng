@@ -37,116 +37,119 @@ class MainMenu:
         self.parser = ArgumentParser()
         self._active = False
         self.subp = self.parser.add_subparsers()
-        clearp = self.subp.add_parser("clear", self._clear_handler, [
-            "clear", "clears the terminal window."])
-        clearp.set_defaults(func=self._clear_handler)
+        clear_p = self.subp.add_parser(
+            "clear", help="clears the terminal window.")
+        clear_p.set_defaults(func=self._clear_handler)
 
-        self.subp.add_parser("hosts", self._hosts_handler, [
-            "hosts", "lists all scanned hosts.\ncontains host information, \
-including IDs."])
+        hosts_p = self.subp.add_parser(
+            "hosts", help="lists all scanned hosts.\ncontains host \
+information, including IDs.")
+        hosts_p.set_defaults(func=self._hosts_handler)
 
-        scan_parser = self.subp.add_parser("scan", self._scan_handler, [
-            "scan (--range [IP range])\n(--intensity [(1,2,3)])",
-            "scans for online hosts on your network.\nrequired to \
+        scan_parser = self.subp.add_parser(
+            "scan", help="scan (--range [IP range])\n(--intensity [(1,2,3)])\n\
+scans for online hosts on your network.\nrequired to \
 find the hosts you want to limit.\ne.g.: scan\nscan --range \
 192.168.178.1-192.168.178.50\nscan --range 192.168.178.1/24 \
---intensity 3"])
-        scan_parser.add_parameterized_flag("--range", "iprange")
-        scan_parser.add_parameterized_flag("--intensity", "intensity")
+--intensity 3")
+        scan_parser.add_argument("-r", "--range")
+        scan_parser.add_argument("-i", "--intensity")
+        scan_parser.set_defaults(func=self._scan_handler)
 
         limit_parser = self.subp.add_parser(
-            "limit", self._limit_handler, ["limit [ID1,ID2,...] [rate]\n\
-(--upload) (--download)", "limits bandwith of host(s) \
+            "limit", self._limit_handler, help="limits bandwith of host(s) \
 (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
---download\nlimit all 200kbit --upload"])
-        limit_parser.add_parameter("id")
-        limit_parser.add_parameter("rate")
-        limit_parser.add_flag("--upload", "upload")
-        limit_parser.add_flag("--download", "download")
+--download\nlimit all 200kbit --upload")
+        limit_parser.add_argument("id")
+        limit_parser.add_argument("rate")
+        limit_parser.add_argument("-u", "--upload")
+        limit_parser.add_argument("-d", "--download")
+        limit_parser.set_defaults(func=self._limit_handler)
 
         block_parser = self.subp.add_parser(
-            "block", self._block_handler, ["block [ID1,ID2,...]\n\
-(--upload) (--download)", "blocks internet access of \
-host(s).\ne.g.: block 3,2\nblock all --upload"])
-        block_parser.add_parameter("id")
-        block_parser.add_flag("--upload", "upload")
-        block_parser.add_flag("--download", "download")
+            "block", help="blocks internet access of \
+host(s).\ne.g.: block 3,2\nblock all --upload")
+        block_parser.add_argument("id")
+        block_parser.add_argument("-u", "--upload")
+        block_parser.add_argument("-d", "--download")
+        block_parser.set_defaults(func=self._block_handler)
 
-        free_parser = self.subp.add_parser("free", self._free_handler, [
-            "free [ID1,ID2,...]",
-            "unlimits/unblocks host(s).\ne.g.: free 3\nfree all"])
-        free_parser.add_parameter("id")
+        free_parser = self.subp.add_parser(
+            "free",
+            help="unlimits/unblocks host(s).\ne.g.: free 3,2\nfree all")
+        free_parser.add_argument("id")
+        free_parser.set_defaults(func=self._free_handler)
 
-        add_parser = self.subp.add_parser("add", self._add_handler, [
-            "add [IP] (--mac [MAC])",
-            "adds custom host to host list.\nmac resolved automatically.\n\
+        add_parser = self.subp.add_parser(
+            "add", help="adds custom host to host list.\n\
+mac resolved automatically.\n\
 e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
-1c:fc:bc:2d:a6:37"])
-        add_parser.add_parameter("ip")
-        add_parser.add_parameterized_flag("--mac", "mac")
+1c:fc:bc:2d:a6:37")
+        add_parser.add_argument("ip")
+        add_parser.add_argument("-m", "--mac")
+        add_parser.set_defaults(func=self._add_handler)
 
         import_parser = self.subp.add_parser(
-            "import-json", self._import_handler, [
-                "import-json [JSON FILE PATH]",
-                "Import a JSON file containing IP addresses and MAC \
-addresses encoded in base64."
-            ])
-        import_parser.add_parameter("json_path")
+            "import-json", help="Import a JSON file containing IP addresses \
+and MAC \addresses encoded in base64.")
+        import_parser.add_argument("json_path")
+        import_parser.set_defaults(func=self._import_handler)
 
         export_parser = self.subp.add_parser(
-            "export-json", self._export_handler, [
-                "export-json [JSON FILE PATH]",
-                "Export a JSON file containing IP addresses and MAC \
-addresses encoded in base64."
-            ]
-        )
-        export_parser.add_parameter("json_path")
+            "export-json", help="Export a JSON file containing IP addresses \
+and MAC addresses encoded in base64.")
+        export_parser.add_argument("json_path")
+        export_parser.set_defaults(func=self._export_handler)
 
         monitor_parser = self.subp.add_parser(
-            "monitor", self._monitor_handler, ["monitor [ID1,ID2,...]\n\
-(--interval [time in ms])", "monitors bandwidth usage of \
-host(s).\ne.g.: monitor all --interval 600"])
-        monitor_parser.add_parameter("id")
-        monitor_parser.add_parameterized_flag("--interval", "interval")
+            "monitor", help="monitors bandwidth usage of \
+host(s).\ne.g.: monitor all --interval 600")
+        monitor_parser.add_argument("id")
+        monitor_parser.add_argument("-i", "--interval")
+        monitor_parser.set_defaults(func=self._monitor_handler)
 
         analyze_parser = self.subp.add_parser(
-            "analyze", self._analyze_handler, ["analyze [ID1,ID2,...]\n\
-(--duration [time in s])", "analyzes traffic of host(s) \
+            "analyze", help="analyzes traffic of host(s) \
 without limiting\nto determine who uses how much bandwidth.\
-\ne.g.: analyze 2,3 --duration 120"])
-        analyze_parser.add_parameter("id")
-        analyze_parser.add_parameterized_flag("--duration", "duration")
+\ne.g.: analyze 2,3 --duration 120")
+        analyze_parser.add_argument("id")
+        analyze_parser.add_argument("-d", "--duration")
+        analyze_parser.set_defaults(func=self._analyze_handler)
 
         watch_parser = self.subp.add_parser(
-            "watch", self._watch_handler, ["watch", "detects host \
-reconnects with different IP."])
+            "watch", help="detects host reconnects with different IP.")
+        watch_parser.set_defaults(func=self._watch_handler)
 
-        watch_add_parser = watch_parser.add_parser(
-            "add", self._watch_add_handler, ["watch add [ID1,ID2,...]", "\
-adds host to the reconnection watchlist.\ne.g.: watch add 3,4"])
-        watch_add_parser.add_parameter("id")
+        watch_sub = watch_parser.add_subparsers()
 
-        watch_remove_parser = watch_parser.add_parser(
-            "remove", self._watch_remove_handler, ["watch remove [ID1,ID2,...]\
-", "removes host from the reconnection watchlist.\ne.g.: watch \
-remove all"])
-        watch_remove_parser.add_parameter("id")
+        watch_add_parser = watch_sub.add_parser(
+            "add", help="adds host to the reconnection watchlist.\ne.g.: \
+watch add 3,4")
+        watch_add_parser.add_argument("id")
+        watch_add_parser.set_defaults(func=self._watch_add_handler)
 
-        watch_set_parser = watch_parser.add_parser(
-            "set", self._watch_set_handler, ["watch set [attr] [value]", "\
-changes reconnect watch settings.\ne.g.: watch set interval \
-120\nwatch set intensity 1"])
-        watch_set_parser.add_parameter("attribute")
-        watch_set_parser.add_parameter("value")
+        watch_remove_parser = watch_sub.add_parser(
+            "remove", help="removes host from the reconnection watchlist.\n\
+e.g.: watch remove all")
+        watch_remove_parser.add_argument("id")
+        watch_remove_parser.set_defaults(func=self._watch_remove_handler)
+
+        watch_set_parser = watch_sub.add_parser(
+            "set", help="changes reconnect watch settings.\ne.g.: watch set \
+interval 120\nwatch set intensity 1")
+        watch_set_parser.add_argument("attribute")
+        watch_set_parser.add_argument("value")
+        watch_set_parser.set_defaults(func=self._watch_set_handler)
 
         sleep_parser = self.subp.add_parser(
-            "sleep", self._sleep_handler, ["sleep", "Waits for <n> seconds"])
-        sleep_parser.add_parameter("seconds")
+            "sleep", help="Waits for <n> seconds")
+        sleep_parser.add_argument("seconds")
+        sleep_parser.set_defaults(func=self._sleep_handler)
 
-        self.subp.add_parser("help", self._help_handler, [
-                                  "help", "Shows this help."])
-        self.subp.add_parser("exit", self._quit_handler, [
-                                  "exit", "quits the application."])
+        help_p = self.subp.add_parser("help", help="Shows this help.")
+        help_p.set_defaults(func=self._help_handler)
+        exit_p = self.subp.add_parser("exit", help="quits the application.")
+        exit_p.set_defaults(func=self._help_handler)
 
         self.version = version  # application version
         self.interface = interface  # specified IPv4 interface
