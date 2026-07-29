@@ -9,7 +9,7 @@ import stat
 import base64
 import socket
 import threading
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentError
 from shlex import split
 import netaddr
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -34,7 +34,7 @@ from evillimiter_ng.networking.watch import HostWatcher
 class MainMenu:
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         self.prompt = ">>> "
-        self.parser = ArgumentParser()
+        self.parser = ArgumentParser(exit_on_error=False)
         self._active = False
         self.subp = self.parser.add_subparsers()
         clear_p = self.subp.add_parser(
@@ -57,7 +57,7 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
         scan_parser.set_defaults(func=self._scan_handler)
 
         limit_parser = self.subp.add_parser(
-            "limit", self._limit_handler, help="limits bandwith of host(s) \
+            "limit", help="limits bandwith of host(s) \
 (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
 --download\nlimit all 200kbit --upload")
         limit_parser.add_argument("id")
@@ -149,7 +149,7 @@ interval 120\nwatch set intensity 1")
         help_p = self.subp.add_parser("help", help="Shows this help.")
         help_p.set_defaults(func=self._help_handler)
         exit_p = self.subp.add_parser("exit", help="quits the application.")
-        exit_p.set_defaults(func=self._help_handler)
+        exit_p.set_defaults(func=self._exit_handler)
 
         self.version = version  # application version
         self.interface = interface  # specified IPv4 interface
@@ -199,13 +199,15 @@ interval 120\nwatch set intensity 1")
 
             # split command and parse the split subcommands by spaces
             for subcommand in command.split("&&"):
-                self.subp.parse(split(subcommand.strip()))
-
-    def stop(self):
-        """
-        Breaks the menu input loop
-        """
-        self._active = False
+                try:
+                    try:
+                        args = self.parser.parse_args(
+                            split(subcommand.strip()))
+                        args.func(args)
+                    except ArgumentError:
+                        self.parser.print_help()
+                except SystemExit:
+                    pass
 
     def interrupt_handler(self, ctrl_c=True):
         if ctrl_c:
@@ -224,7 +226,7 @@ interval 120\nwatch set intensity 1")
         Handles 'scan' command-line argument
         (Re)scans for hosts on the network
         """
-        if args.iprange:
+        if args.range:
             iprange = self._parse_iprange(args.iprange)
             if iprange is None:
                 IO.error("invalid ip range.")
@@ -546,7 +548,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
         IO.console.print(Columns([up_panel, down_panel]))
 
     def _watch_handler(self, args):
-        if len(args) == 0:
+        if len(args.__dict__) == 1:
             watch_table_data = [
                 f"{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}",
                 f"{IO.BOLD_LIGHT}IP address{IO.END_BOLD_LIGHT}",
@@ -669,7 +671,7 @@ an invalid settings attribute."
 
     def _sleep_handler(self, args):
         try:
-            time.sleep(float(args[0]))
+            time.sleep(float(args.seconds))
         except ValueError:
             IO.error("Seconds must be an int or float")
 
@@ -753,11 +755,11 @@ be corrupted.")
         Handles 'help' command-line argument
         Prints help message including commands and usage
         """
-        IO.print(self.parser.print_help())
+        self.parser.print_help()
 
-    def _quit_handler(self, args):
+    def _exit_handler(self, args):
         self.interrupt_handler(False)
-        self.stop()
+        self._active = False
 
     def _get_host_id(self, host, lock=True):
         ret = None
