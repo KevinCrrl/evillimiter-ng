@@ -9,7 +9,7 @@ import stat
 import base64
 import socket
 import threading
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser, ArgumentError, RawTextHelpFormatter
 from shlex import split
 import netaddr
 from prompt_toolkit.shortcuts import yes_no_dialog
@@ -34,21 +34,23 @@ from evillimiter_ng.networking.watch import HostWatcher
 class MainMenu:
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
         self.prompt = ">>> "
-        self.parser = ArgumentParser(exit_on_error=False)
+        self.parser = ArgumentParser(
+            prog="",  # Empty prog because it is a REPL, not a CLI
+            exit_on_error=False, formatter_class=RawTextHelpFormatter)
         self._active = False
         self.subp = self.parser.add_subparsers()
         clear_p = self.subp.add_parser(
-            "clear", help="clears the terminal window.")
+            "clear", help="Clears the terminal window.")
         clear_p.set_defaults(func=self._clear_handler)
 
         hosts_p = self.subp.add_parser(
-            "hosts", help="lists all scanned hosts.\ncontains host \
+            "hosts", help="Lists all scanned hosts.\ncontains host \
 information, including IDs.")
         hosts_p.set_defaults(func=self._hosts_handler)
 
         scan_parser = self.subp.add_parser(
-            "scan", help="scan (--range [IP range])\n(--intensity [(1,2,3)])\n\
-scans for online hosts on your network.\nrequired to \
+            "scan", help="scan (--range [IP range]) (--intensity [(1,2,3)])\n\
+Scans for online hosts on your network.\nrequired to \
 find the hosts you want to limit.\ne.g.: scan\nscan --range \
 192.168.178.1-192.168.178.50\nscan --range 192.168.178.1/24 \
 --intensity 3")
@@ -57,7 +59,7 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
         scan_parser.set_defaults(func=self._scan_handler)
 
         limit_parser = self.subp.add_parser(
-            "limit", help="limits bandwith of host(s) \
+            "limit", help="Limits bandwith of host(s) \
 (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
 --download\nlimit all 200kbit --upload")
         limit_parser.add_argument("id")
@@ -67,7 +69,7 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
         limit_parser.set_defaults(func=self._limit_handler)
 
         block_parser = self.subp.add_parser(
-            "block", help="blocks internet access of \
+            "block", help="Blocks internet access of \
 host(s).\ne.g.: block 3,2\nblock all --upload")
         block_parser.add_argument("id")
         block_parser.add_argument("-u", "--upload")
@@ -76,12 +78,12 @@ host(s).\ne.g.: block 3,2\nblock all --upload")
 
         free_parser = self.subp.add_parser(
             "free",
-            help="unlimits/unblocks host(s).\ne.g.: free 3,2\nfree all")
+            help="Unlimits/Unblocks host(s).\ne.g.: free 3,2\nfree all")
         free_parser.add_argument("id")
         free_parser.set_defaults(func=self._free_handler)
 
         add_parser = self.subp.add_parser(
-            "add", help="adds custom host to host list.\n\
+            "add", help="Adds custom host to host list.\n\
 mac resolved automatically.\n\
 e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
 1c:fc:bc:2d:a6:37")
@@ -91,25 +93,25 @@ e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
 
         import_parser = self.subp.add_parser(
             "import-json", help="Import a JSON file containing IP addresses \
-and MAC \addresses encoded in base64.")
+and MAC \addresses encoded in base64.\ne.g.: import-json /root/hosts.json")
         import_parser.add_argument("json_path")
         import_parser.set_defaults(func=self._import_handler)
 
         export_parser = self.subp.add_parser(
             "export-json", help="Export a JSON file containing IP addresses \
-and MAC addresses encoded in base64.")
+and MAC addresses encoded in base64.\ne.g.: export-json /root/hosts.json")
         export_parser.add_argument("json_path")
         export_parser.set_defaults(func=self._export_handler)
 
         monitor_parser = self.subp.add_parser(
-            "monitor", help="monitors bandwidth usage of \
+            "monitor", help="Monitors bandwidth usage of \
 host(s).\ne.g.: monitor all --interval 600")
         monitor_parser.add_argument("id")
         monitor_parser.add_argument("-i", "--interval")
         monitor_parser.set_defaults(func=self._monitor_handler)
 
         analyze_parser = self.subp.add_parser(
-            "analyze", help="analyzes traffic of host(s) \
+            "analyze", help="Analyzes traffic of host(s) \
 without limiting\nto determine who uses how much bandwidth.\
 \ne.g.: analyze 2,3 --duration 120")
         analyze_parser.add_argument("id")
@@ -117,25 +119,26 @@ without limiting\nto determine who uses how much bandwidth.\
         analyze_parser.set_defaults(func=self._analyze_handler)
 
         watch_parser = self.subp.add_parser(
-            "watch", help="detects host reconnects with different IP.")
+            "watch", help="Detects host reconnects with different IP.\n\
+Type watch --help to see the subcommands.")
         watch_parser.set_defaults(func=self._watch_handler)
 
         watch_sub = watch_parser.add_subparsers()
 
         watch_add_parser = watch_sub.add_parser(
-            "add", help="adds host to the reconnection watchlist.\ne.g.: \
+            "add", help="Adds host to the reconnection watchlist.\ne.g.: \
 watch add 3,4")
         watch_add_parser.add_argument("id")
         watch_add_parser.set_defaults(func=self._watch_add_handler)
 
         watch_remove_parser = watch_sub.add_parser(
-            "remove", help="removes host from the reconnection watchlist.\n\
+            "remove", help="Removes host from the reconnection watchlist.\n\
 e.g.: watch remove all")
         watch_remove_parser.add_argument("id")
         watch_remove_parser.set_defaults(func=self._watch_remove_handler)
 
         watch_set_parser = watch_sub.add_parser(
-            "set", help="changes reconnect watch settings.\ne.g.: watch set \
+            "set", help="Changes reconnect watch settings.\ne.g.: watch set \
 interval 120\nwatch set intensity 1")
         watch_set_parser.add_argument("attribute")
         watch_set_parser.add_argument("value")
@@ -148,7 +151,7 @@ interval 120\nwatch set intensity 1")
 
         help_p = self.subp.add_parser("help", help="Shows this help.")
         help_p.set_defaults(func=self._help_handler)
-        exit_p = self.subp.add_parser("exit", help="quits the application.")
+        exit_p = self.subp.add_parser("exit", help="Quits the application.")
         exit_p.set_defaults(func=self._exit_handler)
 
         self.version = version  # application version
@@ -205,6 +208,7 @@ interval 120\nwatch set intensity 1")
                             split(subcommand.strip()))
                         args.func(args)
                     except ArgumentError:
+                        IO.error("Invalid command.")
                         self.parser.print_help()
                 except SystemExit:
                     pass
@@ -227,7 +231,7 @@ interval 120\nwatch set intensity 1")
         (Re)scans for hosts on the network
         """
         if args.range:
-            iprange = self._parse_iprange(args.iprange)
+            iprange = self._parse_iprange(args.range)
             if iprange is None:
                 IO.error("invalid ip range.")
                 return
@@ -780,7 +784,7 @@ be corrupted.")
     def _print_help_reminder(self):
         IO.print(
             f"Type {IO.LIGHTYELLOW}help{IO.END_LIGHTYELLOW} or \
-{IO.LIGHTYELLOW}?{IO.END_LIGHTYELLOW} to show command \
+{IO.LIGHTYELLOW}-h{IO.END_LIGHTYELLOW} to show command \
 information."
         )
 
