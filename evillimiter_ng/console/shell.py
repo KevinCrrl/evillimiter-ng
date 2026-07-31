@@ -19,6 +19,12 @@ def execute_suppressed(command):
     ).returncode
 
 
+def execute_output(command):
+    return subprocess.run(
+        command, check=False, capture_output=True, text=True
+    ).stdout
+
+
 def locate_bin(name):
     search_bin = which(name)
     return search_bin if search_bin is not None else IO.error(f"missing util: \

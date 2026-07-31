@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import threading
+import json
 
 from evillimiter_ng.console import shell
-from evillimiter_ng.common.globals import BIN_TC, BIN_IPTABLES
+from evillimiter_ng.common.globals import BIN_TC, BIN_NFT
 from evillimiter_ng.console.io import IO
 
 
@@ -71,17 +72,20 @@ class Limiter:
             # marks outgoing packets
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "mangle",
-                    "-A",
+                    BIN_NFT,
+                    "add",
+                    "rule",
+                    "ip",
+                    "eng",
                     "POSTROUTING",
-                    "-s",
+                    "ip",
+                    "saddr",
                     host.ip,
-                    "-j",
-                    "MARK",
-                    "--set-mark",
-                    str(host_ids.upload_id),
+                    "counter",
+                    "meta",
+                    "mark",
+                    "set",
+                    hex(host_ids.upload_id),
                 ]
             )
         if (direction & Direction.INCOMING) == Direction.INCOMING:
@@ -129,17 +133,20 @@ class Limiter:
             # marks incoming packets
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "mangle",
-                    "-A",
+                    BIN_NFT,
+                    "add",
+                    "rule",
+                    "ip",
+                    "eng",
                     "PREROUTING",
-                    "-d",
+                    "ip",
+                    "daddr",
                     host.ip,
-                    "-j",
-                    "MARK",
-                    "--set-mark",
-                    str(host_ids.download_id),
+                    "counter",
+                    "meta",
+                    "mark",
+                    "set",
+                    hex(host_ids.download_id),
                 ]
             )
 
@@ -159,30 +166,34 @@ class Limiter:
             # drops forwarded packets with matching source
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "filter",
-                    "-A",
+                    BIN_NFT,
+                    "add",
+                    "rule",
+                    "ip",
+                    "eng",
                     "FORWARD",
-                    "-s",
+                    "ip",
+                    "saddr",
                     host.ip,
-                    "-j",
-                    "DROP",
+                    "counter",
+                    "drop",
                 ]
             )
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             # drops forwarded packets with matching destination
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "filter",
-                    "-A",
+                    BIN_NFT,
+                    "add",
+                    "rule",
+                    "ip",
+                    "eng",
                     "FORWARD",
-                    "-d",
+                    "ip",
+                    "daddr",
                     host.ip,
-                    "-j",
-                    "DROP",
+                    "counter",
+                    "drop",
                 ]
             )
 
@@ -204,12 +215,10 @@ class Limiter:
 
             if (direction & Direction.OUTGOING) == Direction.OUTGOING:
                 self._delete_tc_class(host_ids.upload_id)
-                self._delete_iptables_entries(
-                    host, direction, host_ids.upload_id)
+                self._delete_nftables_entries(host, direction)
             if (direction & Direction.INCOMING) == Direction.INCOMING:
                 self._delete_tc_class(host_ids.download_id)
-                self._delete_iptables_entries(
-                    host, direction, host_ids.download_id)
+                self._delete_nftables_entries(host, direction)
 
             del self._host_dict[host]
 
@@ -335,66 +344,83 @@ class Limiter:
             ]
         )
 
-    def _delete_iptables_entries(self, host, direction, id_):
+    def _delete_nftables_entries(self, host, direction):
         """
-        Deletes iptables rules for a given ID (host)
+        Deletes nftables rules for a given handle (host)
         """
+        nft_json: dict = json.loads(shell.execute_output(
+                ["nft", "-j", "-a", "list", "table", "ip", "eng"]))["nftables"]
+
+        def get_handle(subdict, addr, ip, chain) -> str:
+            if subdict["rule"]["expr"][0]["match"]["right"] == ip and\
+             subdict["rule"]["expr"][0]["match"]["left"]["payload"]["field"] == addr\
+             and subdict["rule"]["chain"] == chain:  # noqa
+                return subdict["rule"]["handle"]
+
+        for subdict in nft_json:
+            try:
+                forward_outgoing = get_handle(
+                    subdict, "saddr", host.ip, "FORWARD")
+
+                forward_incoming = get_handle(
+                    subdict, "daddr", host.ip, "FORWARD")
+
+                post_handle = get_handle(
+                    subdict, "saddr", host.ip, "POSTROUTING")
+
+                pre_handle = get_handle(
+                    subdict, "daddr", host.ip, "PREROUTING")
+            except KeyError:
+                pass
+        print(f"{forward_incoming}, {forward_outgoing}")
         if (direction & Direction.OUTGOING) == Direction.OUTGOING:
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "mangle",
-                    "-D",
+                    BIN_NFT,
+                    "delete",
+                    "rule",
+                    "ip",
+                    "eng",
                     "POSTROUTING",
-                    "-s",
-                    host.ip,
-                    "-j",
-                    "MARK",
-                    "--set-mark",
-                    str(id_),
+                    "handle",
+                    str(post_handle)
                 ]
             )
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "filter",
-                    "-D",
+                    BIN_NFT,
+                    "delete",
+                    "rule",
+                    "ip",
+                    "eng",
                     "FORWARD",
-                    "-s",
-                    host.ip,
-                    "-j",
-                    "DROP",
+                    "handle",
+                    str(forward_outgoing)
                 ]
             )
         if (direction & Direction.INCOMING) == Direction.INCOMING:
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "mangle",
-                    "-D",
+                    BIN_NFT,
+                    "delete",
+                    "rule",
+                    "ip",
+                    "eng",
                     "PREROUTING",
-                    "-d",
-                    host.ip,
-                    "-j",
-                    "MARK",
-                    "--set-mark",
-                    str(id_),
+                    "handle",
+                    str(pre_handle)
                 ]
             )
             shell.execute_suppressed(
                 [
-                    BIN_IPTABLES,
-                    "-t",
-                    "filter",
-                    "-D",
+                    BIN_NFT,
+                    "delete",
+                    "rule",
+                    "ip",
+                    "eng",
                     "FORWARD",
-                    "-d",
-                    host.ip,
-                    "-j",
-                    "DROP",
+                    "handle",
+                    str(forward_incoming)
                 ]
             )
 

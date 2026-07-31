@@ -8,7 +8,7 @@ from scapy.all import Ether, ARP, srp1  # pylint: disable=no-name-in-module
 from evillimiter_ng.console import shell
 from evillimiter_ng.common.globals import (
     BIN_TC,
-    BIN_IPTABLES,
+    BIN_NFT,
     BIN_SYSCTL,
     IP_FORWARD_LOC,
     BROADCAST,  # <-- Added this import
@@ -68,16 +68,7 @@ def flush_network_settings(interface):
     Flushes all iptable rules and traffic control entries
     related to the given interface
     """
-    # reset default policy
-    shell.execute_suppressed([BIN_IPTABLES, "-P", "INPUT", "ACCEPT"])
-    shell.execute_suppressed([BIN_IPTABLES, "-P", "OUTPUT", "ACCEPT"])
-    shell.execute_suppressed([BIN_IPTABLES, "-P", "FORWARD", "ACCEPT"])
-
-    # flush all chains in all tables (including user-defined)
-    shell.execute_suppressed([BIN_IPTABLES, "-t", "mangle", "-F"])
-    shell.execute_suppressed([BIN_IPTABLES, "-t", "nat", "-F"])
-    shell.execute_suppressed([BIN_IPTABLES, "-F"])
-    shell.execute_suppressed([BIN_IPTABLES, "-X"])
+    shell.execute_suppressed([BIN_NFT, "delete", "table", "eng"])
 
     # delete root qdisc for given interface
     shell.execute_suppressed(
@@ -92,7 +83,7 @@ def validate_mac_address(mac):
     return re.match(r"^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$", mac) is not None
 
 
-def create_qdisc_root(interface):
+def network_settings(interface):
     """
     Creates a root htb qdisc in traffic control for a given interface
     """
@@ -100,8 +91,18 @@ def create_qdisc_root(interface):
         shell.execute_suppressed(
             [BIN_TC, "qdisc", "add", "dev", interface,
                 "root", "handle", "1:0", "htb"]
-        )
-        == 0
+        ) == 0 and shell.execute_suppressed(
+            [BIN_NFT, "add", "table", "ip", "eng"]
+        ) == 0 and shell.execute_suppressed(
+            [BIN_NFT, "add", "chain", "ip", "eng", "FORWARD",
+             "{ type filter hook forward priority filter; policy accept; }"]
+        ) == 0 and shell.execute_suppressed(
+            [BIN_NFT, "add", "chain", "ip", "eng", "POSTROUTING",
+             "{ type filter hook postrouting priority mangle; policy accept; }"]  # noqa
+        ) == 0 and shell.execute_suppressed(
+            [BIN_NFT, "add", "chain", "ip", "eng", "PREROUTING",
+             "{ type filter hook prerouting priority mangle; policy accept; }"]
+        ) == 0
     )
 
 
