@@ -349,13 +349,19 @@ class Limiter:
         Deletes nftables rules for a given handle (host)
         """
         nft_json: dict = json.loads(shell.execute_output(
-                ["nft", "-j", "-a", "list", "table", "ip", "eng"]))["nftables"]
+            ["nft", "-j", "-a", "list", "table", "ip", "eng"]))["nftables"]
 
-        def get_handle(subdict, addr, ip, chain) -> str:
+        def get_handle(subdict, addr, ip, chain) -> str | None:
             if subdict["rule"]["expr"][0]["match"]["right"] == ip and\
              subdict["rule"]["expr"][0]["match"]["left"]["payload"]["field"] == addr\
              and subdict["rule"]["chain"] == chain:  # noqa
                 return subdict["rule"]["handle"]
+            return None
+
+        forward_incoming = ""
+        forward_outgoing = ""
+        post_handle = ""
+        pre_handle = ""
 
         for subdict in nft_json:
             try:
@@ -372,57 +378,57 @@ class Limiter:
                     subdict, "daddr", host.ip, "PREROUTING")
             except KeyError:
                 pass
-        print(f"{forward_incoming}, {forward_outgoing}")
-        if (direction & Direction.OUTGOING) == Direction.OUTGOING:
-            shell.execute_suppressed(
-                [
-                    BIN_NFT,
-                    "delete",
-                    "rule",
-                    "ip",
-                    "eng",
-                    "POSTROUTING",
-                    "handle",
-                    str(post_handle)
-                ]
-            )
-            shell.execute_suppressed(
-                [
-                    BIN_NFT,
-                    "delete",
-                    "rule",
-                    "ip",
-                    "eng",
-                    "FORWARD",
-                    "handle",
-                    str(forward_outgoing)
-                ]
-            )
-        if (direction & Direction.INCOMING) == Direction.INCOMING:
-            shell.execute_suppressed(
-                [
-                    BIN_NFT,
-                    "delete",
-                    "rule",
-                    "ip",
-                    "eng",
-                    "PREROUTING",
-                    "handle",
-                    str(pre_handle)
-                ]
-            )
-            shell.execute_suppressed(
-                [
-                    BIN_NFT,
-                    "delete",
-                    "rule",
-                    "ip",
-                    "eng",
-                    "FORWARD",
-                    "handle",
-                    str(forward_incoming)
-                ]
-            )
+
+            if (direction & Direction.OUTGOING) == Direction.OUTGOING:
+                shell.execute_suppressed(
+                    [
+                        BIN_NFT,
+                        "delete",
+                        "rule",
+                        "ip",
+                        "eng",
+                        "POSTROUTING",
+                        "handle",
+                        str(post_handle)
+                    ]
+                )
+                shell.execute_suppressed(
+                    [
+                        BIN_NFT,
+                        "delete",
+                        "rule",
+                        "ip",
+                        "eng",
+                        "FORWARD",
+                        "handle",
+                        str(forward_outgoing)
+                    ]
+                )
+            if (direction & Direction.INCOMING) == Direction.INCOMING:
+                shell.execute_suppressed(
+                    [
+                        BIN_NFT,
+                        "delete",
+                        "rule",
+                        "ip",
+                        "eng",
+                        "PREROUTING",
+                        "handle",
+                        str(pre_handle)
+                    ]
+                )
+                shell.execute_suppressed(
+                    [
+                        BIN_NFT,
+                        "delete",
+                        "rule",
+                        "ip",
+                        "eng",
+                        "FORWARD",
+                        "handle",
+                        str(forward_incoming)
+                    ]
+                )
 
 
 class Direction:

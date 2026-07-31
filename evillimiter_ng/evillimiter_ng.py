@@ -169,7 +169,7 @@ def cleanup(interface):
     """
     Resets what has been initialized
     """
-    netutils.delete_qdisc_root(interface)
+    netutils.delete_network_settings(interface)
     netutils.disable_ip_forwarding()
 
 

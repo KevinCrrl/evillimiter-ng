@@ -106,11 +106,13 @@ def network_settings(interface):
     )
 
 
-def delete_qdisc_root(interface):
+def delete_network_settings(interface):
     return shell.execute_suppressed(
         [BIN_TC, "qdisc", "del", "dev",
             interface, "root", "handle", "1:0", "htb"]
-    )
+    ) == 0 and shell.execute_suppressed(
+        [BIN_NFT, "delete", "table", "eng"]
+    ) == 0
 
 
 def enable_ip_forwarding():

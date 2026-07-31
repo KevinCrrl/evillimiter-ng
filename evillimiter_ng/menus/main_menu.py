@@ -64,16 +64,16 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
 --download\nlimit all 200kbit --upload")
         limit_parser.add_argument("id")
         limit_parser.add_argument("rate")
-        limit_parser.add_argument("-u", "--upload")
-        limit_parser.add_argument("-d", "--download")
+        limit_parser.add_argument("-u", "--upload", action="store_true")
+        limit_parser.add_argument("-d", "--download", action="store_true")
         limit_parser.set_defaults(func=self._limit_handler)
 
         block_parser = self.subp.add_parser(
             "block", help="Blocks internet access of \
 host(s).\ne.g.: block 3,2\nblock all --upload")
         block_parser.add_argument("id")
-        block_parser.add_argument("-u", "--upload")
-        block_parser.add_argument("-d", "--download")
+        block_parser.add_argument("-u", "--upload", action="store_true")
+        block_parser.add_argument("-d", "--download", action="store_true")
         block_parser.set_defaults(func=self._block_handler)
 
         free_parser = self.subp.add_parser(
@@ -210,6 +210,8 @@ interval 120\nwatch set intensity 1")
                     except ArgumentError:
                         IO.error("Invalid command.")
                         self.parser.print_help()
+                    except AttributeError:
+                        pass
                 except SystemExit:
                     pass
 
@@ -683,8 +685,8 @@ an invalid settings attribute."
         write: bool = True
         if os.path.exists(args.json_path):
             write = yes_no_dialog(
-                            "There is already a file with that path and name.",
-                            "Want to overwrite the file?").run()
+                "There is already a file with that path and name.",
+                "Want to overwrite the file?").run()
 
         if write:
             info: dict = {}
