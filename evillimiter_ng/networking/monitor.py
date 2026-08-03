@@ -21,7 +21,7 @@ class BandwidthMonitor:
             self._upload_temp_size = ByteValue()
             self._download_temp_size = ByteValue()
 
-    def __init__(self, interface, interval):
+    def __init__(self, interface):
         self.interface = interface
 
         self._host_result_dict = {}

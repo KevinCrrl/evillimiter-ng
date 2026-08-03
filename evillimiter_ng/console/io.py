@@ -5,6 +5,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import NestedCompleter
 from rich.console import Console
+from rich.table import Table
 
 from . import shell
 
@@ -23,7 +24,7 @@ class IO:
     session = PromptSession()
 
     @staticmethod
-    def print(text="", end="\n"):
+    def print(text: str | Table = "", end="\n"):
         """
         Writes a given string to the console.
         """

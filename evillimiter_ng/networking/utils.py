@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import re
-import netifaces
-from scapy.all import Ether, ARP, srp1  # pylint: disable=no-name-in-module
+import socket
+
+import psutil
+from scapy.all import Ether, ARP, srp1, conf  # pylint: disable=no-name-in-module # noqa
+from scapy.interfaces import get_if_list
 
 from evillimiter_ng.console import shell
 from evillimiter_ng.common.globals import (
@@ -19,27 +22,33 @@ def get_default_interface():
     """
     Returns the default IPv4 interface
     """
-    gateway = netifaces.default_gateway()
-    if netifaces.AF_INET in gateway:
-        return gateway[netifaces.AF_INET][1]
+    interfaces = psutil.net_if_addrs()
+    for interface, info in interfaces.items():
+        if interface == "lo":
+            continue
+
+        for snicaddr in info:
+            if snicaddr.family == socket.AF_INET and \
+                    snicaddr.broadcast is not None:
+                return interface
+    return None
 
 
 def get_default_gateway():
     """
     Returns the default IPv4 gateway address
     """
-    gateway = netifaces.default_gateway()
-    if netifaces.AF_INET in gateway:
-        return gateway[netifaces.AF_INET][0]
+    return conf.route.route("0.0.0.0")[2]
 
 
 def get_default_netmask(interface):
     """
     Returns the default IPv4 netmask associated to an interface
     """
-    ifaddrs = netifaces.ifaddresses(interface)
-    if netifaces.AF_INET in ifaddrs:
-        return ifaddrs[netifaces.AF_INET][0].get("mask")
+    for snicaddr in psutil.net_if_addrs()[interface]:
+        if snicaddr.family == socket.AF_INET:
+            return snicaddr.netmask
+    return None
 
 
 def get_mac_by_ip(interface, address):
@@ -60,13 +69,12 @@ def exists_interface(interface):
     """
     Determines whether or not a given interface exists
     """
-    return interface in netifaces.interfaces()
+    return interface in get_if_list()
 
 
 def flush_network_settings(interface):
     """
-    Flushes all iptable rules and traffic control entries
-    related to the given interface
+    Deletes eng table using nftables
     """
     shell.execute_suppressed([BIN_NFT, "delete", "table", "eng"])
 

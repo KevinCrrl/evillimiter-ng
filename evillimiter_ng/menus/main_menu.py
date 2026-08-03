@@ -168,7 +168,7 @@ interval 120\nwatch set intensity 1")
         self.arp_spoofer = ARPSpoofer(
             self.interface, self.gateway_ip, self.gateway_mac)
         self.limiter = Limiter(self.interface)
-        self.bandwidth_monitor = BandwidthMonitor(self.interface, 1)
+        self.bandwidth_monitor = BandwidthMonitor(self.interface)
         self.host_watcher = HostWatcher(
             self.interface, self.iprange, self._reconnect_callback
         )
@@ -849,7 +849,7 @@ information."
             if "-" in ip_range:
                 return list(netaddr.iter_iprange(*ip_range.split("-")))
             return list(netaddr.IPNetwork(ip_range))
-        except netaddr.core.AddrFormatError:
+        except netaddr.AddrFormatError:
             return
 
     def _parse_scan_intensity(self, value):
