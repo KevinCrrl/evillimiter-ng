@@ -14,38 +14,25 @@ jobs:
       contents: write
 
     steps:
-      - name: Install git (needed before checkout)
+      - name: Install git
         run: pacman -Sy --noconfirm git
 
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # importante para tags
+          fetch-depth: 0 # importante para tags
           persist-credentials: true
 
       - name: Update PKGBUILD version
         run: |
-          pacman -Syu --noconfirm base-devel pacman-contrib python nvchecker wget python-build python-installer python-wheel python-setuptools
-
-          mkdir python-pkgbuild-parser
-          cd python-pkgbuild-parser
-
-          wget https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=python-pkgbuild-parser -O PKGBUILD
-
-          useradd -m build_user
-          chown -R build_user:build_user .
-
-          su build_user -c "makepkg -c --noconfirm"
-          pacman -U *.zst --noconfirm
-
-          cd "$GITHUB_WORKSPACE"   # 🔥 VOLVER AL REPO
+          pacman -Syu --noconfirm pacman-contrib python nvchecker wget devtools
 
           wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/main.py
           wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/repo_bot.py
 
           chmod -R 777 .
 
-          su build_user -c "python main.py ."
+          su build_user -c "python main.py . log.txt -v"
 
           chown -R root:root .
 
