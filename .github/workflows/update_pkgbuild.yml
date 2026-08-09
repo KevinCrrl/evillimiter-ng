@@ -25,10 +25,11 @@ jobs:
 
       - name: Update PKGBUILD version
         run: |
-          pacman -Syu --noconfirm pacman-contrib python nvchecker wget devtools
+          pacman -Syu --noconfirm pacman-contrib python nvchecker wget devtools tar
 
-          wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/main.py
-          wget https://raw.githubusercontent.com/KevinCrrl/repo_bot/refs/heads/main/repo_bot.py
+          wget https://github.com/KevinCrrl/repo_bot/archive/refs/tags/1.tar.gz
+          tar -xvf 1.tar.gz
+          mv repo_bot-1/*.py .
 
           chmod -R 777 .
 
