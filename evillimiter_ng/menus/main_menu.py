@@ -104,9 +104,9 @@ and MAC addresses encoded in base64.\ne.g.: export-json /root/hosts.json")
         export_parser.set_defaults(func=self._export_handler)
 
         monitor_parser = self.subp.add_parser(
-            "monitor", help="Monitors bandwidth usage of \
-host(s).\ne.g.: monitor all --interval 600")
-        monitor_parser.add_argument("id")
+            "monitor", help="Monitors bandwidth usage of limited\
+host(s).\ne.g.: monitor --with-id all --interval 600")
+        monitor_parser.add_argument("-w", "--with-id")
         monitor_parser.add_argument("-i", "--interval")
         monitor_parser.set_defaults(func=self._monitor_handler)
 
@@ -435,7 +435,11 @@ blocked{IO.END_BOLD_LIGHTRED}."
 
             return table
 
-        hosts = self._get_hosts_by_ids(args.id)
+        if args.with_id:
+            hosts = self._get_hosts_by_ids(args.with_id)
+        else:
+            hosts = []
+
         hosts_to_be_freed = set()
 
         interval = 0.5  # in s

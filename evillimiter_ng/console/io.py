@@ -60,7 +60,7 @@ class IO:
                     "block": {"-u", "-d", "--upload", "--download"},
                     "free": None,
                     "add": {"-m", "--mac"},
-                    "monitor": {"-i", "--interval"},
+                    "monitor": {"-i", "--interval", "-w", "--with-id"},
                     "analyze": {"-d", "--duration"},
                     "watch": {"add", "remove", "set"},
                     "sleep": None,
