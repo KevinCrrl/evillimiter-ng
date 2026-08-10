@@ -66,7 +66,7 @@ class IO:
                     "sleep": None,
                     "clear": None,
                     "exit": None,
-                    "help": None,
+                    "--help": None,
                     "import-json": None,
                     "export-json": None
                 }),
