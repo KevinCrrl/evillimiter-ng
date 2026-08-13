@@ -675,7 +675,8 @@ an invalid settings attribute."
     def _export_handler(self, args):
         write: bool = True
         if os.path.exists(args.json_path):
-            write = yes_no_dialog(title="There is already a file with that path and name.",
+            write = yes_no_dialog(title="There is already a file with that \
+path and name.",
                                   text="Want to overwrite the file?").run()
 
         if write:

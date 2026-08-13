@@ -152,9 +152,9 @@ def initialize(interface):
         netutils.flush_network_settings(interface)
         IO.ok("Flushed network settings\n")
         if not netutils.create_qdisc_root(interface):
-            IO.error("""The qdisc root handle could not be created even after the flush,
-your system may need to be restarted if you updated a critical
-low-level component such as the kernel.""")
+            IO.error("""The qdisc root handle could not be created even after
+the flush, your system may need to be restarted if you
+updated a critical low-level component such as the kernel.""")
             return False
 
     if not netutils.enable_ip_forwarding():
@@ -190,6 +190,13 @@ def main():
     args = process_arguments(args)
 
     IO.print(MAIN_BANNER)
+
+    if not os.path.exists(os.path.expanduser("~/.no-eng-spam")):
+        IO.print("This project is searching volunteer testers for the 3.0 \
+version, if you're interested in helping, see \
+https://github.com/KevinCrrl/evillimiter-ng/tree/3.x and report bugs here: \
+https://github.com/KevinCrrl/evillimiter-ng/issues\n\
+You can disable this message using: touch ~/.no-eng-spam\n")
 
     if args is None:
         return
