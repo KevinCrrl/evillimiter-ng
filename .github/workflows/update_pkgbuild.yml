@@ -31,6 +31,9 @@ jobs:
           tar -xvf 1.tar.gz
           mv repo_bot-1/*.py .
 
+          useradd -m build_user
+          chown -R build_user:build_user .
+
           chmod -R 777 .
 
           su build_user -c "python main.py . log.txt -v"
