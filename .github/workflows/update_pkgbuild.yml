@@ -36,6 +36,8 @@ jobs:
 
           chmod -R 777 .
 
+          cd "$GITHUB_WORKSPACE"
+
           su build_user -c "python main.py . log.txt -v"
 
           chown -R root:root .
