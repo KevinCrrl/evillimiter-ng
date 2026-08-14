@@ -59,7 +59,7 @@ class IO:
                     "limit": {"-u", "-d", "--upload", "--download"},
                     "block": {"-u", "-d", "--upload", "--download"},
                     "free": None,
-                    "add": {"-m", "--mac"},
+                    "add": {"-m", "--mac", "-n", "--name"},
                     "monitor": {"-i", "--interval", "-w", "--with-id"},
                     "analyze": {"-d", "--duration"},
                     "watch": {"add", "remove", "set"},

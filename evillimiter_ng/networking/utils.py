@@ -276,10 +276,10 @@ class ByteValue:
 
     @classmethod
     def from_byte_string(cls, byte_string):
-        return cls(ByteValue._byte_value(byte_string))
+        return cls(ByteValue.byte_value(byte_string))
 
     @staticmethod
-    def _byte_value(byte_string):
+    def byte_value(byte_string):
         number = 0  # rate number
         offset = 0  # string offset
 

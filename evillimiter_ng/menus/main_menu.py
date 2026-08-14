@@ -88,6 +88,7 @@ e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
 1c:fc:bc:2d:a6:37")
         add_parser.add_argument("ip")
         add_parser.add_argument("-m", "--mac")
+        add_parser.add_argument("-n", "--name")
         add_parser.set_defaults(func=self._add_handler)
 
         import_parser = self.subp.add_parser(
@@ -375,11 +376,14 @@ blocked{IO.END_BOLD_LIGHTRED}."
                 return
 
         name = None
-        try:
-            host_info = socket.gethostbyaddr(ip)
-            name = None if host_info is None else host_info[0]
-        except socket.herror:
-            pass
+        if args.name:
+            name = args.name
+        else:
+            try:
+                host_info = socket.gethostbyaddr(ip)
+                name = None if host_info is None else host_info[0]
+            except socket.herror:
+                pass
 
         host = Host(ip, mac, name)
 
@@ -556,8 +560,8 @@ blocked{IO.END_BOLD_LIGHTRED}."
 
         for host in hosts:
             values = get_values(host)
-            up_bytes.append(ByteValue._byte_value(values["up"].__str__()))
-            down_bytes.append(ByteValue._byte_value(values["down"].__str__()))
+            up_bytes.append(ByteValue.byte_value(values["up"].__str__()))
+            down_bytes.append(ByteValue.byte_value(values["down"].__str__()))
 
         max_up = max(up_bytes)
         max_down = max(down_bytes)
@@ -719,7 +723,7 @@ an invalid settings attribute."
         if write:
             info: dict = {}
             for host in self.hosts:
-                info[host.get_ip()] = {"mac": host.get_mac()}
+                info[host.ip] = {"mac": host.mac, "hostname": host.name}
             try:
                 # Read and Write for owner (root)
                 fd: int = os.open(args.json_path,
@@ -743,15 +747,12 @@ be corrupted.")
                 else:
                     for ip_arg, sub_dict in json_dict.items():
                         IO.print(f"Adding host {ip_arg}")
-
-                        class SubArgs:
-                            ip = ip_arg
-                            try:
-                                mac = sub_dict["mac"]
-                            except KeyError:
-                                mac = None
-
-                        self._add_handler(SubArgs)
+                        try:
+                            sub_dict["hostname"]
+                        except KeyError:
+                            sub_dict["hostname"] = None
+                        self._add_handler(Host(ip_arg, sub_dict["mac"],
+                                               sub_dict["hostname"]))
         except (FileNotFoundError, IsADirectoryError) as e:
             IO.error(e)
 

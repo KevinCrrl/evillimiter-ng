@@ -13,9 +13,8 @@ A tool to monitor, analyze and limit the bandwidth (upload/download) of devices 
 `evillimiter-ng` employs [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) and [traffic shaping](https://en.wikipedia.org/wiki/Traffic_shaping) to throttle the bandwidth of hosts on the network.
 
 ## Requirements
-- Linux distribution
-- nftables
-- Python 3 or greater
+- Linux distribution with nftables
+- Python 3.10 or greater
 
 Possibly missing python packages will be installed during the installation process.
 
