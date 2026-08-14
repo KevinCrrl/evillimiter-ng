@@ -14,14 +14,13 @@ from shlex import split
 import netaddr
 from prompt_toolkit.shortcuts import yes_no_dialog
 from rich.table import Table
-from rich.panel import Panel
 from rich.columns import Columns
 from rich.live import Live
+from rich.progress import Progress, BarColumn, TextColumn
 
 import evillimiter_ng.networking.utils as netutils
-from evillimiter_ng.networking.utils import BitRate
+from evillimiter_ng.networking.utils import BitRate, ByteValue
 from evillimiter_ng.console.io import IO
-from evillimiter_ng.console.chart import BarChart
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.limit import Limiter, Direction
@@ -532,28 +531,53 @@ blocked{IO.END_BOLD_LIGHTRED}."
         if error_occurred:
             return
 
-        upload_chart = BarChart(max_bar_length=29)
-        download_chart = BarChart(max_bar_length=29)
+        up_bytes = []
+        down_bytes = []
 
-        for host in hosts:
+        up_panel = Table(title="Upload")
+        up_panel.add_column("Id")
+        up_panel.add_column("Ip")
+        up_panel.add_column("Hostname")
+        up_panel.add_column("Upload Bar")
+        down_panel = Table(title="Download")
+        down_panel.add_column("Id")
+        down_panel.add_column("Ip")
+        down_panel.add_column("Hostname")
+        down_panel.add_column("Download Bar")
+
+        def get_values(host) -> dict:
             upload_value = (
                 host_values[host]["current"][0] - host_values[host]["prev"][0]
             )
             download_value = (
                 host_values[host]["current"][1] - host_values[host]["prev"][1]
             )
+            return {"up": upload_value, "down": download_value}
 
-            prefix = f"{IO.LIGHTYELLOW}{self._get_host_id(host)}\
-                {IO.END_LIGHTYELLOW} ({host.ip}, {host.name})"
+        for host in hosts:
+            values = get_values(host)
+            up_bytes.append(ByteValue._byte_value(values["up"].__str__()))
+            down_bytes.append(ByteValue._byte_value(values["down"].__str__()))
 
-            upload_chart.add_value(upload_value.value, prefix, upload_value)
-            download_chart.add_value(
-                download_value.value, prefix, download_value)
+        max_up = max(up_bytes)
+        max_down = max(down_bytes)
 
-        up_panel = Panel(upload_chart.get(), title="Upload", expand=False)
-
-        down_panel = Panel(download_chart.get(),
-                           title="Download", expand=False)
+        for host in hosts:
+            values = get_values(host)
+            up_progress = Progress(BarColumn(), TextColumn(str(values["up"])),
+                                   console=IO.console)
+            down_progress = Progress(BarColumn(),
+                                     TextColumn(str(values["down"])),
+                                     console=IO.console)
+            up_task = up_progress.add_task(description=":", total=max_up)
+            down_task = down_progress.add_task(description=":", total=max_down)
+            up_progress.update(up_task, advance=int(values["up"]))
+            down_progress.update(down_task, advance=int(values["down"]))
+            hid = str(self._get_host_id(host))
+            ip = host.ip
+            name = host.name
+            up_panel.add_row(hid, ip, name, up_progress.get_renderable())
+            down_panel.add_row(hid, ip, name, down_progress.get_renderable())
 
         IO.console.print(Columns([up_panel, down_panel]))
 
