@@ -8,10 +8,12 @@ import platform
 import collections
 
 import evillimiter_ng.networking.utils as netutils
+from evillimiter_ng.lib import envnet
 from evillimiter_ng.menus.main_menu import MainMenu
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.common import globals as gb
+from evillimiter_ng.lib.envnet import initialize
 
 InitialArguments = collections.namedtuple(
     "InitialArguments", "interface, gateway_ip, netmask, gateway_mac"
@@ -80,7 +82,7 @@ def process_arguments(args):
         sys.exit(0)
 
     if args.interface is None:
-        interface = netutils.get_default_interface()
+        interface = envnet.get_default_interface()
         if interface is None:
             IO.error(
                 "default interface could not be resolved. specify \
@@ -98,7 +100,7 @@ manually (-i).")
     IO.ok(f"interface: {IO.LIGHTYELLOW}{interface}{IO.END_LIGHTYELLOW}")
 
     if args.gateway_ip is None:
-        gateway_ip = netutils.get_default_gateway()
+        gateway_ip = envnet.get_default_gateway()
         if gateway_ip is None:
             IO.error(
                 "default gateway address could not be \
@@ -111,7 +113,7 @@ resolved. specify manually (-g)."
     IO.ok(f"Gateway ip: {IO.LIGHTYELLOW}{gateway_ip}{IO.END_LIGHTYELLOW}")
 
     if args.gateway_mac is None:
-        gateway_mac = netutils.get_mac_by_ip(interface, gateway_ip)
+        gateway_mac = envnet.get_mac_by_ip(interface, gateway_ip)
         if gateway_mac is None:
             IO.error("Gateway mac address could not be resolved.")
             return
@@ -125,7 +127,7 @@ resolved. specify manually (-g)."
     IO.ok(f"Gateway mac: {IO.LIGHTYELLOW}{gateway_mac}{IO.END_LIGHTYELLOW}")
 
     if args.netmask is None:
-        netmask = netutils.get_default_netmask(interface)
+        netmask = envnet.get_default_netmask(interface)
         if netmask is None:
             IO.error("Netmask could not be resolved. specify manually (-n).")
             return
@@ -140,37 +142,6 @@ resolved. specify manually (-g)."
         gateway_mac=gateway_mac,
         netmask=netmask,
     )
-
-
-def initialize(interface):
-    """
-    Sets up requirements, e.g. IP-Forwarding, 3rd party applications
-    """
-    if not netutils.network_settings(interface):
-        IO.print()
-        IO.error("qdisc root handle could not be created.")
-        netutils.flush_network_settings(interface)
-        IO.ok("Flushed network settings\n")
-        if not netutils.network_settings(interface):
-            IO.error("""The qdisc root handle could not be created even after
-the flush, your system may need to be restarted if you
-updated a critical low-level component such as the kernel.""")
-            return False
-
-    if not netutils.enable_ip_forwarding():
-        IO.print()
-        IO.error("IP forwarding could not be enabled.")
-        return False
-
-    return True
-
-
-def cleanup(interface):
-    """
-    Resets what has been initialized
-    """
-    netutils.delete_network_settings(interface)
-    netutils.disable_ip_forwarding()
 
 
 def main():
@@ -200,4 +171,4 @@ def main():
             args.gateway_mac, args.netmask
         )
         menu.start()
-        cleanup(args.interface)
+        envnet.stop_eng(args.interface)

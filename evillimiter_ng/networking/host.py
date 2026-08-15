@@ -3,7 +3,7 @@
 
 
 class Host:
-    def __init__(self, ip, mac, name):
+    def __init__(self, ip: str, mac: str, name: str | None = None):
         self.ip = ip
         self.mac = mac
         self.name = name
