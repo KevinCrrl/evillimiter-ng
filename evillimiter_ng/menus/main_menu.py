@@ -8,7 +8,6 @@ import os
 import stat
 import base64
 import socket
-import threading
 from argparse import ArgumentParser, ArgumentError, RawTextHelpFormatter
 from shlex import split
 import netaddr
@@ -23,15 +22,15 @@ from evillimiter_ng.networking.utils import BitRate, ByteValue
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.networking.host import Host
-from evillimiter_ng.networking.limit import Limiter, Direction
-from evillimiter_ng.networking.spoof import ARPSpoofer
-from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
-from evillimiter_ng.networking.monitor import BandwidthMonitor
-from evillimiter_ng.networking.watch import HostWatcher
+from evillimiter_ng.networking.limit import Direction
+from evillimiter_ng.networking.scan import ScanIntensity
+from evillimiter_ng.lib.manager import CoreLimiter
+from evillimiter_ng.lib.envnet import get_mac_by_ip
 
 
-class MainMenu:
+class MainMenu(CoreLimiter):
     def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
+        super().__init__(interface, gateway_ip, gateway_mac, netmask)
         self.prompt = ">>> "
         self.parser = ArgumentParser(
             prog="",  # Empty prog because it is a REPL, not a CLI
@@ -155,36 +154,7 @@ interval 120\nwatch set intensity 1")
         exit_p.set_defaults(func=self._exit_handler)
 
         self.version = version  # application version
-        self.interface = interface  # specified IPv4 interface
-        self.gateway_ip = gateway_ip
-        self.gateway_mac = gateway_mac
-        self.netmask = netmask
-
-        # range of IP address calculated from gateway IP and netmask
-        self.iprange = list(netaddr.IPNetwork(
-            f"{self.gateway_ip}/{self.netmask}"))
-
-        self.host_scanner = HostScanner(self.interface, self.iprange)
-        self.arp_spoofer = ARPSpoofer(
-            self.interface, self.gateway_ip, self.gateway_mac)
-        self.limiter = Limiter(self.interface)
-        self.bandwidth_monitor = BandwidthMonitor(self.interface)
-        self.host_watcher = HostWatcher(
-            self.interface, self.iprange, self._reconnect_callback
-        )
-
-        # holds discovered hosts
-        self.hosts: list[Host] = []
-        self.hosts_lock = threading.Lock()
-
         self._print_help_reminder()
-
-        # start the spoof thread
-        self.arp_spoofer.start()
-        # start the bandwidth monitor thread
-        self.bandwidth_monitor.start()
-        # start the host watch thread
-        self.host_watcher.start()
 
     def start(self):
         """
@@ -214,18 +184,6 @@ interval 120\nwatch set intensity 1")
                         pass
                 except SystemExit:
                     pass
-
-    def interrupt_handler(self, ctrl_c=True):
-        if ctrl_c:
-            IO.print()
-
-        IO.ok("Cleaning up... stand by...")
-
-        self.arp_spoofer.stop()
-        self.bandwidth_monitor.stop()
-
-        for host in self.hosts:
-            self._free_host(host)
 
     def _scan_handler(self, args):
         """
@@ -369,7 +327,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
                 IO.error("Invalid mac address.")
                 return
         else:
-            mac = netutils.get_mac_by_ip(self.interface, ip)
+            mac = get_mac_by_ip(self.interface, ip)
             if mac is None:
                 IO.error(
                     "Unable to resolve mac address. Specify manually (--mac).")
@@ -756,26 +714,6 @@ be corrupted.")
         except (FileNotFoundError, IsADirectoryError) as e:
             IO.error(e)
 
-    def _reconnect_callback(self, old_host, new_host):
-        """
-        Callback that is called when a watched host reconnects
-        Method will run in a separate thread
-        """
-        with self.hosts_lock:
-            if old_host in self.hosts:
-                self.hosts[self.hosts.index(old_host)] = new_host
-            else:
-                return
-
-        self.arp_spoofer.remove(old_host, restore=False)
-        self.arp_spoofer.add(new_host)
-
-        self.host_watcher.remove(old_host)
-        self.host_watcher.add(new_host)
-
-        self.limiter.replace(old_host, new_host)
-        self.bandwidth_monitor.replace(old_host, new_host)
-
     def _clear_handler(self, args):
         """
         Handler for the 'clear' command-line argument
@@ -793,7 +731,7 @@ be corrupted.")
         self.parser.print_help()
 
     def _exit_handler(self, args):
-        self.interrupt_handler(False)
+        self.interrupt_handler(repl=True)
         self._active = False
 
     def _get_host_id(self, host, lock=True):
@@ -888,13 +826,3 @@ information."
             ScanIntensity.INTENSE,
         ):
             return int(value)
-
-    def _free_host(self, host):
-        """
-        Stops ARP spoofing and unlimits host
-        """
-        if host.spoofed:
-            self.arp_spoofer.remove(host)
-            self.limiter.unlimit(host, Direction.BOTH)
-            self.bandwidth_monitor.remove(host)
-            self.host_watcher.remove(host)

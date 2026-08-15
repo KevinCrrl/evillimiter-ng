@@ -5,6 +5,7 @@ import threading
 
 import netaddr
 
+from evillimiter_ng.console.io import IO
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.limit import Limiter, Direction
 from evillimiter_ng.networking.spoof import ARPSpoofer
@@ -44,7 +45,13 @@ class CoreLimiter:
         # start the host watch thread
         self.host_watcher.start()
 
-    def interrupt_handler(self):
+    def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
+        if repl:
+            if ctrl_c:
+                IO.print()
+
+            IO.ok("Cleaning up... stand by...")
+
         self.arp_spoofer.stop()
         self.bandwidth_monitor.stop()
 
