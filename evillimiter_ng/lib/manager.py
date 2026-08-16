@@ -100,6 +100,31 @@ blocked{IO.END_BOLD_LIGHTRED}."
             for host in hosts:
                 self._free_host(host)
 
+    def limit(self, id: str, rate: str | netutils.BitRate,
+              upload: str | None = None, download: str | None = None):
+        hosts = self.get_hosts_by_ids(id)
+        if hosts is None or len(hosts) == 0:
+            return
+
+        try:
+            rate = netutils.BitRate.from_rate_string(rate)
+        except Exception:
+            IO.error("Limit rate is invalid.")
+            return
+
+        direction = self._parse_direction_args(upload, download)
+
+        for host in hosts:
+            self.arp_spoofer.add(host)
+            self.limiter.limit(host, direction, rate)
+            self.bandwidth_monitor.add(host)
+
+            IO.ok(
+                f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
+{Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
+limited{IO.END_BOLD_LIGHTRED} to {rate}."
+            )
+
     def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
         if repl:
             if ctrl_c:

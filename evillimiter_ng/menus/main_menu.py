@@ -17,11 +17,10 @@ from rich.live import Live
 from rich.progress import Progress, BarColumn, TextColumn
 
 import evillimiter_ng.networking.utils as netutils
-from evillimiter_ng.networking.utils import BitRate, ByteValue
+from evillimiter_ng.networking.utils import ByteValue
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.networking.host import Host
-from evillimiter_ng.networking.limit import Direction
 from evillimiter_ng.lib.manager import CoreLimiter
 from evillimiter_ng.lib.envnet import get_mac_by_ip
 
@@ -227,28 +226,7 @@ hosts discovered.")
         Handles 'limit' command-line argument
         Limits bandwith of host to specified rate
         """
-        hosts = self.get_hosts_by_ids(args.id)
-        if hosts is None or len(hosts) == 0:
-            return
-
-        try:
-            rate = BitRate.from_rate_string(args.rate)
-        except Exception:
-            IO.error("Limit rate is invalid.")
-            return
-
-        direction = self._parse_direction_args(args)
-
-        for host in hosts:
-            self.arp_spoofer.add(host)
-            self.limiter.limit(host, direction, rate)
-            self.bandwidth_monitor.add(host)
-
-            IO.ok(
-                f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
-{Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
-limited{IO.END_BOLD_LIGHTRED} to {rate}."
-            )
+        self.limit(args.id, args.rate, args.upload, args.download)
 
     def _block_handler(self, args):
         """
