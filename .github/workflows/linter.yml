@@ -11,8 +11,8 @@ jobs:
     steps:
       - name: Check out source repository
         uses: actions/checkout@v5
-      - name: flake8 Lint
+      - name: ruff check
         run: |
           apk update && apk upgrade --no-cache
-          apk add py3-flake8 --no-cache
-          flake8 evillimiter_ng
+          apk add ruff --no-cache
+          ruff check evillimiter_ng
