@@ -48,12 +48,12 @@ class CoreLimiter:
         self.host_watcher.start()
 
     def scan(self, range: str | None = None,
-             intensity: str = "2") -> list[Host]:
+             intensity: str = "2") -> list[Host] | None:
         if range:
             iprange = self._parse_iprange(range)
             if iprange is None:
                 IO.error("invalid ip range.")
-                return []
+                return
         else:
             iprange = None
 
@@ -75,6 +75,30 @@ class CoreLimiter:
         self.hosts_lock.release()
 
         return hosts
+
+    def block(self, id: str | int,
+              upload: str | None = None, download: str | None = None):
+        hosts = self.get_hosts_by_ids(id)
+        direction = self._parse_direction_args(upload, download)
+
+        if hosts is not None and len(hosts) > 0:
+            for host in hosts:
+                if not host.spoofed:
+                    self.arp_spoofer.add(host)
+
+                self.limiter.block(host, direction)
+                self.bandwidth_monitor.add(host)
+                IO.ok(
+                    f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
+{Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
+blocked{IO.END_BOLD_LIGHTRED}."
+                )
+
+    def free(self, id: str | int):
+        hosts = self.get_hosts_by_ids(id)
+        if hosts is not None and len(hosts) > 0:
+            for host in hosts:
+                self._free_host(host)
 
     def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
         if repl:
@@ -119,12 +143,12 @@ class CoreLimiter:
             self.bandwidth_monitor.remove(host)
             self.host_watcher.remove(host)
 
-    def _parse_direction_args(self, args):
+    def _parse_direction_args(self, upload, download):
         direction = Direction.NONE
 
-        if args.upload:
+        if upload:
             direction |= Direction.OUTGOING
-        if args.download:
+        if download:
             direction |= Direction.INCOMING
 
         return Direction.BOTH if direction == Direction.NONE else direction
@@ -146,8 +170,10 @@ class CoreLimiter:
             return int(value)
         return 2
 
-    def get_hosts_by_ids(self,
-                         ids_string: str) -> set[Host] | list[Host] | None:
+    def get_hosts_by_ids(
+            self, ids_string: str | int) -> set[Host] | list[Host] | None:
+        if isinstance(ids_string, int):
+            ids_string = str(ids_string)
         if ids_string == "all":
             with self.hosts_lock:
                 return self.hosts.copy()

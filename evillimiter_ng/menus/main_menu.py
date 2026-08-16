@@ -255,31 +255,14 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
         Handles 'block' command-line argument
         Blocks internet communication for host
         """
-        hosts = self.get_hosts_by_ids(args.id)
-        direction = self._parse_direction_args(args)
-
-        if hosts is not None and len(hosts) > 0:
-            for host in hosts:
-                if not host.spoofed:
-                    self.arp_spoofer.add(host)
-
-                self.limiter.block(host, direction)
-                self.bandwidth_monitor.add(host)
-                IO.ok(
-                    f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
-{Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
-blocked{IO.END_BOLD_LIGHTRED}."
-                )
+        self.block(args.id, args.upload, args.download)
 
     def _free_handler(self, args):
         """
         Handles 'free' command-line argument
         Frees the host from all limitations
         """
-        hosts = self.get_hosts_by_ids(args.id)
-        if hosts is not None and len(hosts) > 0:
-            for host in hosts:
-                self._free_host(host)
+        self.free(args.id)
 
     def _add_handler(self, args):
         """

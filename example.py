@@ -16,5 +16,9 @@ hosts = myeng.get_hosts_by_ids("all")
 if hosts is not None:
     for host in hosts:
         print(host.ip)
+    hid = input("block host by id: ")
+    myeng.block(hid)
+    input("Press enter to free host...")
+    myeng.free(hid)
 myeng.interrupt_handler()
 envnet.stop_eng()
