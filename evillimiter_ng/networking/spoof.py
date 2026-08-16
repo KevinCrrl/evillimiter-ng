@@ -1,9 +1,10 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import time
 import threading
-from scapy.all import Ether, ARP, sendp  # pylint: disable=no-name-in-module
+import time
+
+from scapy.all import ARP, Ether, sendp  # pylint: disable=no-name-in-module
 
 from evillimiter_ng.common.globals import BROADCAST
 
@@ -64,11 +65,10 @@ class ARPSpoofer:
         # 2 packets = 1 gateway packet, 1 host packet
         # Wrapped in Ethernet frames to resolve Scapy warnings
         packets = [
-            Ether(dst=self.gateway_mac) / ARP(op=2, psrc=host.ip,
-                                              pdst=self.gateway_ip,
-                                              hwdst=self.gateway_mac),
-            Ether(dst=host.mac) / ARP(op=2, psrc=self.gateway_ip,
-                                      pdst=host.ip, hwdst=host.mac),
+            Ether(dst=self.gateway_mac)
+            / ARP(op=2, psrc=host.ip, pdst=self.gateway_ip, hwdst=self.gateway_mac),
+            Ether(dst=host.mac)
+            / ARP(op=2, psrc=self.gateway_ip, pdst=host.ip, hwdst=host.mac),
         ]
 
         [sendp(x, iface=self.interface, verbose=0) for x in packets]
@@ -80,14 +80,16 @@ class ARPSpoofer:
         # 2 packets = 1 gateway packet, 1 host packet
         # Wrapped in Ethernet frames to resolve Scapy warnings
         packets = [
-            Ether(dst=BROADCAST) / ARP(
+            Ether(dst=BROADCAST)
+            / ARP(
                 op=2,
                 psrc=host.ip,
                 hwsrc=host.mac,
                 pdst=self.gateway_ip,
                 hwdst=BROADCAST,
             ),
-            Ether(dst=BROADCAST) / ARP(
+            Ether(dst=BROADCAST)
+            / ARP(
                 op=2,
                 psrc=self.gateway_ip,
                 hwsrc=self.gateway_mac,

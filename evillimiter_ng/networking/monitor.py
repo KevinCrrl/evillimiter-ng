@@ -1,11 +1,12 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import time
 import threading
-from scapy.all import sniff, IP  # pylint: disable=no-name-in-module
+import time
 
-from .utils import ValueConverter, BitRate, ByteValue
+from scapy.all import IP, sniff  # pylint: disable=no-name-in-module
+
+from .utils import BitRate, ByteValue, ValueConverter
 
 
 class BandwidthMonitor:
@@ -44,16 +45,14 @@ class BandwidthMonitor:
     def replace(self, old_host, new_host):
         with self._host_result_lock:
             if old_host in self._host_result_dict:
-                self._host_result_dict[new_host] = \
-                    self._host_result_dict[old_host]
+                self._host_result_dict[new_host] = self._host_result_dict[old_host]
                 del self._host_result_dict[old_host]
 
     def start(self):
         if self._running:
             return
 
-        sniff_thread = threading.Thread(
-            target=self._sniff, args=[], daemon=True)
+        sniff_thread = threading.Thread(target=self._sniff, args=[], daemon=True)
         sniff_thread.start()
 
         self._running = True
@@ -69,15 +68,13 @@ class BandwidthMonitor:
                 result = self._host_result_dict[host]["result"]
                 result.upload_rate = BitRate(
                     int(
-                        ValueConverter.byte_to_bit(
-                            result._upload_temp_size.value)
+                        ValueConverter.byte_to_bit(result._upload_temp_size.value)
                         / time_passed
                     )
                 )
                 result.download_rate = BitRate(
                     int(
-                        ValueConverter.byte_to_bit(
-                            result._download_temp_size.value)
+                        ValueConverter.byte_to_bit(result._download_temp_size.value)
                         / time_passed
                     )
                 )

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 from evillimiter_ng.common import globals as bg
+
 from .io import IO
 
 MAIN_BANNER = f"""{IO.BOLD_LIGHTRED}
@@ -13,4 +14,4 @@ MAIN_BANNER = f"""{IO.BOLD_LIGHTRED}
  ╚══════╝  ╚═══╝  ╚═╝╚══════╝ ╚══════╝ ╚═╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝        ╚═╝  ╚═══╝ ╚═════╝
                         {IO.END_BOLD_LIGHTRED}by KevinCrrl   ~   Next Generation
                                     v{bg.VERSION}
-"""  # noqa
+"""

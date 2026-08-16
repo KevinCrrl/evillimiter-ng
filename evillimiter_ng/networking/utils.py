@@ -5,13 +5,14 @@ import re
 
 from scapy.interfaces import get_if_list
 
-from evillimiter_ng.console import shell
 from evillimiter_ng.common.globals import (
-    BIN_TC,
     BIN_NFT,
     BIN_SYSCTL,
+    BIN_TC,
     IP_FORWARD_LOC,
 )
+from evillimiter_ng.console import shell
+from evillimiter_ng.lib.errors import BitError, ByteValueError
 
 
 def exists_interface(interface):
@@ -28,8 +29,7 @@ def flush_network_settings(interface):
     shell.execute_suppressed([BIN_NFT, "delete", "table", "eng"])
 
     # delete root qdisc for given interface
-    shell.execute_suppressed(
-        [BIN_TC, "qdisc", "del", "dev", interface, "root"])
+    shell.execute_suppressed([BIN_TC, "qdisc", "del", "dev", interface, "root"])
 
 
 def validate_ip_address(ip):
@@ -46,26 +46,51 @@ def network_settings(interface):
     """
     return (
         shell.execute_suppressed(
-            [BIN_TC, "qdisc", "add", "dev", interface,
-                "root", "handle", "1:0", "htb"]
-        ) == 0 and shell.execute_suppressed(
-            [BIN_NFT, "add", "table", "ip", "eng"]
-        ) == 0 and shell.execute_suppressed(
-            [BIN_NFT, "add", "chain", "ip", "eng", "FORWARD",
-             "{ type filter hook forward priority filter; policy accept; }"]
-        ) == 0 and shell.execute_suppressed(
-            [BIN_NFT, "add", "chain", "ip", "eng", "POSTROUTING",
-             "{ type filter hook postrouting priority mangle; policy accept; }"]  # noqa
-        ) == 0 and shell.execute_suppressed(
-            [BIN_NFT, "add", "chain", "ip", "eng", "PREROUTING",
-             "{ type filter hook prerouting priority mangle; policy accept; }"]
-        ) == 0
+            [BIN_TC, "qdisc", "add", "dev", interface, "root", "handle", "1:0", "htb"]
+        )
+        == 0
+        and shell.execute_suppressed([BIN_NFT, "add", "table", "ip", "eng"]) == 0
+        and shell.execute_suppressed(
+            [
+                BIN_NFT,
+                "add",
+                "chain",
+                "ip",
+                "eng",
+                "FORWARD",
+                "{ type filter hook forward priority filter; policy accept; }",
+            ]
+        )
+        == 0
+        and shell.execute_suppressed(
+            [
+                BIN_NFT,
+                "add",
+                "chain",
+                "ip",
+                "eng",
+                "POSTROUTING",
+                "{ type filter hook postrouting priority mangle; policy accept; }",
+            ]
+        )
+        == 0
+        and shell.execute_suppressed(
+            [
+                BIN_NFT,
+                "add",
+                "chain",
+                "ip",
+                "eng",
+                "PREROUTING",
+                "{ type filter hook prerouting priority mangle; policy accept; }",
+            ]
+        )
+        == 0
     )
 
 
 def enable_ip_forwarding():
-    return shell.execute_suppressed([BIN_SYSCTL, "-w",
-                                    f"{IP_FORWARD_LOC}=1"]) == 0
+    return shell.execute_suppressed([BIN_SYSCTL, "-w", f"{IP_FORWARD_LOC}=1"]) == 0
 
 
 class ValueConverter:
@@ -103,7 +128,7 @@ class BitRate:
                 return f"{int(r)}{unit}"
 
             if counter > 3:
-                raise Exception("Bitrate limit exceeded")
+                raise BitError("Bitrate limit exceeded")
 
     def __mul__(self, other):
         if isinstance(other, BitRate):
@@ -143,7 +168,7 @@ class BitRate:
             return number * 1000**2
         if unit == "gbit":
             return number * 1000**3
-        raise Exception("Invalid bitrate")
+        raise BitError("Invalid bitrate")
 
 
 class ByteValue:
@@ -177,7 +202,7 @@ class ByteValue:
                 return f"{int(v)}{unit}"
 
             if counter > 3:
-                raise Exception("Byte value limit exceeded")
+                raise ByteValueError("Byte value limit exceeded")
 
     def __int__(self):
         return self.value
@@ -237,4 +262,4 @@ class ByteValue:
             return number * 1024**3
         if unit == "tb":
             return number * 1024**4
-        raise Exception("Invalid byte string")
+        raise ByteValueError("Invalid byte string")

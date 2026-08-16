@@ -1,28 +1,29 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
+import base64
 import binascii
-import time
 import json
 import os
-import stat
-import base64
 import socket
-from argparse import ArgumentParser, ArgumentError, RawTextHelpFormatter
+import stat
+import time
+from argparse import ArgumentError, ArgumentParser, RawTextHelpFormatter
 from shlex import split
+
 from prompt_toolkit.shortcuts import yes_no_dialog
-from rich.table import Table
 from rich.columns import Columns
 from rich.live import Live
-from rich.progress import Progress, BarColumn, TextColumn
+from rich.progress import BarColumn, Progress, TextColumn
+from rich.table import Table
 
 import evillimiter_ng.networking.utils as netutils
-from evillimiter_ng.networking.utils import ByteValue
-from evillimiter_ng.console.io import IO
 from evillimiter_ng.console.banner import MAIN_BANNER
-from evillimiter_ng.networking.host import Host
-from evillimiter_ng.lib.manager import CoreLimiter
+from evillimiter_ng.console.io import IO
 from evillimiter_ng.lib.envnet import get_mac_by_ip
+from evillimiter_ng.lib.manager import CoreLimiter
+from evillimiter_ng.networking.host import Host
+from evillimiter_ng.networking.utils import ByteValue
 
 
 class MainMenu(CoreLimiter):
@@ -31,32 +32,39 @@ class MainMenu(CoreLimiter):
         self.prompt = ">>> "
         self.parser = ArgumentParser(
             prog="",  # Empty prog because it is a REPL, not a CLI
-            exit_on_error=False, formatter_class=RawTextHelpFormatter)
+            exit_on_error=False,
+            formatter_class=RawTextHelpFormatter,
+        )
         self._active = False
         self.subp = self.parser.add_subparsers()
-        clear_p = self.subp.add_parser(
-            "clear", help="Clears the terminal window.")
+        clear_p = self.subp.add_parser("clear", help="Clears the terminal window.")
         clear_p.set_defaults(func=self._clear_handler)
 
         hosts_p = self.subp.add_parser(
-            "hosts", help="Lists all scanned hosts.\ncontains host \
-information, including IDs.")
+            "hosts",
+            help="Lists all scanned hosts.\ncontains host \
+information, including IDs.",
+        )
         hosts_p.set_defaults(func=self._hosts_handler)
 
         scan_parser = self.subp.add_parser(
-            "scan", help="scan (--range [IP range]) (--intensity [(1,2,3)])\n\
+            "scan",
+            help="scan (--range [IP range]) (--intensity [(1,2,3)])\n\
 Scans for online hosts on your network.\nrequired to \
 find the hosts you want to limit.\ne.g.: scan\nscan --range \
 192.168.178.1-192.168.178.50\nscan --range 192.168.178.1/24 \
---intensity 3")
+--intensity 3",
+        )
         scan_parser.add_argument("-r", "--range")
         scan_parser.add_argument("-i", "--intensity")
         scan_parser.set_defaults(func=self._scan_handler)
 
         limit_parser = self.subp.add_parser(
-            "limit", help="Limits bandwith of host(s) \
+            "limit",
+            help="Limits bandwith of host(s) \
 (uload/dload).\ne.g.: limit 4 100kbit\nlimit 2,3,4 1gbit \
---download\nlimit all 200kbit --upload")
+--download\nlimit all 200kbit --upload",
+        )
         limit_parser.add_argument("id")
         limit_parser.add_argument("rate")
         limit_parser.add_argument("-u", "--upload", action="store_true")
@@ -64,84 +72,103 @@ find the hosts you want to limit.\ne.g.: scan\nscan --range \
         limit_parser.set_defaults(func=self._limit_handler)
 
         block_parser = self.subp.add_parser(
-            "block", help="Blocks internet access of \
-host(s).\ne.g.: block 3,2\nblock all --upload")
+            "block",
+            help="Blocks internet access of \
+host(s).\ne.g.: block 3,2\nblock all --upload",
+        )
         block_parser.add_argument("id")
         block_parser.add_argument("-u", "--upload", action="store_true")
         block_parser.add_argument("-d", "--download", action="store_true")
         block_parser.set_defaults(func=self._block_handler)
 
         free_parser = self.subp.add_parser(
-            "free",
-            help="Unlimits/Unblocks host(s).\ne.g.: free 3,2\nfree all")
+            "free", help="Unlimits/Unblocks host(s).\ne.g.: free 3,2\nfree all"
+        )
         free_parser.add_argument("id")
         free_parser.set_defaults(func=self._free_handler)
 
         add_parser = self.subp.add_parser(
-            "add", help="Adds custom host to host list.\n\
+            "add",
+            help="Adds custom host to host list.\n\
 mac resolved automatically.\n\
 e.g.: add 192.168.178.24\nadd 192.168.1.50 --mac \
-1c:fc:bc:2d:a6:37")
+1c:fc:bc:2d:a6:37",
+        )
         add_parser.add_argument("ip")
         add_parser.add_argument("-m", "--mac")
         add_parser.add_argument("-n", "--name")
         add_parser.set_defaults(func=self._add_handler)
 
         import_parser = self.subp.add_parser(
-            "import-json", help="Import a JSON file containing IP addresses \
-and MAC \addresses encoded in base64.\ne.g.: import-json /root/hosts.json")
+            "import-json",
+            help="Import a JSON file containing IP addresses \
+and MAC \addresses encoded in base64.\ne.g.: import-json /root/hosts.json",
+        )
         import_parser.add_argument("json_path")
         import_parser.set_defaults(func=self._import_handler)
 
         export_parser = self.subp.add_parser(
-            "export-json", help="Export a JSON file containing IP addresses \
-and MAC addresses encoded in base64.\ne.g.: export-json /root/hosts.json")
+            "export-json",
+            help="Export a JSON file containing IP addresses \
+and MAC addresses encoded in base64.\ne.g.: export-json /root/hosts.json",
+        )
         export_parser.add_argument("json_path")
         export_parser.set_defaults(func=self._export_handler)
 
         monitor_parser = self.subp.add_parser(
-            "monitor", help="Monitors bandwidth usage of limited\
-host(s).\ne.g.: monitor --with-id all --interval 600")
+            "monitor",
+            help="Monitors bandwidth usage of limited\
+host(s).\ne.g.: monitor --with-id all --interval 600",
+        )
         monitor_parser.add_argument("-w", "--with-id")
         monitor_parser.add_argument("-i", "--interval")
         monitor_parser.set_defaults(func=self._monitor_handler)
 
         analyze_parser = self.subp.add_parser(
-            "analyze", help="Analyzes traffic of host(s) \
+            "analyze",
+            help="Analyzes traffic of host(s) \
 without limiting\nto determine who uses how much bandwidth.\
-\ne.g.: analyze 2,3 --duration 120")
+\ne.g.: analyze 2,3 --duration 120",
+        )
         analyze_parser.add_argument("id")
         analyze_parser.add_argument("-d", "--duration")
         analyze_parser.set_defaults(func=self._analyze_handler)
 
         watch_parser = self.subp.add_parser(
-            "watch", help="Detects host reconnects with different IP.\n\
-Type watch --help to see the subcommands.")
+            "watch",
+            help="Detects host reconnects with different IP.\n\
+Type watch --help to see the subcommands.",
+        )
         watch_parser.set_defaults(func=self._watch_handler)
 
         watch_sub = watch_parser.add_subparsers()
 
         watch_add_parser = watch_sub.add_parser(
-            "add", help="Adds host to the reconnection watchlist.\ne.g.: \
-watch add 3,4")
+            "add",
+            help="Adds host to the reconnection watchlist.\ne.g.: \
+watch add 3,4",
+        )
         watch_add_parser.add_argument("id")
         watch_add_parser.set_defaults(func=self._watch_add_handler)
 
         watch_remove_parser = watch_sub.add_parser(
-            "remove", help="Removes host from the reconnection watchlist.\n\
-e.g.: watch remove all")
+            "remove",
+            help="Removes host from the reconnection watchlist.\n\
+e.g.: watch remove all",
+        )
         watch_remove_parser.add_argument("id")
         watch_remove_parser.set_defaults(func=self._watch_remove_handler)
 
         watch_set_parser = watch_sub.add_parser(
-            "set", help="Changes reconnect watch settings.\ne.g.: watch set \
-interval 120\nwatch set intensity 1")
+            "set",
+            help="Changes reconnect watch settings.\ne.g.: watch set \
+interval 120\nwatch set intensity 1",
+        )
         watch_set_parser.add_argument("attribute")
         watch_set_parser.add_argument("value")
         watch_set_parser.set_defaults(func=self._watch_set_handler)
 
-        sleep_parser = self.subp.add_parser(
-            "sleep", help="Waits for <n> seconds")
+        sleep_parser = self.subp.add_parser("sleep", help="Waits for <n> seconds")
         sleep_parser.add_argument("seconds")
         sleep_parser.set_defaults(func=self._sleep_handler)
 
@@ -171,8 +198,7 @@ interval 120\nwatch set intensity 1")
             for subcommand in command.split("&&"):
                 try:
                     try:
-                        args = self.parser.parse_args(
-                            split(subcommand.strip()))
+                        args = self.parser.parse_args(split(subcommand.strip()))
                         args.func(args)
                     except ArgumentError:
                         IO.error("Invalid command.")
@@ -188,8 +214,10 @@ interval 120\nwatch set intensity 1")
         (Re)scans for hosts on the network
         """
         hosts: list[Host] = self.scan(args.range, args.intensity)
-        IO.ok(f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
-hosts discovered.")
+        IO.ok(
+            f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
+hosts discovered."
+        )
         IO.print()
 
     def _hosts_handler(self, args):
@@ -199,8 +227,7 @@ hosts discovered.")
         """
 
         table = Table(title="Hosts")
-        table.add_column(
-            f"{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}", style="yellow")
+        table.add_column(f"{IO.BOLD_LIGHT}ID{IO.END_BOLD_LIGHT}", style="yellow")
         table.add_column(f"{IO.BOLD_LIGHT}IP address{IO.END_BOLD_LIGHT}")
         table.add_column(f"{IO.BOLD_LIGHT}MAC address{IO.END_BOLD_LIGHT}")
         table.add_column(f"{IO.BOLD_LIGHT}Hostname{IO.END_BOLD_LIGHT}")
@@ -260,8 +287,7 @@ hosts discovered.")
         else:
             mac = get_mac_by_ip(self.interface, ip)
             if mac is None:
-                IO.error(
-                    "Unable to resolve mac address. Specify manually (--mac).")
+                IO.error("Unable to resolve mac address. Specify manually (--mac).")
                 return
 
         name = None
@@ -297,7 +323,8 @@ hosts discovered.")
                     [
                         x
                         for x in [
-                            (y, self.bandwidth_monitor.get(y)) for y in self.hosts  # noqa
+                            (y, self.bandwidth_monitor.get(y))
+                            for y in self.hosts
                         ]
                         if x[1] is not None
                     ],
@@ -306,8 +333,14 @@ hosts discovered.")
 
         def gen_table():
             table = Table()
-            columns = ["ID", "IP address", "Hostname",
-                       "Current (per s)", "total", "Packets"]
+            columns = [
+                "ID",
+                "IP address",
+                "Hostname",
+                "Current (per s)",
+                "total",
+                "Packets",
+            ]
             for column in columns:
                 table.add_column(column)
 
@@ -322,7 +355,7 @@ hosts discovered.")
                     f"{result.upload_total_size}↑ \
                         {result.download_total_size}↓",
                     f"{result.upload_total_count}↑ \
-                        {result.download_total_count}↓"
+                        {result.download_total_count}↓",
                 )
 
             return table
@@ -356,8 +389,11 @@ hosts discovered.")
             return
 
         with Live(
-            gen_table(), console=IO.console, screen=True,
-            refresh_per_second=interval, transient=True
+            gen_table(),
+            console=IO.console,
+            screen=True,
+            refresh_per_second=interval,
+            transient=True,
         ) as live:
             while True:
                 try:
@@ -457,11 +493,12 @@ hosts discovered.")
 
         for host in hosts:
             values = get_values(host)
-            up_progress = Progress(BarColumn(), TextColumn(str(values["up"])),
-                                   console=IO.console)
-            down_progress = Progress(BarColumn(),
-                                     TextColumn(str(values["down"])),
-                                     console=IO.console)
+            up_progress = Progress(
+                BarColumn(), TextColumn(str(values["up"])), console=IO.console
+            )
+            down_progress = Progress(
+                BarColumn(), TextColumn(str(values["down"])), console=IO.console
+            )
             up_task = up_progress.add_task(description=":", total=max_up)
             down_task = down_progress.add_task(description=":", total=max_down)
             up_progress.update(up_task, advance=int(values["up"]))
@@ -510,7 +547,7 @@ hosts discovered.")
 
             set_table.add_row(
                 f"{IO.LIGHTYELLOW}range{IO.END_LIGHTYELLOW}",
-                f"{len(iprange)} addresses" if iprange is not None else "default",  # noqa
+                f"{len(iprange)} addresses" if iprange is not None else "default",
             )
 
             set_table.add_row(
@@ -518,8 +555,7 @@ hosts discovered.")
             )
 
             set_table.add_row(
-                f"{IO.LIGHTYELLOW}intensity{IO.END_LIGHTYELLOW}", str(
-                    intensity)
+                f"{IO.LIGHTYELLOW}intensity{IO.END_LIGHTYELLOW}", str(intensity)
             )
 
             for host in self.host_watcher.hosts:
@@ -532,8 +568,7 @@ hosts discovered.")
 
             for recon in self.host_watcher.log_list:
                 hist_table.add_row(
-                    recon["old"].mac, recon["old"].ip,
-                    recon["new"].ip, recon["time"]
+                    recon["old"].mac, recon["old"].ip, recon["new"].ip, recon["time"]
                 )
 
             IO.print()
@@ -607,7 +642,8 @@ an invalid settings attribute."
         if os.path.exists(args.json_path):
             write = yes_no_dialog(
                 "There is already a file with that path and name.",
-                "Want to overwrite the file?").run()
+                "Want to overwrite the file?",
+            ).run()
 
         if write:
             info: dict = {}
@@ -615,9 +651,11 @@ an invalid settings attribute."
                 info[host.ip] = {"mac": host.mac, "hostname": host.name}
             try:
                 # Read and Write for owner (root)
-                fd: int = os.open(args.json_path,
-                                  os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
-                                  stat.S_IRUSR | stat.S_IWUSR)
+                fd: int = os.open(
+                    args.json_path,
+                    os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                    stat.S_IRUSR | stat.S_IWUSR,
+                )
 
                 with os.fdopen(fd, "w", encoding="utf-8") as f:
                     f.write(base64.b64encode(str(info).encode()).decode())
@@ -628,11 +666,16 @@ an invalid settings attribute."
         try:
             with open(args.json_path, "r", encoding="utf-8") as f:
                 try:
-                    json_dict = json.loads(base64.b64decode(
-                        f.read(), validate=True).decode().replace("'", '"'))
+                    json_dict = json.loads(
+                        base64.b64decode(f.read(), validate=True)
+                        .decode()
+                        .replace("'", '"')
+                    )
                 except binascii.Error:
-                    IO.error("The Base64 encoding of the JSON appears to \
-be corrupted.")
+                    IO.error(
+                        "The Base64 encoding of the JSON appears to \
+be corrupted."
+                    )
                 else:
                     for ip_arg, sub_dict in json_dict.items():
                         IO.print(f"Adding host {ip_arg}")
@@ -640,8 +683,9 @@ be corrupted.")
                             sub_dict["hostname"]
                         except KeyError:
                             sub_dict["hostname"] = None
-                        self._add_handler(Host(ip_arg, sub_dict["mac"],
-                                               sub_dict["hostname"]))
+                        self._add_handler(
+                            Host(ip_arg, sub_dict["mac"], sub_dict["hostname"])
+                        )
         except (FileNotFoundError, IsADirectoryError) as e:
             IO.error(e)
 

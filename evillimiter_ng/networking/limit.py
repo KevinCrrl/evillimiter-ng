@@ -1,11 +1,11 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import threading
 import json
+import threading
 
+from evillimiter_ng.common.globals import BIN_NFT, BIN_TC
 from evillimiter_ng.console import shell
-from evillimiter_ng.common.globals import BIN_TC, BIN_NFT
 from evillimiter_ng.console.io import IO
 
 
@@ -227,8 +227,7 @@ class Limiter:
 
     def replace(self, old_host, new_host):
         self._host_dict_lock.acquire()
-        info = \
-            self._host_dict[old_host] if old_host in self._host_dict else None
+        info = self._host_dict.get(old_host, None)
         self._host_dict_lock.release()
 
         if info is not None:
@@ -281,8 +280,7 @@ class Limiter:
             self.unlimit(host, direction)
 
         return (
-            Limiter.HostLimitIDs(*self._create_ids()
-                                 ) if host_ids is None else host_ids
+            Limiter.HostLimitIDs(*self._create_ids()) if host_ids is None else host_ids
         )
 
     def _create_ids(self):
@@ -303,8 +301,7 @@ class Limiter:
                         v = (x for x in self._host_dict.values())
                         ids = (x["ids"] for x in v)
                         if id_ not in (
-                            x for y in ids for x in
-                                [y.upload_id, y.download_id]
+                            x for y in ids for x in [y.upload_id, y.download_id]
                         ):
                             return id_
                     id_ += 1
@@ -348,13 +345,17 @@ class Limiter:
         """
         Deletes nftables rules for a given handle (host)
         """
-        nft_json: dict = json.loads(shell.execute_output(
-            ["nft", "-j", "-a", "list", "table", "ip", "eng"]))["nftables"]
+        nft_json: dict = json.loads(
+            shell.execute_output(["nft", "-j", "-a", "list", "table", "ip", "eng"])
+        )["nftables"]
 
         def get_handle(subdict, addr, ip, chain) -> str | None:
-            if subdict["rule"]["expr"][0]["match"]["right"] == ip and\
-             subdict["rule"]["expr"][0]["match"]["left"]["payload"]["field"] == addr\
-             and subdict["rule"]["chain"] == chain:  # noqa
+            if (
+                subdict["rule"]["expr"][0]["match"]["right"] == ip
+                and subdict["rule"]["expr"][0]["match"]["left"]["payload"]["field"]
+                == addr
+                and subdict["rule"]["chain"] == chain
+            ):
                 return subdict["rule"]["handle"]
             return None
 
@@ -365,17 +366,13 @@ class Limiter:
 
         for subdict in nft_json:
             try:
-                forward_outgoing = get_handle(
-                    subdict, "saddr", host.ip, "FORWARD")
+                forward_outgoing = get_handle(subdict, "saddr", host.ip, "FORWARD")
 
-                forward_incoming = get_handle(
-                    subdict, "daddr", host.ip, "FORWARD")
+                forward_incoming = get_handle(subdict, "daddr", host.ip, "FORWARD")
 
-                post_handle = get_handle(
-                    subdict, "saddr", host.ip, "POSTROUTING")
+                post_handle = get_handle(subdict, "saddr", host.ip, "POSTROUTING")
 
-                pre_handle = get_handle(
-                    subdict, "daddr", host.ip, "PREROUTING")
+                pre_handle = get_handle(subdict, "daddr", host.ip, "PREROUTING")
             except KeyError:
                 pass
 
@@ -389,7 +386,7 @@ class Limiter:
                         "eng",
                         "POSTROUTING",
                         "handle",
-                        str(post_handle)
+                        str(post_handle),
                     ]
                 )
                 shell.execute_suppressed(
@@ -401,7 +398,7 @@ class Limiter:
                         "eng",
                         "FORWARD",
                         "handle",
-                        str(forward_outgoing)
+                        str(forward_outgoing),
                     ]
                 )
             if (direction & Direction.INCOMING) == Direction.INCOMING:
@@ -414,7 +411,7 @@ class Limiter:
                         "eng",
                         "PREROUTING",
                         "handle",
-                        str(pre_handle)
+                        str(pre_handle),
                     ]
                 )
                 shell.execute_suppressed(
@@ -426,7 +423,7 @@ class Limiter:
                         "eng",
                         "FORWARD",
                         "handle",
-                        str(forward_incoming)
+                        str(forward_incoming),
                     ]
                 )
 

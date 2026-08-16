@@ -2,21 +2,22 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 # pylint: disable=no-name-in-module
+import collections
 import socket
 import threading
-import collections
 from concurrent.futures import ThreadPoolExecutor
-from rich.progress import Progress, TextColumn, SpinnerColumn, BarColumn
-from scapy.all import srp1, ARP, Ether
 
-from evillimiter_ng.console.io import IO
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
+from scapy.all import ARP, Ether, srp1
+
 from evillimiter_ng.common.globals import BROADCAST
+from evillimiter_ng.console.io import IO
+
 from .host import Host
 
 
 class HostScanner:
-    Settings = collections.namedtuple(
-        "Settings", "max_workers retries timeout")
+    Settings = collections.namedtuple("Settings", "max_workers retries timeout")
 
     def __init__(self, interface, iprange):
         self.interface = interface
@@ -54,11 +55,9 @@ class HostScanner:
             self.settings = self._intense_settings
 
     def scan(self, iprange=None):
-        with ThreadPoolExecutor(max_workers=self.settings.max_workers)\
-                as executor:
+        with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             hosts = []
-            iprange = [str(x)
-                       for x in (self.iprange if iprange is None else iprange)]
+            iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
             iterable = executor.map(self._sweep, iprange)
 
             with Progress(
@@ -74,8 +73,7 @@ class HostScanner:
                         if host is not None:
                             try:
                                 host_info = socket.gethostbyaddr(host.ip)
-                                name = \
-                                    "" if host_info is None else host_info[0]
+                                name = "" if host_info is None else host_info[0]
                                 host.name = name
                             except socket.herror:
                                 pass
@@ -87,11 +85,9 @@ class HostScanner:
             return hosts
 
     def scan_for_reconnects(self, hosts, iprange=None):
-        with ThreadPoolExecutor(max_workers=self.settings.max_workers)\
-                as executor:
+        with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             scanned_hosts = []
-            iprange = [str(x)
-                       for x in (self.iprange if iprange is None else iprange)]
+            iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
             for host in executor.map(self._sweep, iprange):
                 if host is not None:
                     scanned_hosts.append(host)
@@ -120,7 +116,7 @@ class HostScanner:
             iface=self.interface,
             retry=settings.retries,
             timeout=settings.timeout,
-            verbose=0
+            verbose=0,
         )
 
         if answer is not None:

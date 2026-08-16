@@ -6,30 +6,28 @@ import threading
 import netaddr
 
 from evillimiter_ng.console.io import IO
-from evillimiter_ng.networking.host import Host
-from evillimiter_ng.networking.limit import Limiter, Direction
-from evillimiter_ng.networking.spoof import ARPSpoofer
-from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
-from evillimiter_ng.networking.monitor import BandwidthMonitor
-from evillimiter_ng.networking.watch import HostWatcher
+from evillimiter_ng.lib.errors import BitError
 from evillimiter_ng.networking import utils as netutils
+from evillimiter_ng.networking.host import Host
+from evillimiter_ng.networking.limit import Direction, Limiter
+from evillimiter_ng.networking.monitor import BandwidthMonitor
+from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
+from evillimiter_ng.networking.spoof import ARPSpoofer
+from evillimiter_ng.networking.watch import HostWatcher
 
 
 class CoreLimiter:
-    def __init__(self, interface: str, gateway_ip: str,
-                 gateway_mac: str, netmask):
+    def __init__(self, interface: str, gateway_ip: str, gateway_mac: str, netmask):
         self.interface = interface  # specified IPv4 interface
         self.gateway_ip = gateway_ip
         self.gateway_mac = gateway_mac
         self.netmask = netmask
 
         # range of IP address calculated from gateway IP and netmask
-        self.iprange = list(netaddr.IPNetwork(
-            f"{self.gateway_ip}/{self.netmask}"))
+        self.iprange = list(netaddr.IPNetwork(f"{self.gateway_ip}/{self.netmask}"))
 
         self.host_scanner = HostScanner(self.interface, self.iprange)
-        self.arp_spoofer = ARPSpoofer(
-            self.interface, self.gateway_ip, self.gateway_mac)
+        self.arp_spoofer = ARPSpoofer(self.interface, self.gateway_ip, self.gateway_mac)
         self.limiter = Limiter(self.interface)
         self.bandwidth_monitor = BandwidthMonitor(self.interface)
         self.host_watcher = HostWatcher(
@@ -47,8 +45,7 @@ class CoreLimiter:
         # start the host watch thread
         self.host_watcher.start()
 
-    def scan(self, range: str | None = None,
-             intensity: str = "2") -> list[Host] | None:
+    def scan(self, range: str | None = None, intensity: str = "2") -> list[Host] | None:
         if range:
             iprange = self._parse_iprange(range)
             if iprange is None:
@@ -76,8 +73,9 @@ class CoreLimiter:
 
         return hosts
 
-    def block(self, id: str | int,
-              upload: str | None = None, download: str | None = None):
+    def block(
+        self, id: str | int, upload: str | None = None, download: str | None = None
+    ):
         hosts = self.get_hosts_by_ids(id)
         direction = self._parse_direction_args(upload, download)
 
@@ -100,15 +98,20 @@ blocked{IO.END_BOLD_LIGHTRED}."
             for host in hosts:
                 self._free_host(host)
 
-    def limit(self, id: str, rate: str | netutils.BitRate,
-              upload: str | None = None, download: str | None = None):
+    def limit(
+        self,
+        id: str,
+        rate: str | netutils.BitRate,
+        upload: str | None = None,
+        download: str | None = None,
+    ):
         hosts = self.get_hosts_by_ids(id)
         if hosts is None or len(hosts) == 0:
             return
 
         try:
             rate = netutils.BitRate.from_rate_string(rate)
-        except Exception:
+        except BitError:
             IO.error("Limit rate is invalid.")
             return
 
@@ -195,8 +198,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
             return int(value)
         return 2
 
-    def get_hosts_by_ids(
-            self, ids_string: str | int) -> set[Host] | list[Host] | None:
+    def get_hosts_by_ids(self, ids_string: str | int) -> set[Host] | list[Host] | None:
         if isinstance(ids_string, int):
             ids_string = str(ids_string)
         if ids_string == "all":
@@ -231,8 +233,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                         return
                 else:
                     id_ = int(id_)
-                    if (len(self.hosts) == 0 or
-                            id_ not in range(len(self.hosts))):
+                    if len(self.hosts) == 0 or id_ not in range(len(self.hosts)):
                         IO.error(
                             f"No host with id {IO.LIGHTYELLOW}{id_}\
 {IO.END_LIGHTYELLOW}."

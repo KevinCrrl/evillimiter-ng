@@ -4,3 +4,11 @@
 
 class UnsupportedSystem(Exception):
     pass
+
+
+class ByteValueError(Exception):
+    pass
+
+
+class BitError(Exception):
+    pass

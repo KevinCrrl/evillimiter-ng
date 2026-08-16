@@ -20,6 +20,9 @@ dependencies = [
     'prompt_toolkit>=3.0.0'
 ]
 
+[project.optional-dependencies]
+dev = ["ruff", "hatch"]
+
 classifiers = ['Environment :: Console',
                'Intended Audience :: End Users/Desktop',
                'Intended Audience :: System Administrators',
@@ -33,7 +36,6 @@ classifiers = ['Environment :: Console',
 [project.urls]
 "Homepage" = "https://github.com/KevinCrrl/evillimiter-ng"
 "Bug Tracker" = "https://github.com/KevinCrrl/evillimiter-ng/issues"
-
 
 [project.scripts]
 evillimiter-ng = "evillimiter_ng.evillimiter_ng:main"
@@ -50,3 +52,6 @@ packages = ["evillimiter_ng"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["evillimiter_ng"]
+
+[tool.ruff.lint]
+ignore = ["EXE002", "SIM115"]

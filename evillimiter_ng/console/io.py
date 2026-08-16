@@ -35,8 +35,11 @@ class IO:
         """
         Print a success status message
         """
-        IO.print(f"[{IO.BOLD_LIGHTBLUE}  OK\
-{IO.END_BOLD_LIGHTBLUE}  ]  {text}", end=end)  # noqa: E202
+        IO.print(
+            f"[{IO.BOLD_LIGHTBLUE}  OK\
+{IO.END_BOLD_LIGHTBLUE}  ]  {text}",
+            end=end,
+        )
 
     @staticmethod
     def error(text):
@@ -53,26 +56,28 @@ class IO:
         try:
             return IO.session.prompt(
                 text,
-                completer=NestedCompleter.from_nested_dict({
-                    "scan": {"-r", "-i", "--range", "--intensity"},
-                    "hosts": None,
-                    "limit": {"-u", "-d", "--upload", "--download"},
-                    "block": {"-u", "-d", "--upload", "--download"},
-                    "free": None,
-                    "add": {"-m", "--mac", "-n", "--name"},
-                    "monitor": {"-i", "--interval", "-w", "--with-id"},
-                    "analyze": {"-d", "--duration"},
-                    "watch": {"add", "remove", "set"},
-                    "sleep": None,
-                    "clear": None,
-                    "exit": None,
-                    "--help": None,
-                    "import-json": None,
-                    "export-json": None
-                }),
+                completer=NestedCompleter.from_nested_dict(
+                    {
+                        "scan": {"-r", "-i", "--range", "--intensity"},
+                        "hosts": None,
+                        "limit": {"-u", "-d", "--upload", "--download"},
+                        "block": {"-u", "-d", "--upload", "--download"},
+                        "free": None,
+                        "add": {"-m", "--mac", "-n", "--name"},
+                        "monitor": {"-i", "--interval", "-w", "--with-id"},
+                        "analyze": {"-d", "--duration"},
+                        "watch": {"add", "remove", "set"},
+                        "sleep": None,
+                        "clear": None,
+                        "exit": None,
+                        "--help": None,
+                        "import-json": None,
+                        "export-json": None,
+                    }
+                ),
                 complete_while_typing=True,
                 auto_suggest=AutoSuggestFromHistory(),
-                show_frame=True
+                show_frame=True,
             )
         except EOFError:
             return "exit"

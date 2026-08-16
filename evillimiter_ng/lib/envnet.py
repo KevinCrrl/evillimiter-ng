@@ -1,24 +1,24 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import socket
-import platform
 import os
+import platform
+import socket
 
 import psutil
-from scapy.all import Ether, ARP, srp1, conf  # pylint: disable=no-name-in-module # noqa
+from scapy.all import ARP, Ether, conf, srp1  # pylint: disable=no-name-in-module
 
-from evillimiter_ng.networking import utils as netutils
-from evillimiter_ng.console.io import IO
-from evillimiter_ng.console import shell
-from evillimiter_ng.lib import errors as errs
 from evillimiter_ng.common.globals import (
-    BIN_TC,
     BIN_NFT,
     BIN_SYSCTL,
-    IP_FORWARD_LOC,
+    BIN_TC,
     BROADCAST,
+    IP_FORWARD_LOC,
 )
+from evillimiter_ng.console import shell
+from evillimiter_ng.console.io import IO
+from evillimiter_ng.lib import errors as errs
+from evillimiter_ng.networking import utils as netutils
 
 
 def is_privileged():
@@ -39,22 +39,22 @@ def get_default_interface() -> str:
             continue
 
         for snicaddr in info:
-            if snicaddr.family == socket.AF_INET and \
-                    snicaddr.broadcast is not None:
+            if snicaddr.family == socket.AF_INET and snicaddr.broadcast is not None:
                 return interface
     return ""
 
 
-def initialize(interface: str = get_default_interface(),
-               show_io: bool = False):
+def initialize(interface: str = get_default_interface(), show_io: bool = False):
     """
     Sets up requirements, e.g. IP-Forwarding, 3rd party applications
     """
     if not is_privileged():
         raise PermissionError("This program requires root access to found.")
     if not is_linux():
-        raise errs.UnsupportedSystem("This program only supports Linux \
-systems.")
+        raise errs.UnsupportedSystem(
+            "This program only supports Linux \
+systems."
+        )
     if not netutils.network_settings(interface):
         if show_io:
             IO.error("qdisc root handle could not be created.")
@@ -110,17 +110,17 @@ def get_mac_by_ip(interface: str, address: str) -> str:
 
 
 def delete_network_settings(interface):
-    return shell.execute_suppressed(
-        [BIN_TC, "qdisc", "del", "dev",
-            interface, "root", "handle", "1:0", "htb"]
-    ) == 0 and shell.execute_suppressed(
-        [BIN_NFT, "delete", "table", "eng"]
-    ) == 0
+    return (
+        shell.execute_suppressed(
+            [BIN_TC, "qdisc", "del", "dev", interface, "root", "handle", "1:0", "htb"]
+        )
+        == 0
+        and shell.execute_suppressed([BIN_NFT, "delete", "table", "eng"]) == 0
+    )
 
 
 def disable_ip_forwarding():
-    return shell.execute_suppressed([BIN_SYSCTL, "-w",
-                                    f"{IP_FORWARD_LOC}=0"]) == 0
+    return shell.execute_suppressed([BIN_SYSCTL, "-w", f"{IP_FORWARD_LOC}=0"]) == 0
 
 
 def stop_eng(interface: str = get_default_interface()):

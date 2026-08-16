@@ -1,18 +1,18 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import sys
 import argparse
 import collections
+import sys
 
 import evillimiter_ng.networking.utils as netutils
-from evillimiter_ng.lib import envnet
-from evillimiter_ng.menus.main_menu import MainMenu
+from evillimiter_ng.common import globals as gb
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.console.io import IO
-from evillimiter_ng.common import globals as gb
+from evillimiter_ng.lib import envnet
 from evillimiter_ng.lib.envnet import initialize
 from evillimiter_ng.lib.errors import UnsupportedSystem
+from evillimiter_ng.menus.main_menu import MainMenu
 
 InitialArguments = collections.namedtuple(
     "InitialArguments", "interface, gateway_ip, netmask, gateway_mac"
@@ -54,7 +54,7 @@ not specified.",
         "-v",
         "--version",
         action="store_true",
-        help="Displays the version of the program currently in use."
+        help="Displays the version of the program currently in use.",
     )
 
     return parser.parse_args()
@@ -69,7 +69,8 @@ def process_arguments(args):
     if args.version:
         IO.print(
             f"EvilLimiter Next Generation Version \
-{IO.BOLD_LIGHTBLUE}{gb.VERSION}{IO.END_BOLD_LIGHTBLUE}")
+{IO.BOLD_LIGHTBLUE}{gb.VERSION}{IO.END_BOLD_LIGHTBLUE}"
+        )
         sys.exit(0)
 
     if args.interface is None:
@@ -77,7 +78,8 @@ def process_arguments(args):
         if interface is None:
             IO.error(
                 "default interface could not be resolved. specify \
-manually (-i).")
+manually (-i)."
+            )
             return
     else:
         interface = args.interface
@@ -151,8 +153,11 @@ def main():
 
         if initialize(args.interface, True):
             menu = MainMenu(
-                gb.VERSION, args.interface, args.gateway_ip,
-                args.gateway_mac, args.netmask
+                gb.VERSION,
+                args.interface,
+                args.gateway_ip,
+                args.gateway_mac,
+                args.netmask,
             )
             menu.start()
             envnet.stop_eng(args.interface)
