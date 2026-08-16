@@ -45,14 +45,16 @@ def get_default_interface() -> str:
     return ""
 
 
-def initialize(interface: str = get_default_interface(), show_io: bool = False):
+def initialize(interface: str = get_default_interface(),
+               show_io: bool = False):
     """
     Sets up requirements, e.g. IP-Forwarding, 3rd party applications
     """
     if not is_privileged():
         raise PermissionError("This program requires root access to found.")
     if not is_linux():
-        raise errs.UnsupportedSystem("This program only supports Linux systems.")
+        raise errs.UnsupportedSystem("This program only supports Linux \
+systems.")
     if not netutils.network_settings(interface):
         if show_io:
             IO.error("qdisc root handle could not be created.")
@@ -61,8 +63,8 @@ def initialize(interface: str = get_default_interface(), show_io: bool = False):
             IO.ok("Flushed network settings\n")
         if not netutils.network_settings(interface):
             if show_io:
-                IO.error("""The qdisc root handle could not be created even after
-the flush, your system may need to be restarted if you
+                IO.error("""The qdisc root handle could not be created even
+after the flush, your system may need to be restarted if you
 updated a critical low-level component such as the kernel.""")
             return False
 

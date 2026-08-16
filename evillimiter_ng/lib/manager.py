@@ -47,7 +47,8 @@ class CoreLimiter:
         # start the host watch thread
         self.host_watcher.start()
 
-    def scan(self, range: str | None = None, intensity: str  = "2") -> list[Host]:
+    def scan(self, range: str | None = None,
+             intensity: str = "2") -> list[Host]:
         if range:
             iprange = self._parse_iprange(range)
             if iprange is None:

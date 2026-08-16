@@ -22,7 +22,6 @@ from evillimiter_ng.console.io import IO
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.limit import Direction
-from evillimiter_ng.networking.scan import ScanIntensity
 from evillimiter_ng.lib.manager import CoreLimiter
 from evillimiter_ng.lib.envnet import get_mac_by_ip
 
