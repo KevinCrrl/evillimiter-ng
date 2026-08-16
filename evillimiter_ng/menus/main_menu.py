@@ -227,7 +227,7 @@ hosts discovered.")
         Handles 'limit' command-line argument
         Limits bandwith of host to specified rate
         """
-        hosts = self._get_hosts_by_ids(args.id)
+        hosts = self.get_hosts_by_ids(args.id)
         if hosts is None or len(hosts) == 0:
             return
 
@@ -255,7 +255,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
         Handles 'block' command-line argument
         Blocks internet communication for host
         """
-        hosts = self._get_hosts_by_ids(args.id)
+        hosts = self.get_hosts_by_ids(args.id)
         direction = self._parse_direction_args(args)
 
         if hosts is not None and len(hosts) > 0:
@@ -276,7 +276,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
         Handles 'free' command-line argument
         Frees the host from all limitations
         """
-        hosts = self._get_hosts_by_ids(args.id)
+        hosts = self.get_hosts_by_ids(args.id)
         if hosts is not None and len(hosts) > 0:
             for host in hosts:
                 self._free_host(host)
@@ -367,7 +367,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
             return table
 
         if args.with_id:
-            hosts = self._get_hosts_by_ids(args.with_id)
+            hosts = self.get_hosts_by_ids(args.with_id)
         else:
             hosts = []
 
@@ -409,7 +409,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
             self._free_host(host)
 
     def _analyze_handler(self, args):
-        hosts = self._get_hosts_by_ids(args.id)
+        hosts = self.get_hosts_by_ids(args.id)
         if hosts is None or len(hosts) == 0:
             IO.error("No hosts to be analyzed.")
             return
@@ -588,7 +588,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
         Handles 'watch add' command-line argument
         Adds host to the reconnection watch list
         """
-        hosts = self._get_hosts_by_ids(args.id)
+        hosts = self.get_hosts_by_ids(args.id)
         if hosts is None or len(hosts) == 0:
             return
 
@@ -600,7 +600,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
         Handles 'watch remove' command-line argument
         Removes host from the reconnection watch list
         """
-        hosts = self._get_hosts_by_ids(args.id)
+        hosts = self.get_hosts_by_ids(args.id)
         if hosts is None or len(hosts) == 0:
             return
 
@@ -726,47 +726,3 @@ be corrupted.")
 {IO.LIGHTYELLOW}-h{IO.END_LIGHTYELLOW} to show command \
 information."
         )
-
-    def _get_hosts_by_ids(self, ids_string):
-        if ids_string == "all":
-            with self.hosts_lock:
-                return self.hosts.copy()
-
-        ids = ids_string.split(",")
-        hosts = set()
-
-        with self.hosts_lock:
-            for id_ in ids:
-                is_mac = netutils.validate_mac_address(id_)
-                is_ip = netutils.validate_ip_address(id_)
-                is_id_ = id_.isdigit()
-
-                if not is_mac and not is_ip and not is_id_:
-                    IO.error(f"Invalid identifier(s): '{ids_string}'.")
-                    return
-
-                if is_mac or is_ip:
-                    found = False
-                    for host in self.hosts:
-                        if host.mac == id_.lower() or host.ip == id_:
-                            found = True
-                            hosts.add(host)
-                            break
-                    if not found:
-                        IO.error(
-                            f"No host matching {IO.LIGHTYELLOW}{id_}\
-{IO.END_LIGHTYELLOW}."
-                        )
-                        return
-                else:
-                    id_ = int(id_)
-                    if (len(self.hosts) == 0 or
-                            id_ not in range(len(self.hosts))):
-                        IO.error(
-                            f"No host with id {IO.LIGHTYELLOW}{id_}\
-{IO.END_LIGHTYELLOW}."
-                        )
-                        return
-                    hosts.add(self.hosts[id_])
-
-        return hosts

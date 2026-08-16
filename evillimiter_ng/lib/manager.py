@@ -9,10 +9,10 @@ from evillimiter_ng.console.io import IO
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.limit import Limiter, Direction
 from evillimiter_ng.networking.spoof import ARPSpoofer
-from evillimiter_ng.networking.scan import HostScanner
+from evillimiter_ng.networking.scan import HostScanner, ScanIntensity
 from evillimiter_ng.networking.monitor import BandwidthMonitor
 from evillimiter_ng.networking.watch import HostWatcher
-from evillimiter_ng.networking.scan import ScanIntensity
+from evillimiter_ng.networking import utils as netutils
 
 
 class CoreLimiter:
@@ -145,3 +145,48 @@ class CoreLimiter:
         ):
             return int(value)
         return 2
+
+    def get_hosts_by_ids(self,
+                         ids_string: str) -> set[Host] | list[Host] | None:
+        if ids_string == "all":
+            with self.hosts_lock:
+                return self.hosts.copy()
+
+        ids = ids_string.split(",")
+        hosts = set()
+
+        with self.hosts_lock:
+            for id_ in ids:
+                is_mac = netutils.validate_mac_address(id_)
+                is_ip = netutils.validate_ip_address(id_)
+                is_id_ = id_.isdigit()
+
+                if not is_mac and not is_ip and not is_id_:
+                    IO.error(f"Invalid identifier(s): '{ids_string}'.")
+                    return
+
+                if is_mac or is_ip:
+                    found = False
+                    for host in self.hosts:
+                        if host.mac == id_.lower() or host.ip == id_:
+                            found = True
+                            hosts.add(host)
+                            break
+                    if not found:
+                        IO.error(
+                            f"No host matching {IO.LIGHTYELLOW}{id_}\
+{IO.END_LIGHTYELLOW}."
+                        )
+                        return
+                else:
+                    id_ = int(id_)
+                    if (len(self.hosts) == 0 or
+                            id_ not in range(len(self.hosts))):
+                        IO.error(
+                            f"No host with id {IO.LIGHTYELLOW}{id_}\
+{IO.END_LIGHTYELLOW}."
+                        )
+                        return
+                    hosts.add(self.hosts[id_])
+
+        return hosts
