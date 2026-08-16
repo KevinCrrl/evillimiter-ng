@@ -10,7 +10,6 @@ import base64
 import socket
 from argparse import ArgumentParser, ArgumentError, RawTextHelpFormatter
 from shlex import split
-import netaddr
 from prompt_toolkit.shortcuts import yes_no_dialog
 from rich.table import Table
 from rich.columns import Columns
@@ -190,35 +189,7 @@ interval 120\nwatch set intensity 1")
         Handles 'scan' command-line argument
         (Re)scans for hosts on the network
         """
-        if args.range:
-            iprange = self._parse_iprange(args.range)
-            if iprange is None:
-                IO.error("invalid ip range.")
-                return
-        else:
-            iprange = None
-
-        if args.intensity:
-            intensity = self._parse_scan_intensity(args.intensity)
-            if intensity is None:
-                IO.error("Invalid intensity level.")
-                return
-        else:
-            intensity = ScanIntensity.NORMAL
-
-        self.host_scanner.set_intensity(intensity)
-
-        with self.hosts_lock:
-            for host in self.hosts:
-                self._free_host(host)
-
-        IO.print()
-        hosts = self.host_scanner.scan(iprange)
-
-        self.hosts_lock.acquire()
-        self.hosts = hosts
-        self.hosts_lock.release()
-
+        hosts: list[Host] = self.scan(args.range, args.intensity)
         IO.ok(f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
 hosts discovered.")
         IO.print()
@@ -800,29 +771,3 @@ information."
                     hosts.add(self.hosts[id_])
 
         return hosts
-
-    def _parse_direction_args(self, args):
-        direction = Direction.NONE
-
-        if args.upload:
-            direction |= Direction.OUTGOING
-        if args.download:
-            direction |= Direction.INCOMING
-
-        return Direction.BOTH if direction == Direction.NONE else direction
-
-    def _parse_iprange(self, ip_range):
-        try:
-            if "-" in ip_range:
-                return list(netaddr.iter_iprange(*ip_range.split("-")))
-            return list(netaddr.IPNetwork(ip_range))
-        except netaddr.AddrFormatError:
-            return
-
-    def _parse_scan_intensity(self, value):
-        if value.isdigit() and int(value) in (
-            ScanIntensity.QUICK,
-            ScanIntensity.NORMAL,
-            ScanIntensity.INTENSE,
-        ):
-            return int(value)

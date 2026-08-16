@@ -2,14 +2,16 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import socket
+import platform
+import os
 
 import psutil
 from scapy.all import Ether, ARP, srp1, conf  # pylint: disable=no-name-in-module # noqa
-from scapy.interfaces import get_if_list
 
 from evillimiter_ng.networking import utils as netutils
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.console import shell
+from evillimiter_ng.lib import errors as errs
 from evillimiter_ng.common.globals import (
     BIN_TC,
     BIN_NFT,
@@ -17,6 +19,14 @@ from evillimiter_ng.common.globals import (
     IP_FORWARD_LOC,
     BROADCAST,
 )
+
+
+def is_privileged():
+    return os.geteuid() == 0
+
+
+def is_linux():
+    return platform.system() == "Linux"
 
 
 def get_default_interface() -> str:
@@ -35,24 +45,31 @@ def get_default_interface() -> str:
     return ""
 
 
-def initialize(interface: str = get_default_interface()):
+def initialize(interface: str = get_default_interface(), show_io: bool = False):
     """
     Sets up requirements, e.g. IP-Forwarding, 3rd party applications
     """
+    if not is_privileged():
+        raise PermissionError("This program requires root access to found.")
+    if not is_linux():
+        raise errs.UnsupportedSystem("This program only supports Linux systems.")
     if not netutils.network_settings(interface):
-        IO.print()
-        IO.error("qdisc root handle could not be created.")
+        if show_io:
+            IO.error("qdisc root handle could not be created.")
         netutils.flush_network_settings(interface)
-        IO.ok("Flushed network settings\n")
+        if show_io:
+            IO.ok("Flushed network settings\n")
         if not netutils.network_settings(interface):
-            IO.error("""The qdisc root handle could not be created even after
+            if show_io:
+                IO.error("""The qdisc root handle could not be created even after
 the flush, your system may need to be restarted if you
 updated a critical low-level component such as the kernel.""")
             return False
 
     if not netutils.enable_ip_forwarding():
-        IO.print()
-        IO.error("IP forwarding could not be enabled.")
+        if show_io:
+            IO.print()
+            IO.error("IP forwarding could not be enabled.")
         return False
 
     return True

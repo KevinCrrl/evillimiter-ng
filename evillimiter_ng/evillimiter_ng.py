@@ -1,10 +1,8 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import os
 import sys
 import argparse
-import platform
 import collections
 
 import evillimiter_ng.networking.utils as netutils
@@ -14,18 +12,11 @@ from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.common import globals as gb
 from evillimiter_ng.lib.envnet import initialize
+from evillimiter_ng.lib.errors import UnsupportedSystem
 
 InitialArguments = collections.namedtuple(
     "InitialArguments", "interface, gateway_ip, netmask, gateway_mac"
 )
-
-
-def is_privileged():
-    return os.geteuid() == 0
-
-
-def is_linux():
-    return platform.system() == "Linux"
 
 
 def parse_arguments():
@@ -148,27 +139,24 @@ def main():
     """
     Main entry point of the application
     """
-    if not is_linux():
-        IO.error("Run under linux.")
-        return
+    try:
+        args = parse_arguments()
 
-    if not is_privileged():
+        args = process_arguments(args)
+
+        IO.print(MAIN_BANNER)
+
+        if args is None:
+            return
+
+        if initialize(args.interface, True):
+            menu = MainMenu(
+                gb.VERSION, args.interface, args.gateway_ip,
+                args.gateway_mac, args.netmask
+            )
+            menu.start()
+            envnet.stop_eng(args.interface)
+    except PermissionError:
         IO.error("Run as root.")
-        return
-
-    args = parse_arguments()
-
-    args = process_arguments(args)
-
-    IO.print(MAIN_BANNER)
-
-    if args is None:
-        return
-
-    if initialize(args.interface):
-        menu = MainMenu(
-            gb.VERSION, args.interface, args.gateway_ip,
-            args.gateway_mac, args.netmask
-        )
-        menu.start()
-        envnet.stop_eng(args.interface)
+    except UnsupportedSystem:
+        IO.error("Run under Linux")

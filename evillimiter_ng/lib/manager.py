@@ -12,10 +12,12 @@ from evillimiter_ng.networking.spoof import ARPSpoofer
 from evillimiter_ng.networking.scan import HostScanner
 from evillimiter_ng.networking.monitor import BandwidthMonitor
 from evillimiter_ng.networking.watch import HostWatcher
+from evillimiter_ng.networking.scan import ScanIntensity
 
 
 class CoreLimiter:
-    def __init__(self, interface: str, gateway_ip: str, gateway_mac: str, netmask):
+    def __init__(self, interface: str, gateway_ip: str,
+                 gateway_mac: str, netmask):
         self.interface = interface  # specified IPv4 interface
         self.gateway_ip = gateway_ip
         self.gateway_mac = gateway_mac
@@ -44,6 +46,34 @@ class CoreLimiter:
         self.bandwidth_monitor.start()
         # start the host watch thread
         self.host_watcher.start()
+
+    def scan(self, range: str | None = None, intensity: str  = "2") -> list[Host]:
+        if range:
+            iprange = self._parse_iprange(range)
+            if iprange is None:
+                IO.error("invalid ip range.")
+                return []
+        else:
+            iprange = None
+
+        if intensity:
+            new_intensity = self._parse_scan_intensity(intensity)
+        else:
+            new_intensity = ScanIntensity.NORMAL
+
+        self.host_scanner.set_intensity(new_intensity)
+
+        with self.hosts_lock:
+            for host in self.hosts:
+                self._free_host(host)
+
+        hosts = self.host_scanner.scan(iprange)
+
+        self.hosts_lock.acquire()
+        self.hosts = hosts
+        self.hosts_lock.release()
+
+        return hosts
 
     def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
         if repl:
@@ -87,3 +117,30 @@ class CoreLimiter:
             self.limiter.unlimit(host, Direction.BOTH)
             self.bandwidth_monitor.remove(host)
             self.host_watcher.remove(host)
+
+    def _parse_direction_args(self, args):
+        direction = Direction.NONE
+
+        if args.upload:
+            direction |= Direction.OUTGOING
+        if args.download:
+            direction |= Direction.INCOMING
+
+        return Direction.BOTH if direction == Direction.NONE else direction
+
+    def _parse_iprange(self, ip_range):
+        try:
+            if "-" in ip_range:
+                return list(netaddr.iter_iprange(*ip_range.split("-")))
+            return list(netaddr.IPNetwork(ip_range))
+        except netaddr.AddrFormatError:
+            return
+
+    def _parse_scan_intensity(self, value) -> int:
+        if value.isdigit() and int(value) in (
+            ScanIntensity.QUICK,
+            ScanIntensity.NORMAL,
+            ScanIntensity.INTENSE,
+        ):
+            return int(value)
+        return 2
