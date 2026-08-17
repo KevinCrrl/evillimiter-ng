@@ -1,12 +1,20 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
+import base64
+import binascii
+import json
+import os
 import socket
+import stat
 import threading
+from pathlib import Path
 
 import netaddr
+from prompt_toolkit.shortcuts import yes_no_dialog
 
 from evillimiter_ng.console.io import IO
+from evillimiter_ng.lib.envnet import get_mac_by_ip
 from evillimiter_ng.lib.errors import BitError
 from evillimiter_ng.networking import utils as netutils
 from evillimiter_ng.networking.host import Host
@@ -129,7 +137,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
 limited{IO.END_BOLD_LIGHTRED} to {rate}."
             )
 
-    def add(self, ip: str, mac: str, name: str) -> dict[str: bool | str]:
+    def add(self, ip: str, mac: str, name: str) -> dict[str, bool | str]:
         if not netutils.validate_ip_address(ip):
             return {"success": False, "msg": "Invalid ip address."}
 
@@ -137,7 +145,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
             if not netutils.validate_mac_address(mac):
                 return {"success": False, "msg": "Invalid mac address."}
         else:
-            mac = netutils.get_mac_by_ip(self.interface, ip)
+            mac = get_mac_by_ip(self.interface, ip)
             if mac is None:
                 return {"success": False, "msg": "Unable to resolve mac address. Specify manually (--mac)."}
 
@@ -157,6 +165,63 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
             self.hosts.append(host)
 
         return {"success": True, "msg": "Host added."}
+
+    def export_json(self, json_path: str | Path) -> dict[str, bool | str | None]:
+        write: bool = True
+        if os.path.exists(json_path):
+            write = yes_no_dialog(
+                "There is already a file with that path and name.",
+                "Want to overwrite the file?",
+            ).run()
+
+        if write:
+            info: dict = {}
+            for host in self.hosts:
+                if host.name is None:
+                    host.name = ""
+                info[host.ip] = {"mac": host.mac, "hostname": host.name}
+            try:
+                # Read and Write for owner (root)
+                fd: int = os.open(
+                    json_path,
+                    os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                    stat.S_IRUSR | stat.S_IWUSR,
+                )
+
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    f.write(base64.b64encode(str(info).encode()).decode())
+                    return {"success": True, "msg": None}
+            except (FileNotFoundError, IsADirectoryError) as e:
+                return {"success": False, "msg": str(e)}
+        else:
+            return {"success": False, "msg": "The file could not be written."}
+
+    def import_json(self, json_path: str | Path) -> dict[str, bool | str | None]:
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                try:
+                    json_dict = json.loads(
+                        base64.b64decode(f.read(), validate=True)
+                        .decode()
+                        .replace("'", '"')
+                    )
+                except binascii.Error:
+                    return {"success": False, "msg": "The Base64 encoding of the JSON appears to be corrupted."}
+                else:
+                    for ip_arg, sub_dict in json_dict.items():
+                        IO.print(f"Adding host {ip_arg}")
+                        try:
+                            sub_dict["hostname"]
+                        except KeyError:
+                            sub_dict["hostname"] = None
+                        add_dict = self.add(ip_arg, sub_dict["mac"], sub_dict["hostname"])
+                        if add_dict["success"]:
+                            IO.ok(add_dict["msg"])
+                        else:
+                            IO.error(add_dict["msg"])
+                    return {"success": True, "msg": None}
+        except (FileNotFoundError, IsADirectoryError) as e:
+            return {"success": False, "msg": str(e)}
 
     def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
         if repl:
@@ -272,3 +337,19 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                     hosts.add(self.hosts[id_])
 
         return hosts
+
+    def get_host_id(self, host: Host, lock: bool = True):
+        ret = None
+
+        if lock:
+            self.hosts_lock.acquire()
+
+        for i, host_ in enumerate(self.hosts):
+            if host_ == host:
+                ret = i
+                break
+
+        if lock:
+            self.hosts_lock.release()
+
+        return ret

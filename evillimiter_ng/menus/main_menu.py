@@ -1,16 +1,10 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import base64
-import binascii
-import json
-import os
-import stat
 import time
 from argparse import ArgumentError, ArgumentParser, RawTextHelpFormatter
 from shlex import split
 
-from prompt_toolkit.shortcuts import yes_no_dialog
 from rich.columns import Columns
 from rich.live import Live
 from rich.progress import BarColumn, Progress, TextColumn
@@ -233,7 +227,7 @@ hosts discovered."
         with self.hosts_lock:
             for host in self.hosts:
                 table.add_row(
-                    f"{IO.LIGHTYELLOW}{self._get_host_id(host, lock=False)}\
+                    f"{IO.LIGHTYELLOW}{self.get_host_id(host, lock=False)}\
 {IO.END_LIGHTYELLOW}",
                     host.ip,
                     host.mac,
@@ -314,7 +308,7 @@ hosts discovered."
 
             for host, result in host_results:
                 table.add_row(
-                    str(self._get_host_id(host)),
+                    str(self.get_host_id(host)),
                     host.ip,
                     host.name,
                     f"{result.upload_rate}↑ {result.download_rate}↓",
@@ -327,9 +321,9 @@ hosts discovered."
             return table
 
         if args.with_id:
-            hosts = self.get_hosts_by_ids(args.with_id)
+            hosts: set[Host] | list[Host] | None = self.get_hosts_by_ids(args.with_id)
         else:
-            hosts = []
+            hosts: list = []
 
         hosts_to_be_freed = set()
 
@@ -469,7 +463,7 @@ hosts discovered."
             down_task = down_progress.add_task(description=":", total=max_down)
             up_progress.update(up_task, advance=int(values["up"]))
             down_progress.update(down_task, advance=int(values["down"]))
-            hid = str(self._get_host_id(host))
+            hid = str(self.get_host_id(host))
             ip = host.ip
             name = host.name
             up_panel.add_row(hid, ip, name, up_progress.get_renderable())
@@ -526,7 +520,7 @@ hosts discovered."
 
             for host in self.host_watcher.hosts:
                 watch_table.add_row(
-                    f"{IO.LIGHTYELLOW}{self._get_host_id(host)}\
+                    f"{IO.LIGHTYELLOW}{self.get_host_id(host)}\
                         {IO.END_LIGHTYELLOW}",
                     host.ip,
                     host.mac,
@@ -604,56 +598,14 @@ an invalid settings attribute."
             IO.error("Seconds must be an int or float")
 
     def _export_handler(self, args):
-        write: bool = True
-        if os.path.exists(args.json_path):
-            write = yes_no_dialog(
-                "There is already a file with that path and name.",
-                "Want to overwrite the file?",
-            ).run()
-
-        if write:
-            info: dict = {}
-            for host in self.hosts:
-                info[host.ip] = {"mac": host.mac, "hostname": host.name}
-            try:
-                # Read and Write for owner (root)
-                fd: int = os.open(
-                    args.json_path,
-                    os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
-                    stat.S_IRUSR | stat.S_IWUSR,
-                )
-
-                with os.fdopen(fd, "w", encoding="utf-8") as f:
-                    f.write(base64.b64encode(str(info).encode()).decode())
-            except (FileNotFoundError, IsADirectoryError) as e:
-                IO.error(e)
+        export_dict = self.export_json(args.json_path)
+        if not export_dict["success"]:
+            IO.error(export_dict["msg"])
 
     def _import_handler(self, args):
-        try:
-            with open(args.json_path, "r", encoding="utf-8") as f:
-                try:
-                    json_dict = json.loads(
-                        base64.b64decode(f.read(), validate=True)
-                        .decode()
-                        .replace("'", '"')
-                    )
-                except binascii.Error:
-                    IO.error(
-                        "The Base64 encoding of the JSON appears to \
-be corrupted."
-                    )
-                else:
-                    for ip_arg, sub_dict in json_dict.items():
-                        IO.print(f"Adding host {ip_arg}")
-                        try:
-                            sub_dict["hostname"]
-                        except KeyError:
-                            sub_dict["hostname"] = None
-                        self._add_handler(
-                            Host(ip_arg, sub_dict["mac"], sub_dict["hostname"])
-                        )
-        except (FileNotFoundError, IsADirectoryError) as e:
-            IO.error(e)
+        import_dict = self.import_json(args.json_path)
+        if not import_dict["success"]:
+            IO.error(import_dict["msg"])
 
     def _clear_handler(self, args):
         """
@@ -674,22 +626,6 @@ be corrupted."
     def _exit_handler(self, args):
         self.interrupt_handler(repl=True)
         self._active = False
-
-    def _get_host_id(self, host, lock=True):
-        ret = None
-
-        if lock:
-            self.hosts_lock.acquire()
-
-        for i, host_ in enumerate(self.hosts):
-            if host_ == host:
-                ret = i
-                break
-
-        if lock:
-            self.hosts_lock.release()
-
-        return ret
 
     def _print_help_reminder(self):
         IO.print(
