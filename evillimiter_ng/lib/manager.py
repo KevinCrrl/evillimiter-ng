@@ -1,6 +1,7 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
+import socket
 import threading
 
 import netaddr
@@ -127,6 +128,35 @@ blocked{IO.END_BOLD_LIGHTRED}."
 {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
 limited{IO.END_BOLD_LIGHTRED} to {rate}."
             )
+
+    def add(self, ip: str, mac: str, name: str) -> dict[str: bool | str]:
+        if not netutils.validate_ip_address(ip):
+            return {"success": False, "msg": "Invalid ip address."}
+
+        if mac:
+            if not netutils.validate_mac_address(mac):
+                return {"success": False, "msg": "Invalid mac address."}
+        else:
+            mac = netutils.get_mac_by_ip(self.interface, ip)
+            if mac is None:
+                return {"success": False, "msg": "Unable to resolve mac address. Specify manually (--mac)."}
+
+        if name is None:
+            try:
+                host_info = socket.gethostbyaddr(ip)
+                name = None if host_info is None else host_info[0]
+            except socket.herror:
+                pass
+
+        host = Host(ip, mac, name)
+
+        with self.hosts_lock:
+            if host in self.hosts:
+                return {"success": False, "msg": "Host does already exist."}
+
+            self.hosts.append(host)
+
+        return {"success": True, "msg": "Host added."}
 
     def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
         if repl:

@@ -5,7 +5,6 @@ import base64
 import binascii
 import json
 import os
-import socket
 import stat
 import time
 from argparse import ArgumentError, ArgumentParser, RawTextHelpFormatter
@@ -17,10 +16,8 @@ from rich.live import Live
 from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 
-import evillimiter_ng.networking.utils as netutils
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.console.io import IO
-from evillimiter_ng.lib.envnet import get_mac_by_ip
 from evillimiter_ng.lib.manager import CoreLimiter
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.utils import ByteValue
@@ -274,42 +271,11 @@ hosts discovered."
         Handles 'add' command-line argument
         Adds custom host to host list
         """
-        ip = args.ip
-        if not netutils.validate_ip_address(ip):
-            IO.error("Invalid ip address.")
-            return
-
-        if args.mac:
-            mac = args.mac
-            if not netutils.validate_mac_address(mac):
-                IO.error("Invalid mac address.")
-                return
+        add_return: dict = self.add(args.ip, args.mac, args.name)
+        if not add_return["success"]:
+            IO.error(add_return["msg"])
         else:
-            mac = get_mac_by_ip(self.interface, ip)
-            if mac is None:
-                IO.error("Unable to resolve mac address. Specify manually (--mac).")
-                return
-
-        name = None
-        if args.name:
-            name = args.name
-        else:
-            try:
-                host_info = socket.gethostbyaddr(ip)
-                name = None if host_info is None else host_info[0]
-            except socket.herror:
-                pass
-
-        host = Host(ip, mac, name)
-
-        with self.hosts_lock:
-            if host in self.hosts:
-                IO.error("Host does already exist.")
-                return
-
-            self.hosts.append(host)
-
-        IO.ok("Host added.")
+            IO.ok(add_return["msg"])
 
     def _monitor_handler(self, args):
         """

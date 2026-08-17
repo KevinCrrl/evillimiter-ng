@@ -20,9 +20,6 @@ dependencies = [
     'prompt_toolkit>=3.0.0'
 ]
 
-[project.optional-dependencies]
-dev = ["ruff", "hatch"]
-
 classifiers = ['Environment :: Console',
                'Intended Audience :: End Users/Desktop',
                'Intended Audience :: System Administrators',
@@ -32,6 +29,9 @@ classifiers = ['Environment :: Console',
                'Programming Language :: Python :: 3 :: Only',
                'Topic :: System :: Networking',
                ]
+
+[project.optional-dependencies]
+dev = ["ruff", "hatch"]
 
 [project.urls]
 "Homepage" = "https://github.com/KevinCrrl/evillimiter-ng"
