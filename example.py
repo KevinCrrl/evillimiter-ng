@@ -1,16 +1,12 @@
 from evillimiter_ng.lib import envnet, manager
 
-interface = envnet.get_default_interface()
-gateway_ip = envnet.get_default_gateway()
+interface: str = envnet.get_default_interface()
 
 envnet.initialize(interface)
 
-myeng = manager.CoreLimiter(interface,
-                            gateway_ip,
-                            envnet.get_mac_by_ip(interface, gateway_ip),
-                            envnet.get_default_netmask())
+myeng = manager.CoreLimiter()
 
-myeng.scan()
+myeng.scan(intensity=1)
 
 hosts = myeng.get_hosts_by_ids("all")
 if hosts is not None:
@@ -21,4 +17,4 @@ if hosts is not None:
     input("Press enter to free host...")
     myeng.free(hid)
 myeng.interrupt_handler()
-envnet.stop_eng()
+envnet.stop_eng(interface)

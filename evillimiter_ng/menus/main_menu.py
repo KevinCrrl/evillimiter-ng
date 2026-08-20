@@ -18,8 +18,8 @@ from evillimiter_ng.networking.utils import ByteValue
 
 
 class MainMenu(CoreLimiter):
-    def __init__(self, version, interface, gateway_ip, gateway_mac, netmask):
-        super().__init__(interface, gateway_ip, gateway_mac, netmask)
+    def __init__(self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars):
+        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars)
         self.prompt = ">>> "
         self.parser = ArgumentParser(
             prog="",  # Empty prog because it is a REPL, not a CLI

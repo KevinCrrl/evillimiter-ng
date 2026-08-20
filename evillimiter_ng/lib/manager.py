@@ -14,8 +14,8 @@ import netaddr
 from prompt_toolkit.shortcuts import yes_no_dialog
 
 from evillimiter_ng.console.io import IO
-from evillimiter_ng.lib.envnet import get_mac_by_ip
-from evillimiter_ng.lib.errors import BitError
+from evillimiter_ng.lib import envnet as et
+from evillimiter_ng.lib.errors import BitError, EnvnetError
 from evillimiter_ng.networking import utils as netutils
 from evillimiter_ng.networking.host import Host
 from evillimiter_ng.networking.limit import Direction, Limiter
@@ -26,11 +26,25 @@ from evillimiter_ng.networking.watch import HostWatcher
 
 
 class CoreLimiter:
-    def __init__(self, interface: str, gateway_ip: str, gateway_mac: str, netmask):
-        self.interface = interface  # specified IPv4 interface
-        self.gateway_ip = gateway_ip
-        self.gateway_mac = gateway_mac
-        self.netmask = netmask
+    def __init__(
+        self,
+        interface: str | None = None,
+        gateway_ip: str | None = None,
+        gateway_mac: str | None = None,
+        netmask: str | None = None,
+        verify_vars: bool = True
+    ):
+        args = et.InitialArguments(interface, gateway_ip, netmask, gateway_mac)
+        if verify_vars:
+            args = et.process_arguments(args, False)
+
+            if isinstance(args, str):
+                raise EnvnetError(args.split(".")[0])
+
+        self.interface = args.interface
+        self.gateway_ip = args.gateway_ip
+        self.gateway_mac = args.gateway_mac
+        self.netmask = args.netmask
 
         # range of IP address calculated from gateway IP and netmask
         self.iprange = list(netaddr.IPNetwork(f"{self.gateway_ip}/{self.netmask}"))
@@ -54,9 +68,11 @@ class CoreLimiter:
         # start the host watch thread
         self.host_watcher.start()
 
-    def scan(self, range: str | None = None, intensity: str = "2") -> list[Host] | None:
-        if range:
-            iprange = self._parse_iprange(range)
+    def scan(self, ip_range: str | None = None, intensity: str | int = "2") -> list[Host] | None:
+        if isinstance(intensity, int):
+            intensity = str(intensity)
+        if ip_range:
+            iprange = self._parse_iprange(ip_range)
             if iprange is None:
                 IO.error("invalid ip range.")
                 return
@@ -83,9 +99,9 @@ class CoreLimiter:
         return hosts
 
     def block(
-        self, id: str | int, upload: str | None = None, download: str | None = None
+        self, hid: str | int, upload: str | None = None, download: str | None = None
     ):
-        hosts = self.get_hosts_by_ids(id)
+        hosts = self.get_hosts_by_ids(hid)
         direction = self._parse_direction_args(upload, download)
 
         if hosts is not None and len(hosts) > 0:
@@ -101,20 +117,20 @@ class CoreLimiter:
 blocked{IO.END_BOLD_LIGHTRED}."
                 )
 
-    def free(self, id: str | int):
-        hosts = self.get_hosts_by_ids(id)
+    def free(self, hid: str | int):
+        hosts = self.get_hosts_by_ids(hid)
         if hosts is not None and len(hosts) > 0:
             for host in hosts:
                 self._free_host(host)
 
     def limit(
         self,
-        id: str,
+        hid: str,
         rate: str | netutils.BitRate,
         upload: str | None = None,
         download: str | None = None,
     ):
-        hosts = self.get_hosts_by_ids(id)
+        hosts = self.get_hosts_by_ids(hid)
         if hosts is None or len(hosts) == 0:
             return
 
@@ -137,7 +153,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
 limited{IO.END_BOLD_LIGHTRED} to {rate}."
             )
 
-    def add(self, ip: str, mac: str, name: str) -> dict[str, bool | str]:
+    def add(self, ip: str, mac: str | None = None, name: str | None = None) -> dict[str, bool | str]:
         if not netutils.validate_ip_address(ip):
             return {"success": False, "msg": "Invalid ip address."}
 
@@ -145,9 +161,13 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
             if not netutils.validate_mac_address(mac):
                 return {"success": False, "msg": "Invalid mac address."}
         else:
-            mac = get_mac_by_ip(self.interface, ip)
-            if mac is None:
-                return {"success": False, "msg": "Unable to resolve mac address. Specify manually (--mac)."}
+            try:
+                mac = et.get_mac_by_ip(self.interface, ip)
+            except EnvnetError:
+                return {
+                    "success": False,
+                    "msg": "Unable to resolve mac address. Specify manually (--mac).",
+                }
 
         if name is None:
             try:
@@ -206,7 +226,10 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                         .replace("'", '"')
                     )
                 except binascii.Error:
-                    return {"success": False, "msg": "The Base64 encoding of the JSON appears to be corrupted."}
+                    return {
+                        "success": False,
+                        "msg": "The Base64 encoding of the JSON appears to be corrupted.",
+                    }
                 else:
                     for ip_arg, sub_dict in json_dict.items():
                         IO.print(f"Adding host {ip_arg}")
@@ -214,7 +237,9 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                             sub_dict["hostname"]
                         except KeyError:
                             sub_dict["hostname"] = None
-                        add_dict = self.add(ip_arg, sub_dict["mac"], sub_dict["hostname"])
+                        add_dict = self.add(
+                            ip_arg, sub_dict["mac"], sub_dict["hostname"]
+                        )
                         if add_dict["success"]:
                             IO.ok(add_dict["msg"])
                         else:

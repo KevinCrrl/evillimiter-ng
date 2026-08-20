@@ -12,3 +12,7 @@ class ByteValueError(Exception):
 
 class BitError(Exception):
     pass
+
+
+class EnvnetError(Exception):
+    pass
