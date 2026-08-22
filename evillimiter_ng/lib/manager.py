@@ -33,6 +33,8 @@ class CoreLimiter:
         gateway_mac: str | None = None,
         netmask: str | None = None,
         verify_vars: bool = True,
+        auto_initialize: bool = True,
+        auto_stop: bool = True,
     ):
         args = et.InitialArguments(interface, gateway_ip, netmask, gateway_mac)
         if verify_vars:
@@ -45,6 +47,10 @@ class CoreLimiter:
         self.gateway_ip = args.gateway_ip
         self.gateway_mac = args.gateway_mac
         self.netmask = args.netmask
+        self.auto_stop = auto_stop
+
+        if auto_initialize:
+            et.initialize(self.interface)
 
         # range of IP address calculated from gateway IP and netmask
         self.iprange = list(netaddr.IPNetwork(f"{self.gateway_ip}/{self.netmask}"))
@@ -255,11 +261,8 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
         except (FileNotFoundError, IsADirectoryError) as e:
             return {"success": False, "msg": str(e)}
 
-    def interrupt_handler(self, repl: bool = False, ctrl_c: bool = False):
+    def interrupt(self, repl: bool = False):
         if repl:
-            if ctrl_c:
-                IO.print()
-
             IO.ok("Cleaning up... stand by...")
 
         self.arp_spoofer.stop()
@@ -267,6 +270,9 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
 
         for host in self.hosts:
             self._free_host(host)
+
+        if self.auto_stop:
+            et.stop_eng(self.interface)
 
     def _reconnect_callback(self, old_host: Host, new_host: Host):
         """

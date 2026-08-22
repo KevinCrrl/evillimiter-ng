@@ -21,7 +21,7 @@ class MainMenu(CoreLimiter):
     def __init__(
         self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars
     ):
-        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars)
+        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars, False, False)
         self.prompt = ">>> "
         self.parser = ArgumentParser(
             prog="",  # Empty prog because it is a REPL, not a CLI
@@ -184,7 +184,7 @@ interval 120\nwatch set intensity 1",
             try:
                 command = IO.input(self.prompt)
             except KeyboardInterrupt:
-                self.interrupt_handler()
+                self.interrupt(True)
                 break
 
             # split command and parse the split subcommands by spaces
@@ -625,7 +625,7 @@ an invalid settings attribute."
         self.parser.print_help()
 
     def _exit_handler(self, args):
-        self.interrupt_handler(repl=True)
+        self.interrupt(True)
         self._active = False
 
     def _print_help_reminder(self):
