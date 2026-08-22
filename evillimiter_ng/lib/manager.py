@@ -32,7 +32,7 @@ class CoreLimiter:
         gateway_ip: str | None = None,
         gateway_mac: str | None = None,
         netmask: str | None = None,
-        verify_vars: bool = True
+        verify_vars: bool = True,
     ):
         args = et.InitialArguments(interface, gateway_ip, netmask, gateway_mac)
         if verify_vars:
@@ -68,7 +68,12 @@ class CoreLimiter:
         # start the host watch thread
         self.host_watcher.start()
 
-    def scan(self, ip_range: str | None = None, intensity: str | int = "2") -> list[Host] | None:
+    def scan(
+        self,
+        ip_range: str | None = None,
+        intensity: str | int = "2",
+        transient: bool = True,
+    ) -> list[Host] | None:
         if isinstance(intensity, int):
             intensity = str(intensity)
         if ip_range:
@@ -90,7 +95,7 @@ class CoreLimiter:
             for host in self.hosts:
                 self._free_host(host)
 
-        hosts = self.host_scanner.scan(iprange)
+        hosts = self.host_scanner.scan(iprange, transient)
 
         self.hosts_lock.acquire()
         self.hosts = hosts
@@ -153,7 +158,9 @@ blocked{IO.END_BOLD_LIGHTRED}."
 limited{IO.END_BOLD_LIGHTRED} to {rate}."
             )
 
-    def add(self, ip: str, mac: str | None = None, name: str | None = None) -> dict[str, bool | str]:
+    def add(
+        self, ip: str, mac: str | None = None, name: str | None = None
+    ) -> dict[str, bool | str]:
         if not netutils.validate_ip_address(ip):
             return {"success": False, "msg": "Invalid ip address."}
 

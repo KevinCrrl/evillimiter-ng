@@ -54,7 +54,7 @@ class HostScanner:
         elif intensity == ScanIntensity.INTENSE:
             self.settings = self._intense_settings
 
-    def scan(self, iprange=None):
+    def scan(self, iprange=None, transient: bool = True):
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as executor:
             hosts = []
             iprange = [str(x) for x in (self.iprange if iprange is None else iprange)]
@@ -65,6 +65,7 @@ class HostScanner:
                 BarColumn(bar_width=None),
                 TextColumn("({task.completed}/{task.total})"),
                 console=IO.console,
+                transient=transient,
             ) as progress:
                 task = progress.add_task("Scaning...", total=len(iprange))
 

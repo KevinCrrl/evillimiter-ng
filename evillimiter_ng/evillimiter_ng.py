@@ -70,7 +70,7 @@ def main():
             IO.print(
                 f"EvilLimiter Next Generation Version \
 {IO.BOLD_LIGHTBLUE}{gb.VERSION}{IO.END_BOLD_LIGHTBLUE}"
-                )
+            )
             sys.exit(0)
 
         args = envnet.process_arguments(args)
@@ -89,7 +89,7 @@ def main():
                     args.gateway_ip,
                     args.gateway_mac,
                     args.netmask,
-                    True
+                    True,
                 )
         except EnvnetError as e:
             IO.error(e)

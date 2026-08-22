@@ -18,7 +18,9 @@ from evillimiter_ng.networking.utils import ByteValue
 
 
 class MainMenu(CoreLimiter):
-    def __init__(self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars):
+    def __init__(
+        self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars
+    ):
         super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars)
         self.prompt = ">>> "
         self.parser = ArgumentParser(
@@ -204,7 +206,7 @@ interval 120\nwatch set intensity 1",
         Handles 'scan' command-line argument
         (Re)scans for hosts on the network
         """
-        hosts: list[Host] = self.scan(args.range, args.intensity)
+        hosts: list[Host] = self.scan(args.range, args.intensity, False)
         IO.ok(
             f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
 hosts discovered."
@@ -283,8 +285,7 @@ hosts discovered."
                     [
                         x
                         for x in [
-                            (y, self.bandwidth_monitor.get(y))
-                            for y in self.hosts
+                            (y, self.bandwidth_monitor.get(y)) for y in self.hosts
                         ]
                         if x[1] is not None
                     ],
