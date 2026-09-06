@@ -203,7 +203,7 @@ interval 120\nwatch set intensity 1",
                     except ArgumentError:
                         if self.sh_mode:
                             try:
-                                run(subcommand, check=False, shell=False)
+                                run(split(subcommand), check=False, shell=False)
                             except FileNotFoundError:
                                 pass
                         else:
