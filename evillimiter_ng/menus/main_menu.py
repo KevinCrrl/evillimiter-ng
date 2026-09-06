@@ -184,7 +184,7 @@ interval 120\nwatch set intensity 1",
             try:
                 command = IO.input(self.prompt)
             except KeyboardInterrupt:
-                self.interrupt(True)
+                self.interrupt()
                 break
 
             # split command and parse the split subcommands by spaces
@@ -625,7 +625,7 @@ an invalid settings attribute."
         self.parser.print_help()
 
     def _exit_handler(self, args):
-        self.interrupt(True)
+        self.interrupt()
         self._active = False
 
     def _print_help_reminder(self):

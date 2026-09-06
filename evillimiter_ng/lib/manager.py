@@ -139,7 +139,7 @@ blocked{IO.END_BOLD_LIGHTRED}."
         if hosts is not None and len(hosts) > 0:
             for host in hosts:
                 self._free_host(host)
-                return True
+            return True
         return False
 
     def limit(
