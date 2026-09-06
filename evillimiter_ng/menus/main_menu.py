@@ -219,11 +219,12 @@ interval 120\nwatch set intensity 1",
         Handles 'scan' command-line argument
         (Re)scans for hosts on the network
         """
-        hosts: list[Host] = self.scan(args.range, args.intensity, False)
-        IO.ok(
-            f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
+        hosts: list[Host] | None = self.scan(args.range, args.intensity, False)
+        if hosts:
+            IO.ok(
+                f"{IO.LIGHTYELLOW}{len(hosts)}{IO.END_LIGHTYELLOW} \
 hosts discovered."
-        )
+            )
         IO.print()
 
     def _hosts_handler(self, args):
@@ -346,11 +347,12 @@ hosts discovered."
             interval = int(args.interval) / 1000  # from ms to s
 
         try:
-            for host in hosts:
-                if not host.spoofed:
-                    hosts_to_be_freed.add(host)
-                self.arp_spoofer.add(host)
-                self.bandwidth_monitor.add(host)
+            if hosts:
+                for host in hosts:
+                    if not host.spoofed:
+                        hosts_to_be_freed.add(host)
+                    self.arp_spoofer.add(host)
+                    self.bandwidth_monitor.add(host)
         except TypeError:
             IO.error("Host not found.")
 
