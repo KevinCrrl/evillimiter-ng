@@ -1,7 +1,6 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-# pylint: disable=no-name-in-module
 import collections
 import socket
 import threading

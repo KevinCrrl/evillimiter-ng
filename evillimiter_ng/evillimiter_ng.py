@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import argparse
-import collections
 import sys
 
 from evillimiter_ng.common import globals as gb
@@ -12,10 +11,6 @@ from evillimiter_ng.lib import envnet
 from evillimiter_ng.lib.envnet import initialize
 from evillimiter_ng.lib.errors import EnvnetError, UnsupportedSystem
 from evillimiter_ng.menus.main_menu import MainMenu
-
-InitialArguments = collections.namedtuple(
-    "InitialArguments", "interface, gateway_ip, netmask, gateway_mac"
-)
 
 
 def parse_arguments():
@@ -55,6 +50,12 @@ not specified.",
         action="store_true",
         help="Displays the version of the program currently in use.",
     )
+    parser.add_argument(
+        "-s",
+        "--shh",
+        action="store_true",
+        help="Enables a shell mode for typing commands and hides banners and flashy elements."
+    )
 
     return parser.parse_args()
 
@@ -65,6 +66,7 @@ def main():
     """
     try:
         args = parse_arguments()
+        shh = args.shh
 
         if args.version:
             IO.print(
@@ -73,16 +75,17 @@ def main():
             )
             sys.exit(0)
 
-        args = envnet.process_arguments(args)
+        args = envnet.process_arguments(args, not shh)
 
         if isinstance(args, str):
             IO.error(args)
             sys.exit(1)
 
-        IO.print(MAIN_BANNER)
+        if not shh:
+            IO.print(MAIN_BANNER)
 
         try:
-            if initialize(args.interface, True):
+            if initialize(args.interface, not shh):
                 menu = MainMenu(
                     gb.VERSION,
                     args.interface,
@@ -90,6 +93,7 @@ def main():
                     args.gateway_mac,
                     args.netmask,
                     True,
+                    sh_mode=shh
                 )
         except EnvnetError as e:
             IO.error(e)

@@ -3,7 +3,10 @@
 
 import time
 from argparse import ArgumentError, ArgumentParser, RawTextHelpFormatter
+from os import getcwd
 from shlex import split
+from socket import gethostname
+from subprocess import run
 
 from rich.columns import Columns
 from rich.live import Live
@@ -19,10 +22,13 @@ from evillimiter_ng.networking.utils import ByteValue
 
 class MainMenu(CoreLimiter):
     def __init__(
-        self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars
+            self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars, sh_mode
     ):
-        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars, False, False, True)
+        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars, False, False, not sh_mode)
+        self.sh_mode: bool = sh_mode
         self.prompt = ">>> "
+        if self.sh_mode:
+            self.prompt = f"root@{gethostname()}:{getcwd()} # "
         self.parser = ArgumentParser(
             prog="",  # Empty prog because it is a REPL, not a CLI
             exit_on_error=False,
@@ -171,7 +177,8 @@ interval 120\nwatch set intensity 1",
         exit_p.set_defaults(func=self._exit_handler)
 
         self.version = version  # application version
-        self._print_help_reminder()
+        if not self.sh_mode:
+            self._print_help_reminder()
 
     def start(self):
         """
@@ -182,7 +189,7 @@ interval 120\nwatch set intensity 1",
 
         while self._active:
             try:
-                command = IO.input(self.prompt)
+                command = IO.input(self.prompt, not self.sh_mode)
             except KeyboardInterrupt:
                 self.interrupt()
                 break
@@ -194,8 +201,14 @@ interval 120\nwatch set intensity 1",
                         args = self.parser.parse_args(split(subcommand.strip()))
                         args.func(args)
                     except ArgumentError:
-                        IO.error("Invalid command.")
-                        self.parser.print_help()
+                        if self.sh_mode:
+                            try:
+                                run(subcommand, check=False, shell=False)
+                            except FileNotFoundError:
+                                pass
+                        else:
+                            IO.error("Invalid command.")
+                            self.parser.print_help()
                     except AttributeError:
                         pass
                 except SystemExit:
@@ -614,8 +627,9 @@ an invalid settings attribute."
         Clears the terminal window and re-prints the banner
         """
         IO.clear()
-        IO.print(MAIN_BANNER)
-        self._print_help_reminder()
+        if not self.sh_mode:
+            IO.print(MAIN_BANNER)
+            self._print_help_reminder()
 
     def _help_handler(self, args):
         """

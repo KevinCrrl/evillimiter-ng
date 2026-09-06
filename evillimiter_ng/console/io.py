@@ -49,36 +49,41 @@ class IO:
         IO.print(f"[{IO.BOLD_LIGHTRED}ERROR!{IO.END_BOLD_LIGHTRED}]  {text}")
 
     @staticmethod
-    def input(text):
+    def input(text, enable_smart_prompt):
         """
         Prompts the user for input.
         """
         try:
-            return IO.session.prompt(
-                text,
-                completer=NestedCompleter.from_nested_dict(
-                    {
-                        "scan": {"-r", "-i", "--range", "--intensity"},
-                        "hosts": None,
-                        "limit": {"-u", "-d", "--upload", "--download"},
-                        "block": {"-u", "-d", "--upload", "--download"},
-                        "free": None,
-                        "add": {"-m", "--mac", "-n", "--name"},
-                        "monitor": {"-i", "--interval", "-w", "--with-id"},
-                        "analyze": {"-d", "--duration"},
-                        "watch": {"add", "remove", "set"},
-                        "sleep": None,
-                        "clear": None,
-                        "exit": None,
-                        "--help": None,
-                        "import-json": None,
-                        "export-json": None,
-                    }
-                ),
-                complete_while_typing=True,
-                auto_suggest=AutoSuggestFromHistory(),
-                show_frame=True,
-            )
+            if enable_smart_prompt:
+                return IO.session.prompt(
+                    text,
+                    completer=NestedCompleter.from_nested_dict(
+                        {
+                            "scan": {"-r", "-i", "--range", "--intensity"},
+                            "hosts": None,
+                            "limit": {"-u", "-d", "--upload", "--download"},
+                            "block": {"-u", "-d", "--upload", "--download"},
+                            "free": None,
+                            "add": {"-m", "--mac", "-n", "--name"},
+                            "monitor": {"-i", "--interval", "-w", "--with-id"},
+                            "analyze": {"-d", "--duration"},
+                            "watch": {"add", "remove", "set"},
+                            "sleep": None,
+                            "clear": None,
+                            "exit": None,
+                            "--help": None,
+                            "import-json": None,
+                            "export-json": None,
+                        }
+                    ),
+                    complete_while_typing=True,
+                    auto_suggest=AutoSuggestFromHistory(),
+                    show_frame=True,
+                )
+            else:
+                return IO.session.prompt(text,
+                                         complete_while_typing=True,
+                                         auto_suggest=AutoSuggestFromHistory())
         except EOFError:
             return "exit"
 

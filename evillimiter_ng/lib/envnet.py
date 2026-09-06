@@ -7,7 +7,7 @@ import platform
 import socket
 
 import psutil
-from scapy.all import ARP, Ether, conf, srp1  # pylint: disable=no-name-in-module
+from scapy.all import ARP, Ether, conf, srp1
 
 from evillimiter_ng.common.globals import (
     BIN_NFT,

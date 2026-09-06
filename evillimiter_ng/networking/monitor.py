@@ -4,7 +4,7 @@
 import threading
 import time
 
-from scapy.all import IP, sniff  # pylint: disable=no-name-in-module
+from scapy.all import IP, sniff
 
 from .utils import BitRate, ByteValue, ValueConverter
 

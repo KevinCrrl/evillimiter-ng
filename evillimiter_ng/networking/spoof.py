@@ -4,7 +4,7 @@
 import threading
 import time
 
-from scapy.all import ARP, Ether, sendp  # pylint: disable=no-name-in-module
+from scapy.all import ARP, Ether, sendp
 
 from evillimiter_ng.common.globals import BROADCAST
 
