@@ -177,21 +177,26 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
 
     def add(
         self, ip: str, mac: str | None = None, name: str | None = None
-    ) -> dict[str, bool | str]:
+    ) -> bool:
         if not netutils.validate_ip_address(ip):
-            return {"success": False, "msg": "Invalid ip address."}
+            if self.show_io:
+                IO.error("Invalid ip address.")
+            return False
 
         if mac:
             if not netutils.validate_mac_address(mac):
-                return {"success": False, "msg": "Invalid mac address."}
+                if self.show_io:
+                    IO.error("Invalid mac address.")
+                return False
         else:
             try:
                 mac = et.get_mac_by_ip(self.interface, ip)
             except EnvnetError:
-                return {
-                    "success": False,
-                    "msg": "Unable to resolve mac address. Specify manually (--mac).",
-                }
+                if self.show_io:
+                    IO.error(
+                        "Unable to resolve mac address. Specify manually (--mac)."
+                    )
+                return False
 
         if name is None:
             try:
@@ -204,13 +209,17 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
 
         with self.hosts_lock:
             if host in self.hosts:
-                return {"success": False, "msg": "Host does already exist."}
+                if self.show_io:
+                    IO.error("Host does already exist.")
+                return False
 
             self.hosts.append(host)
 
-        return {"success": True, "msg": "Host added."}
+        if self.show_io:
+            IO.ok("Host added.")
+        return True
 
-    def export_json(self, json_path: str | Path) -> dict[str, bool | str | None]:
+    def export_json(self, json_path: str | Path) -> bool:
         write: bool = True
         if os.path.exists(json_path):
             write = yes_no_dialog(
@@ -234,13 +243,17 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
 
                 with os.fdopen(fd, "w", encoding="utf-8") as f:
                     f.write(base64.b64encode(str(info).encode()).decode())
-                    return {"success": True, "msg": None}
+                    return True
             except (FileNotFoundError, IsADirectoryError) as e:
-                return {"success": False, "msg": str(e)}
+                if self.show_io:
+                    IO.error(str(e))
+                return False
         else:
-            return {"success": False, "msg": "The file could not be written."}
+            if self.show_io:
+                IO.error("The file could not be written.")
+            return False
 
-    def import_json(self, json_path: str | Path) -> dict[str, bool | str | None]:
+    def import_json(self, json_path: str | Path) -> bool:
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 try:
@@ -250,10 +263,12 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                         .replace("'", '"')
                     )
                 except binascii.Error:
-                    return {
-                        "success": False,
-                        "msg": "The Base64 encoding of the JSON appears to be corrupted.",
-                    }
+                    if self.show_io:
+                        IO.error(
+                            "The Base64 encoding of the JSON appears to be"
+                            " corrupted."
+                        )
+                    return False
                 else:
                     for ip_arg, sub_dict in json_dict.items():
                         if self.show_io:
@@ -262,17 +277,14 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                             sub_dict["hostname"]
                         except KeyError:
                             sub_dict["hostname"] = None
-                        add_dict = self.add(
+                        self.add(
                             ip_arg, sub_dict["mac"], sub_dict["hostname"]
                         )
-                        if self.show_io:
-                            if add_dict["success"]:
-                                IO.ok(add_dict["msg"])
-                            else:
-                                IO.error(add_dict["msg"])
-                    return {"success": True, "msg": None}
+                    return True
         except (FileNotFoundError, IsADirectoryError) as e:
-            return {"success": False, "msg": str(e)}
+            if self.show_io:
+                IO.error(str(e))
+            return False
 
     def interrupt(self):
         if self.show_io:

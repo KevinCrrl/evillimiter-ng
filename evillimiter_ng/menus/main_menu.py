@@ -280,11 +280,7 @@ hosts discovered."
         Handles 'add' command-line argument
         Adds custom host to host list
         """
-        add_return: dict = self.add(args.ip, args.mac, args.name)
-        if not add_return["success"]:
-            IO.error(add_return["msg"])
-        else:
-            IO.ok(add_return["msg"])
+        self.add(args.ip, args.mac, args.name)
 
     def _monitor_handler(self, args):
         """
@@ -594,11 +590,7 @@ hosts discovered."
             else:
                 IO.error("Invalid interval.")
         elif args.attribute.lower() in ("intensity", "scan_intensity"):
-            intensity = self._parse_scan_intensity(args.value)
-            if intensity is not None:
-                self.host_watcher.intensity = intensity
-            else:
-                IO.error("Invalid scan intensity level.")
+            self.host_watcher.intensity = self._parse_scan_intensity(args.value)
         else:
             IO.error(
                 f"{IO.LIGHTYELLOW}{args.attribute}{IO.END_LIGHTYELLOW} is \
@@ -612,14 +604,10 @@ an invalid settings attribute."
             IO.error("Seconds must be an int or float")
 
     def _export_handler(self, args):
-        export_dict = self.export_json(args.json_path)
-        if not export_dict["success"]:
-            IO.error(export_dict["msg"])
+        self.export_json(args.json_path)
 
     def _import_handler(self, args):
-        import_dict = self.import_json(args.json_path)
-        if not import_dict["success"]:
-            IO.error(import_dict["msg"])
+        self.import_json(args.json_path)
 
     def _clear_handler(self, args):
         """
