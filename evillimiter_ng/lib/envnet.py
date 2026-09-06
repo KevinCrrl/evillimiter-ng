@@ -7,7 +7,7 @@ import platform
 import socket
 
 import psutil
-from scapy.all import ARP, Ether, conf, srp1
+from scapy.layers.l2 import ARP, Ether, conf, srp1
 
 from evillimiter_ng.common.globals import (
     BIN_NFT,

@@ -4,7 +4,8 @@
 import threading
 import time
 
-from scapy.all import IP, sniff
+from scapy.layers.dot11 import sniff
+from scapy.layers.inet import IP
 
 from .utils import BitRate, ByteValue, ValueConverter
 

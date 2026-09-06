@@ -7,7 +7,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
-from scapy.all import ARP, Ether, srp1
+from scapy.layers.l2 import ARP, Ether, srp1
 
 from evillimiter_ng.common.globals import BROADCAST
 from evillimiter_ng.console.io import IO
