@@ -21,7 +21,7 @@ class MainMenu(CoreLimiter):
     def __init__(
         self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars
     ):
-        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars, False, False)
+        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars, False, False, True)
         self.prompt = ">>> "
         self.parser = ArgumentParser(
             prog="",  # Empty prog because it is a REPL, not a CLI

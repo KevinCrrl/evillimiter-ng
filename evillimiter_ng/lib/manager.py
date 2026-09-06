@@ -35,6 +35,7 @@ class CoreLimiter:
         verify_vars: bool = True,
         auto_initialize: bool = True,
         auto_stop: bool = True,
+        show_io: bool = False,
     ):
         args = et.InitialArguments(interface, gateway_ip, netmask, gateway_mac)
         if verify_vars:
@@ -48,6 +49,7 @@ class CoreLimiter:
         self.gateway_mac = args.gateway_mac
         self.netmask = args.netmask
         self.auto_stop = auto_stop
+        self.show_io = show_io
 
         if auto_initialize:
             et.initialize(self.interface)
@@ -85,7 +87,8 @@ class CoreLimiter:
         if ip_range:
             iprange = self._parse_iprange(ip_range)
             if iprange is None:
-                IO.error("invalid ip range.")
+                if self.show_io:
+                    IO.error("invalid ip range.")
                 return
         else:
             iprange = None
@@ -111,7 +114,7 @@ class CoreLimiter:
 
     def block(
         self, hid: str | int, upload: str | None = None, download: str | None = None
-    ):
+    ) -> bool:
         hosts = self.get_hosts_by_ids(hid)
         direction = self._parse_direction_args(upload, download)
 
@@ -122,17 +125,22 @@ class CoreLimiter:
 
                 self.limiter.block(host, direction)
                 self.bandwidth_monitor.add(host)
-                IO.ok(
-                    f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
+                if self.show_io:
+                    IO.ok(
+                        f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
 {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
 blocked{IO.END_BOLD_LIGHTRED}."
-                )
+                    )
+            return True
+        return False
 
-    def free(self, hid: str | int):
+    def free(self, hid: str | int) -> bool:
         hosts = self.get_hosts_by_ids(hid)
         if hosts is not None and len(hosts) > 0:
             for host in hosts:
                 self._free_host(host)
+                return True
+        return False
 
     def limit(
         self,
@@ -140,16 +148,17 @@ blocked{IO.END_BOLD_LIGHTRED}."
         rate: str | netutils.BitRate,
         upload: str | None = None,
         download: str | None = None,
-    ):
+    ) -> bool:
         hosts = self.get_hosts_by_ids(hid)
         if hosts is None or len(hosts) == 0:
-            return
+            return False
 
         try:
             rate = netutils.BitRate.from_rate_string(rate)
         except BitError:
-            IO.error("Limit rate is invalid.")
-            return
+            if self.show_io:
+                IO.error("Limit rate is invalid.")
+            return False
 
         direction = self._parse_direction_args(upload, download)
 
@@ -158,11 +167,13 @@ blocked{IO.END_BOLD_LIGHTRED}."
             self.limiter.limit(host, direction, rate)
             self.bandwidth_monitor.add(host)
 
-            IO.ok(
-                f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
+            if self.show_io:
+                IO.ok(
+                    f"{IO.LIGHTYELLOW}{host.ip}{IO.END_LIGHTYELLOW} \
 {Direction.pretty_direction(direction)} {IO.BOLD_LIGHTRED}\
 limited{IO.END_BOLD_LIGHTRED} to {rate}."
-            )
+                )
+        return True
 
     def add(
         self, ip: str, mac: str | None = None, name: str | None = None
@@ -245,7 +256,8 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                     }
                 else:
                     for ip_arg, sub_dict in json_dict.items():
-                        IO.print(f"Adding host {ip_arg}")
+                        if self.show_io:
+                            IO.print(f"adding host {ip_arg}")
                         try:
                             sub_dict["hostname"]
                         except KeyError:
@@ -253,16 +265,17 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                         add_dict = self.add(
                             ip_arg, sub_dict["mac"], sub_dict["hostname"]
                         )
-                        if add_dict["success"]:
-                            IO.ok(add_dict["msg"])
-                        else:
-                            IO.error(add_dict["msg"])
+                        if self.show_io:
+                            if add_dict["success"]:
+                                IO.ok(add_dict["msg"])
+                            else:
+                                IO.error(add_dict["msg"])
                     return {"success": True, "msg": None}
         except (FileNotFoundError, IsADirectoryError) as e:
             return {"success": False, "msg": str(e)}
 
-    def interrupt(self, repl: bool = False):
-        if repl:
+    def interrupt(self):
+        if self.show_io:
             IO.ok("Cleaning up... stand by...")
 
         self.arp_spoofer.stop()
@@ -348,7 +361,8 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                 is_id_ = id_.isdigit()
 
                 if not is_mac and not is_ip and not is_id_:
-                    IO.error(f"Invalid identifier(s): '{ids_string}'.")
+                    if self.show_io:
+                        IO.error(f"Invalid identifier(s): '{ids_string}'.")
                     return
 
                 if is_mac or is_ip:
@@ -359,18 +373,20 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                             hosts.add(host)
                             break
                     if not found:
-                        IO.error(
-                            f"No host matching {IO.LIGHTYELLOW}{id_}\
+                        if self.show_io:
+                            IO.error(
+                                f"No host matching {IO.LIGHTYELLOW}{id_}\
 {IO.END_LIGHTYELLOW}."
-                        )
+                            )
                         return
                 else:
                     id_ = int(id_)
                     if len(self.hosts) == 0 or id_ not in range(len(self.hosts)):
-                        IO.error(
-                            f"No host with id {IO.LIGHTYELLOW}{id_}\
+                        if self.show_io:
+                            IO.error(
+                                f"No host with id {IO.LIGHTYELLOW}{id_}\
 {IO.END_LIGHTYELLOW}."
-                        )
+                            )
                         return
                     hosts.add(self.hosts[id_])
 
