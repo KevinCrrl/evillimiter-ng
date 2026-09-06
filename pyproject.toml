@@ -54,4 +54,4 @@ packages = ["evillimiter_ng"]
 packages = ["evillimiter_ng"]
 
 [tool.ruff.lint]
-ignore = ["EXE002", "SIM115"]
+ignore = ["SIM115"]
