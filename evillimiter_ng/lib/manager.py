@@ -39,7 +39,7 @@ class CoreLimiter:
     ):
         args = et.InitialArguments(interface, gateway_ip, netmask, gateway_mac)
         if verify_vars:
-            args = et.process_arguments(args, False)
+            args = et.process_arguments(args, show_io)
 
             if isinstance(args, str):
                 raise EnvnetError(args.split(".")[0])
@@ -52,7 +52,7 @@ class CoreLimiter:
         self.show_io = show_io
 
         if auto_initialize:
-            et.initialize(self.interface)
+            et.initialize(self.interface, show_io)
 
         # range of IP address calculated from gateway IP and netmask
         self.iprange = list(netaddr.IPNetwork(f"{self.gateway_ip}/{self.netmask}"))
@@ -90,8 +90,6 @@ class CoreLimiter:
                 if self.show_io:
                     IO.error("invalid ip range.")
                 return
-        else:
-            iprange = None
 
         if intensity:
             new_intensity = self._parse_scan_intensity(intensity)

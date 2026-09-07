@@ -4,11 +4,11 @@ body {
     margin: 50px;
 }
 
-p, a {
+a {
     color: rgb(9, 209, 9);
 }
 
-pre {
+.banner {
     color: rgb(247, 45, 45);
 }
 
@@ -18,4 +18,8 @@ h1, h2, h3, h4 {
 
 li {
     color: rgb(5, 180, 189);
+}
+
+p {
+    color: blanchedalmond;
 }

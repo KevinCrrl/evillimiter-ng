@@ -3,12 +3,149 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>EvilLimiter-NG: Library documentation</title>
-    <link rel="stylesheet" href="/KevinCrrl/docs/styles.css">
+    <link rel="stylesheet" href="/docs/styles.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 </head>
 
 <body>
-    <h1></h1>
+    <h1>EvilLimiter-NG as a Library API for your own scripts</h1>
+    <p>Before version 3.0, the evillimiter-ng code was too monolithic, and using it as a library was very hard and a
+        bad idea, you had to import the MainMenu and pass fake arguments to it, the result?: unclear visual
+        elements spamming the terminal and a lot of code fragmented in various functions, without a centralized API.</p>
+    <p>Now, in version 3.0, ENG has a clear and simple API, that can be used in your own scripts or big projects,
+        with options to see or hide visual elements, automatically resolve the network data, and more, this
+        documentation shows the basic usage of each function or class.</p>
+    <h2>Getting Started</h2>
+    <p>This is a very simple, but useful, example:</p>
+    <pre><code class="python">from evillimiter_ng.lib import manager
+
+myeng = manager.CoreLimiter() # Create a CoreLimiter manager
+
+myeng.add("IP_TO_BLOCK") # Replace 'IP_TO_BLOCK' with a real IP from your network
+myeng.block(0) # Block the host with id #0, there is only one host in this example
+input("Press enter to free the host...")
+myeng.free("all") # Free all the spoofed hosts
+print("Done!")
+myeng.interrupt() # IMPORTANT: Clean all evillimiter-ng firewall rules and stop the scanners.</code></pre>
+    <p>This small script assumes a "perfect" environment, where all network data will be resolved correctly and no
+        errors will occur. However, the CoreLimiter class includes parameters that the user can pass in case a value
+        cannot be resolved automatically. Keep in mind that if you distribute a program with fixed values, this may
+        cause incompatibilities between devices.</p>
+    <h2>class CoreLimiter (evillimiter_ng.lib.manager.CoreLimiter)</h2>
+    <p>This section shows the parameters you can pass to the CoreLimiter class and how its behavior varies depending on
+        certain possible values.</p>
+    <pre><code class="python">from evillimiter_ng.lib.errors import EnvnetError
+from evillimiter_ng.lib.manager import CoreLimiter
+
+try:
+    cl = CoreLimiter(
+        interface = None,
+        gateway_ip = None,
+        gateway_mac = None,
+        netmask = None,
+        verify_vars = True,
+        auto_initialize = True,
+        auto_stop = True,
+        show_io = False,)
+except EnvnetError as e:
+    print(e)</code></pre>
+    <p>As you can see, by default, the values for <code>interface</code> <code>gateway_ip</code>
+        <code>gateway_mac</code> and <code>netmask</code> are <code>None</code>. This might seem like a problem that
+        would cause a fatal error; however, the <code>verify_vars</code> setting, which is set to <code>true</code> by
+        default, ensures that during class initialization, <code>evillimiter-ng</code> attempts to resolve these values.
+    </p>
+    <p>You can even pass just one value as the netmask and set <code>verify_vars</code> to <code>true</code> so that it
+        only checks for missing values. This is useful for ensuring functionality across different environments and
+        network hardware; however, if the library cannot obtain a value and that value was not specified, an
+        <code>EnvnetError</code> is raised.
+    </p>
+    <p>If you set <code>verify_vars</code> to <code>False</code> and do not pass any network data, errors such as
+        <code>TypeError</code> or others will
+        occur during execution.</p>
+    <h3>auto_initialize</h3>
+    <p><code>auto_initialize</code> tells CoreLimiter to start the programs necessary for the library to run—such as
+        <code>tc</code> and
+        <code>nftables</code>—on its own, as well as to verify whether the program is running on Linux and as root. When
+        this
+        variable is set to <code>False</code>, you must initialize it manually before running any other components.
+    </p>
+    <pre><code class="python">from evillimiter_ng.lib.envnet import get_default_interface, initialize
+from evillimiter_ng.lib.errors import UnsupportedSystem
+from evillimiter_ng.lib.manager import CoreLimiter
+
+try:
+    initialize(get_default_interface())
+except (PermissionError, UnsupportedSystem) as e:
+    print(e)
+cl = CoreLimiter(auto_initialize=False)</code></pre>
+    <p>If your system isn't running Linux, the error <code>evillimiter_ng.lib.errors.UnsupportedSystem</code> occurs,
+        and if you
+        run it without root privileges, the standard Python <code>PermissionError</code> occurs.</p>
+    <h3>auto_stop</h3>
+    <p>Just like <code>auto_initialize</code>, if you set <code>auto_stop</code> to <code>False</code>, you must
+        manually execute the function needed to
+        stop the library's internal components once your own scripts have finished running.</p>
+    <pre><code class="python">from evillimiter_ng.lib.envnet import get_default_interface, stop_eng
+from evillimiter_ng.lib.manager import CoreLimiter
+
+cl = CoreLimiter(auto_stop=False)
+
+cl.interrupt() # with auto_stop=False, this only stops the scanners and spoofers
+stop_eng(get_default_interface())</code></pre>
+    <h3>show_io</h3>
+    <p>By default, this variable is set to False, which hides the terminal messages generated by the program. If you set
+        it to True, you can avoid having to type your own messages, but they will be in English.</p>
+    <h2>Methods of the CoreLimiter class</h2>
+    <p>Only a few of CoreLimiter's methods are intended for use in custom scripts, and those are the ones that will be
+        explained here; the rest are for internal use only or for use in the MainMenu class, which is not part of the
+        library.</p>
+    <p>These methods are based on the familiar CLI commands. Here, we show the definitions, required values, or those
+        that already have a default value and are optional. Consult the evillimiter-ng CLI help or see the README to
+        learn what each command (or, in this case, function) does. If a function differs significantly from its CLI
+        command, the necessary explanation will be provided in this guide.</p>
+    <p>Other methods that have already been explained—such as <code>interrupt</code>—will not be mentioned again here.
+    </p>
+    <h3>scan</h3>
+    <pre><code class="python">cl.scan(ip_range = None, intensity = "2", transient = True) -> list[Host] | None</code></pre>
+    <p>The only notable difference between this method and the CLI command is the <code>transient</code> parameter. In
+        the
+        CLI, the scan is always non-transient (<code>False</code>). In the
+        library, it defaults to <code>True</code>, meaning no progress bar is maintained and the method simply returns
+        the
+        list of discovered hosts. Set it to <code>False</code> if you want the scan to print the progress bar to the
+        terminal</p>
+    <h3>block</h3>
+    <pre><code class="python">cl.block(hid: str | int, upload: str | None = None, download: str | None = None) -> bool</code></pre>
+    <h3>free</h3>
+    <pre><code class="python">cl.free(hid: str | int) -> bool</code></pre>
+    <h3>limit</h3>
+    <pre><code class="python">cl.limit(hid: str, rate: str | BitRate, upload: str | None = None, download: str | None = None) -> bool</code></pre>
+    <p>This method is very similar to the CLI command, with one key difference: the <code>rate</code> parameter accepts
+        not only a rate string like <code>"100kbit"</code> or <code>"1gbit"</code>, but also a <code>BitRate</code>
+        object
+        from <code>evillimiter_ng.networking.utils</code>. This is useful if you are building the rate value
+        programmatically. The <code>upload</code> and <code>download</code> flags work the same as in the CLI.
+        Returns <code>True</code> on success, <code>False</code> otherwise.</p>
+    <h3>add</h3>
+    <pre><code class="python">cl.add(ip: str, mac: str | None = None, name: str | None = None) -> bool</code></pre>
+    <p>Similar to the CLI <code>add</code> command, with an additional optional <code>name</code> parameter. In the CLI,
+        the
+        hostname is resolved automatically via DNS; here, if <code>name</code> is not provided, it also attempts to
+        resolve the hostname automatically. If <code>mac</code> is omitted, it is resolved via ARP.
+        Returns <code>True</code> on success, <code>False</code> otherwise.</p>
+    <h3>export_json</h3>
+    <pre><code class="python">cl.export_json(json_path: str | Path) -> bool</code></pre>
+    <h3>import_json</h3>
+    <pre><code class="python">cl.import_json(json_path: str | Path) -> bool</code></pre>
+    <p>Some CLI functions have not yet been implemented in the library; they may be implemented in future versions if
+        the need arises beyond the tables generated by certain commands. Other commands simply will not be implemented
+        in the library, such as <code>sleep</code>, which can be used in Python with the standard <code>time</code> library, or <code>clear</code>, which
+        can be called via <code>subprocess.run</code>, which is also part of the standard library.</p>
 </body>
 
 </html>

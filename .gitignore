@@ -9,6 +9,7 @@ dist/
 build/
 eggs/
 *.egg-info
+test.py
 
 # VisualStudio Code
 .vscode/
