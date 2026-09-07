@@ -5,6 +5,7 @@
 [![License Badge](https://img.shields.io/badge/license-GPLv2-blue.svg)](LICENSE)
 [![Compatibility](https://img.shields.io/badge/python-3-brightgreen.svg)](PROJECT)
 [![Hatch project](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pypa/hatch/master/docs/assets/badge/v0.json)](https://github.com/pypa/hatch)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/KevinCrrl/evillimiter-ng/graphs/commit-activity)
 [![Open Source Love](https://badges.frapsoft.com/os/v3/open-source.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
@@ -104,6 +105,7 @@ import-json my_network.json
 | Argument | Explanation |
 | -------- | ----------- |
 | `-h` | Displays help message listing all command-line arguments |
+| `-s` | Enables a shell mode for typing commands and hides banners and flashy elements |
 | `-i [Interface Name]` | Specifies network interface (resolved if not specified) |
 | `-g [Gateway IP Address]` | Specifies gateway IP address (resolved if not specified) |
 | `-m [Gateway MAC Address]` | Specifies gateway MAC address (resolved if not specified) |
@@ -145,6 +147,8 @@ options:
 -h, --help        show this help message and exit
 
 ```
+
+#### Commands Table
 
 This table shows all the available commands:
 

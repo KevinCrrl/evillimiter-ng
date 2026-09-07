@@ -39,7 +39,7 @@ class CoreLimiter:
     ):
         args = et.InitialArguments(interface, gateway_ip, netmask, gateway_mac)
         if verify_vars:
-            args = et.process_arguments(args, show_io)
+            args = et.process_arguments(args, False) # Never show process_arguments messages!
 
             if isinstance(args, str):
                 raise EnvnetError(args.split(".")[0])
