@@ -173,9 +173,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                 )
         return True
 
-    def add(
-        self, ip: str, mac: str | None = None, name: str | None = None
-    ) -> bool:
+    def add(self, ip: str, mac: str | None = None, name: str | None = None) -> bool:
         if not netutils.validate_ip_address(ip):
             if self.show_io:
                 IO.error("Invalid ip address.")
@@ -191,9 +189,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                 mac = et.get_mac_by_ip(self.interface, ip)
             except EnvnetError:
                 if self.show_io:
-                    IO.error(
-                        "Unable to resolve mac address. Specify manually (--mac)."
-                    )
+                    IO.error("Unable to resolve mac address. Specify manually (--mac).")
                 return False
 
         if name is None:
@@ -263,8 +259,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                 except binascii.Error:
                     if self.show_io:
                         IO.error(
-                            "The Base64 encoding of the JSON appears to be"
-                            " corrupted."
+                            "The Base64 encoding of the JSON appears to be corrupted."
                         )
                     return False
                 else:
@@ -275,9 +270,7 @@ limited{IO.END_BOLD_LIGHTRED} to {rate}."
                             sub_dict["hostname"]
                         except KeyError:
                             sub_dict["hostname"] = None
-                        self.add(
-                            ip_arg, sub_dict["mac"], sub_dict["hostname"]
-                        )
+                        self.add(ip_arg, sub_dict["mac"], sub_dict["hostname"])
                     return True
         except (FileNotFoundError, IsADirectoryError) as e:
             if self.show_io:

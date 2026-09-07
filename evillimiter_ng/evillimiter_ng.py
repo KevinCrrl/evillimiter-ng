@@ -54,7 +54,7 @@ not specified.",
         "-s",
         "--shh",
         action="store_true",
-        help="Enables a shell mode for typing commands and hides banners and flashy elements."
+        help="Enables a shell mode for typing commands and hides banners and flashy elements.",
     )
 
     return parser.parse_args()
@@ -93,7 +93,7 @@ def main():
                     args.gateway_mac,
                     args.netmask,
                     True,
-                    sh_mode=shh
+                    sh_mode=shh,
                 )
         except EnvnetError as e:
             IO.error(e)

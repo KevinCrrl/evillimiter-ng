@@ -86,7 +86,7 @@ def get_default_gateway() -> str:
     """
     Returns the default IPv4 gateway address
     """
-    return conf.route.route("0.0.0.0")[2] # ty: ignore[unresolved-attribute] ; Scapy: `route` will be filed by route.py
+    return conf.route.route("0.0.0.0")[2]  # ty: ignore[unresolved-attribute] ; Scapy: `route` will be filed by route.py
 
 
 def get_default_netmask(interface: str) -> str:

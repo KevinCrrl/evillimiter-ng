@@ -22,9 +22,18 @@ from evillimiter_ng.networking.utils import ByteValue
 
 class MainMenu(CoreLimiter):
     def __init__(
-            self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars, sh_mode
+        self, version, interface, gateway_ip, gateway_mac, netmask, verify_vars, sh_mode
     ):
-        super().__init__(interface, gateway_ip, gateway_mac, netmask, verify_vars, False, False, not sh_mode)
+        super().__init__(
+            interface,
+            gateway_ip,
+            gateway_mac,
+            netmask,
+            verify_vars,
+            False,
+            False,
+            not sh_mode,
+        )
         self.sh_mode: bool = sh_mode
         self.prompt = ">>> "
         if self.sh_mode:

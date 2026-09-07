@@ -81,9 +81,11 @@ class IO:
                     show_frame=True,
                 )
             else:
-                return IO.session.prompt(text,
-                                         complete_while_typing=True,
-                                         auto_suggest=AutoSuggestFromHistory())
+                return IO.session.prompt(
+                    text,
+                    complete_while_typing=True,
+                    auto_suggest=AutoSuggestFromHistory(),
+                )
         except EOFError:
             return "exit"
 
