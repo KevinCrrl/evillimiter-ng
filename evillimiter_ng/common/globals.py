@@ -11,6 +11,6 @@ BIN_SYSCTL = shell.locate_bin("sysctl")
 
 IP_FORWARD_LOC = "net.ipv4.ip_forward"
 
-VERSION = "3.0.1"
+VERSION = "3.0.2"
 DESCRIPTION = "Monitors, analyzes and limits the bandwidth of devices \
 on the local network (Next Generation)."

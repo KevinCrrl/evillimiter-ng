@@ -90,6 +90,8 @@ class CoreLimiter:
                 if self.show_io:
                     IO.error("invalid ip range.")
                 return
+        else:
+            iprange = None
 
         if intensity:
             new_intensity = self._parse_scan_intensity(intensity)
