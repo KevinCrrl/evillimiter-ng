@@ -13,6 +13,8 @@ A tool to monitor, analyze and limit the bandwidth (upload/download) of devices 
 
 `evillimiter-ng` employs [ARP spoofing](https://en.wikipedia.org/wiki/ARP_spoofing) and [traffic shaping](https://en.wikipedia.org/wiki/Traffic_shaping) to throttle the bandwidth of hosts on the network.
 
+> [New in version 3.0: Use the code as a library instead of a CLI](#library-api)
+
 ## Requirements
 - Linux distribution with nftables
 - Python 3.10 or greater
@@ -50,6 +52,10 @@ kpa Ins evillimiter-ng
 # Or using yay (https://github.com/Jguer/yay)
 yay -S evillimiter-ng
 ```
+
+## Library API
+
+Learn how to use the library API for your own projects, write less code, take advantage of the architecture based on lists of IPs with assigned IDs, and find more uses for the code beyond the terminal program: [Library docs](https://kevincrrl.github.io/evillimiter-ng/apilib)
 
 ## Quick Start Example
 
