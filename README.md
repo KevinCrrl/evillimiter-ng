@@ -3,7 +3,7 @@
 # Evil Limiter Next Generation
 
 [![License Badge](https://shields.io/badge/license-GPLv2%20only-blue)](LICENSE)
-[![Compatibility](https://img.shields.io/badge/python-3-brightgreen.svg)](PROJECT)
+[![Compatibility](https://img.shields.io/badge/python-3-brightgreen.svg)](pyproject.toml)
 [![Hatch project](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pypa/hatch/master/docs/assets/badge/v0.json)](https://github.com/pypa/hatch)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/KevinCrrl/evillimiter-ng/graphs/commit-activity)
