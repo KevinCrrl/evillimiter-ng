@@ -135,11 +135,6 @@ stop_eng(get_default_interface())</code></pre>
         Returns <code>True</code> on success, <code>False</code> otherwise.</p>
     <h3>add</h3>
     <pre><code class="python">cl.add(ip: str, mac: str | None = None, name: str | None = None) -> bool</code></pre>
-    <p>Similar to the CLI <code>add</code> command, with an additional optional <code>name</code> parameter. In the CLI,
-        the
-        hostname is resolved automatically via DNS; here, if <code>name</code> is not provided, it also attempts to
-        resolve the hostname automatically. If <code>mac</code> is omitted, it is resolved via ARP.
-        Returns <code>True</code> on success, <code>False</code> otherwise.</p>
     <h3>export_json</h3>
     <pre><code class="python">cl.export_json(json_path: str | Path) -> bool</code></pre>
     <h3>import_json</h3>
