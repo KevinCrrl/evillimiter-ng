@@ -62,19 +62,24 @@ git checkout -b fix/your-bug-fix
 
 ### Install in development mode
 
-```bash
-# Create and activate a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate
+Create and activate a virtual environment (recommended)
 
-# Install dependencies
-pip install .
+```bash
+# Using hatch
+hatch env create
+
+# Using venv
+python -m venv .venv
+
+# Activate and install dependencies
+source venv/bin/activate
+pip install -e .
 ```
 
-### Run the tool locally
+### Run the tool locally as root
 
 ```bash
-sudo evillimiter-ng -i wlan0
+evillimiter-ng -i wlan0
 ```
 
 ---
@@ -86,7 +91,7 @@ sudo evillimiter-ng -i wlan0
 3. Commit with a clear and descriptive message:
 
 ```bash
-git commit -m "feat: add support for IPv6 detection warning"
+git commit -m "feat: add support for foo"
 # or
 git commit -m "fix: resolve crash on empty host scan"
 # or
@@ -108,7 +113,7 @@ git push origin feat/your-feature-name
 
 When opening a bug report, please include:
 
-- Your Linux distribution and version
+- Your Linux distribution and version (If you are using a rolling release, post the kernel version)
 - Python version (`python --version`)
 - Steps to reproduce the issue
 - Expected vs actual behavior
@@ -118,7 +123,7 @@ When opening a bug report, please include:
 
 ## Style Guidelines
 
-- Follow [PEP 8](https://peps.python.org/pep-0008/) for Python code style.
+- Follow [PEP 8](https://peps.python.org/pep-0008/) for Python code style, you can use Ruff for it.
 - Keep functions small and focused.
 - Add comments for non-obvious logic.
 - Do not commit unnecessary files (e.g., `__pycache__`, `.env`, `venv/`).
