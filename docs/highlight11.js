@@ -2,10 +2,11 @@
   @licstart  The following is the entire license notice for the JavaScript code in this file.
 
   highlight script with only “licstart” and “licend” added; the code is exactly the same as the version mentioned below. (by KevinCrrl)
+  License: BSD-3-Clause
 
   Highlight.js v11.12.0 (git: f7f7d3803b)
-  (c) 2006-2026 Josh Goebel <hello@joshgoebel.com> and other contributors
-  License: BSD-3-Clause
+
+  Copyright 2006-2026 Josh Goebel <hello@joshgoebel.com> and other contributors
 
   Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
