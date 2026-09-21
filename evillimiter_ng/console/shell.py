@@ -1,13 +1,10 @@
 # Copyright (C) 2026 KevinCrrl and Evillimiter-NG Contributors
 # SPDX-License-Identifier: GPL-2.0-only
 
-import os
 import subprocess
 from shutil import which
 
 from evillimiter_ng.console.io import IO
-
-DEVNULL = open(os.devnull, "w")
 
 
 def execute(command):
@@ -16,7 +13,7 @@ def execute(command):
 
 def execute_suppressed(command):
     return subprocess.run(
-        command, stdout=DEVNULL, stderr=DEVNULL, check=False
+        command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False
     ).returncode
 
 
