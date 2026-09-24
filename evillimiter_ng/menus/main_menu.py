@@ -625,7 +625,7 @@ an invalid settings attribute."
         Handler for the 'clear' command-line argument
         Clears the terminal window and re-prints the banner
         """
-        IO.clear()
+        IO.console.clear()
         if not self.sh_mode:
             IO.print(MAIN_BANNER)
             self._print_help_reminder()

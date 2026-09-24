@@ -7,8 +7,6 @@ from prompt_toolkit.completion import NestedCompleter
 from rich.console import Console
 from rich.table import Table
 
-from . import shell
-
 
 class IO:
     BOLD_LIGHTBLUE = "[bold bright_blue]"
@@ -88,10 +86,3 @@ class IO:
                 )
         except EOFError:
             return "exit"
-
-    @staticmethod
-    def clear():
-        """
-        Clears the terminal screen
-        """
-        shell.execute(["clear"])
