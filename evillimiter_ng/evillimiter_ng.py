@@ -8,7 +8,7 @@ from evillimiter_ng.common import globals as gb
 from evillimiter_ng.console.banner import MAIN_BANNER
 from evillimiter_ng.console.io import IO
 from evillimiter_ng.lib import envnet
-from evillimiter_ng.lib.envnet import initialize
+from evillimiter_ng.lib.envnet import check_env, initialize
 from evillimiter_ng.lib.errors import EnvnetError, UnsupportedSystem
 from evillimiter_ng.menus.main_menu import MainMenu
 
@@ -65,6 +65,7 @@ def main():
     Main entry point of the application
     """
     try:
+        check_env()
         args = parse_arguments()
         shh = args.shh
 

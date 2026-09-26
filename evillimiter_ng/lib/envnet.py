@@ -26,12 +26,13 @@ InitialArguments = collections.namedtuple(
 )
 
 
-def is_privileged() -> bool:
-    return os.geteuid() == 0
-
-
-def is_linux() -> bool:
-    return platform.system() == "Linux"
+def check_env():
+    if os.geteuid() != 0:
+        raise PermissionError("This program requires root access to found.")
+    if platform.system() != "Linux":
+        raise errs.UnsupportedSystem(
+            "This program only supports Linux systems."
+        )
 
 
 def get_default_interface() -> str:
@@ -53,13 +54,6 @@ def initialize(interface: str, show_io: bool = False) -> bool:
     """
     Sets up requirements, e.g. IP-Forwarding, 3rd party applications
     """
-    if not is_privileged():
-        raise PermissionError("This program requires root access to found.")
-    if not is_linux():
-        raise errs.UnsupportedSystem(
-            "This program only supports Linux \
-systems."
-        )
     if not netutils.network_settings(interface):
         if show_io:
             IO.error("qdisc root handle could not be created.")
