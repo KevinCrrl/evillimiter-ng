@@ -30,9 +30,7 @@ def check_env():
     if os.geteuid() != 0:
         raise PermissionError("This program requires root access to found.")
     if platform.system() != "Linux":
-        raise errs.UnsupportedSystem(
-            "This program only supports Linux systems."
-        )
+        raise errs.UnsupportedSystem("This program only supports Linux systems.")
 
 
 def get_default_interface() -> str:
