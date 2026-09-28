@@ -22,7 +22,10 @@
         documentation shows the basic usage of each function or class.</p>
     <h2>Getting Started</h2>
     <p>This is a very simple, but useful, example:</p>
-    <pre><code class="python">from evillimiter_ng.lib import manager
+    <pre><code class="python">from evillimiter_ng.lib import envnet
+from evillimiter_ng.lib import manager
+
+envnet.check_env() # Check the Operating System and the root access
 
 myeng = manager.CoreLimiter() # Create a CoreLimiter manager
 
@@ -65,29 +68,35 @@ except EnvnetError as e:
         <code>EnvnetError</code> is raised.
     </p>
     <p>If you set <code>verify_vars</code> to <code>False</code> and do not pass any network data, errors such as
-        <code>TypeError</code> or others will
-        occur during execution.
+        <code>TypeError</code> or others will occur during execution.
     </p>
     <h3>auto_initialize</h3>
     <p><code>auto_initialize</code> tells CoreLimiter to start the programs necessary for the library to run—such as
-        <code>tc</code> and
-        <code>nftables</code>—on its own, as well as to verify whether the program is running on Linux and as root. When
-        this
-        variable is set to <code>False</code>, you must initialize it manually before running any other components.
+        <code>tc</code> and <code>nftables</code>—on its own. When this variable is set to <code>False</code>, you must
+        initialize it manually before running any other components.
     </p>
-    <pre><code class="python">from evillimiter_ng.lib.envnet import get_default_interface, initialize
+    <p>As of version 3.0.3, CoreLimiter no longer verifies that the program is running on Linux and as root, not even
+        with <code>auto_initialize</code> set to <code>True</code>: those checks were moved to the
+        <code>check_env</code> function, which the CLI calls at startup. In your own scripts you must call it
+        yourself, once, before creating a CoreLimiter or configuring the network, exactly like the Getting Started
+        example does.
+    </p>
+    <pre><code class="python">from evillimiter_ng.lib.envnet import check_env, get_default_interface, initialize
 from evillimiter_ng.lib.errors import UnsupportedSystem
 from evillimiter_ng.lib.manager import CoreLimiter
 
 try:
+    check_env() # Check the Operating System and the root access
     initialize(get_default_interface())
 except (PermissionError, UnsupportedSystem) as e:
     print(e)
 cl = CoreLimiter(auto_initialize=False)</code></pre>
-    <p>If your system isn't running Linux, the error <code>evillimiter_ng.lib.errors.UnsupportedSystem</code> occurs,
-        and if you
-        run it without root privileges, the standard Python <code>PermissionError</code> occurs.</p>
-    <h3>auto_stop</h3>
+    <p>If your system isn't running Linux, <code>check_env</code> raises the error
+        <code>evillimiter_ng.lib.errors.UnsupportedSystem</code>, and if you run it without root privileges, the
+        standard Python <code>PermissionError</code> occurs. If you skip this step, the failure will appear later, as
+        a less clear error, while the library tries to configure the network without the required permissions.
+    </p>
+    / <h3>auto_stop</h3>
     <p>Just like <code>auto_initialize</code>, if you set <code>auto_stop</code> to <code>False</code>, you must
         manually execute the function needed to
         stop the library's internal components once your own scripts have finished running.</p>
